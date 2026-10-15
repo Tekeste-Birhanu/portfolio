@@ -8,11 +8,12 @@ Describes how visitors and the administrator move through the site, including na
 
 ```text
 Public (any visitor)
-[/] Home
-  ├── /projects             Featured projects; Expand to all reveals the full list
-  │     └── /projects/<slug> Project detail and screenshot lightbox
-  ├── /about                About and optional CV download
-  └── /contact              Configured contact links and message form
+[/] Single scrolling public page
+  ├── #home                 Introduction
+  ├── #projects             Featured projects; Expand to all reveals the full list
+  ├── #about                Background and optional CV download
+  └── #contact              Configured contact links and message form
+      /projects/<slug>      Separate project detail and screenshot lightbox
 
 Admin (not linked publicly)
 [/admin]
@@ -27,7 +28,7 @@ Admin (not linked publicly)
         └── /admin/mailbox        Messages and contact methods
 ```
 
-The Projects page initially lists featured projects; "Expand to all" reveals every saved project. Home also shows any number of featured projects in the shared administrator-defined order. Unfeatured projects remain public when the full Projects list is expanded and at their detail URLs. A deleted project and its files are removed; its old URL shows the 404 page. Renaming a project redirects its old URL to the current one.
+The Projects section initially lists featured projects; "Expand to all" reveals every saved project. Home also shows any number of featured projects in the shared administrator-defined order. Selecting Home's "Browse projects" link opens that section with all projects already revealed. Unfeatured projects remain public when the full Projects list is expanded and at their detail URLs. A deleted project and its files are removed; its old URL shows the 404 page. Renaming a project redirects its old URL to the current one.
 
 ## 3. Main journeys
 
@@ -35,7 +36,7 @@ The Projects page initially lists featured projects; "Expand to all" reveals eve
 
 - **Actor:** Visitor
 - **Entry point:** Home, Projects, or a direct project URL
-- **Steps:** Open Home and scan its featured projects, or select "Browse projects"; on Projects, scan the featured projects and select "Expand to all" to reveal every saved project; select "View details" on a project; review its description, screenshots, technologies, status, links, and populated detail sections; use the lightbox to navigate its images; follow a repository or demo link if present.
+- **Steps:** Open Home and scan its featured projects, or select "Browse projects" to open the Projects section with all projects revealed; when entering the section through its navigation link, scan featured projects and select "Expand to all" to reveal every saved project; select "View details" on a project; review its description, screenshots, technologies, status, links, and populated detail sections; use the lightbox to navigate its images; follow a repository or demo link if present.
 - **Success:** The visitor understands the project and can reach its repository or demo.
 - **Failure and recovery:** Unknown or deleted project URLs show a 404 page with a link home. Old project URLs redirect to the current slug. A failed image shows its alt text or a placeholder.
 - **Related requirements:** F-01, F-02, F-03, F-04
@@ -95,11 +96,11 @@ The Projects page initially lists featured projects; "Expand to all" reveals eve
 
 | Screen / route | Purpose | Access | Related journeys |
 | --- | --- | --- | --- |
-| `/` | Intro, featured projects, and skills | Anyone | J-01, J-02 |
-| `/projects` | Featured projects; control to reveal all projects | Anyone | J-01 |
+| `/` and `/#home` | Single scrolling public portfolio, starting at the intro | Anyone | J-01, J-02 |
+| `/#projects` | Projects section; control to reveal all projects | Anyone | J-01 |
 | `/projects/<slug>` | Project detail and screenshot lightbox | Anyone | J-01 |
-| `/about` | Background and optional CV download | Anyone | J-02 |
-| `/contact` | Enabled contact methods and email/message form | Anyone | J-02 |
+| `/#about` | About section and optional CV download | Anyone | J-02 |
+| `/#contact` | Enabled contact methods and email/message form | Anyone | J-02 |
 | 404 | Unknown or deleted addresses | Anyone | J-01, J-06 |
 | `/admin` | Sign-in or Projects landing page | Sign-in is public; dashboard is administrator-only | J-03 |
 | `/admin/reset-password` | Set a new password from a valid recovery link | Anyone with a valid recovery link | J-03 |

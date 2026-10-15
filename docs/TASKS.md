@@ -51,24 +51,24 @@
   - [x] The app runs locally and builds for Cloudflare Pages using documented commands.
   - [x] Supabase migrations can be applied from the repository and public settings are separated from secrets.
   - [x] Nested routes load directly and no real credentials are committed.
-- **Verify:** `npm.cmd ci`, `npm.cmd run dev`, and `npm.cmd run build` passed. The `db:push` CLI workflow was checked; secret-pattern scan found no credential values in project files. Direct nested-route response and built Cloudflare fallback were checked.
 - **Verify:** `npm.cmd ci`, `npm.cmd run dev`, and `npm.cmd run build` passed. CLI authentication and project linking succeeded; `npm.cmd run db:push -- --dry-run` connected to the remote database and reported it was up to date. Secret-pattern scan found no credential values in project files. Direct nested-route response and built Cloudflare fallback were checked.
 - **Notes:** Hosted Supabase migrations are used; Docker is not required. No schema SQL migration exists yet, so no database changes were pushed. The first schema migration will be created with the relevant data implementation task and pushed only after review.
 
 ### M2 — Public portfolio
 
 #### T-03 — Implement public layout and routes
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-02
 - **Related:** F-01, F-02, F-05
-- **Goal:** Create the responsive public shell on which portfolio features can be built.
-- **Scope:** Implement the single light theme, header/navigation, route shells for Home, Projects, About, and Contact, plus loading, error, empty, unavailable-service, and not-found states.
+- **Goal:** Create the responsive single-page public shell on which portfolio features can be built.
+- **Scope:** Implement the single light theme, header/navigation to Home, Projects, About, and Contact sections, separate project detail routes, plus loading, error, empty, unavailable-service, and not-found states. Existing `/projects`, `/about`, and `/contact` paths should land on their corresponding sections.
 - **Done when:**
-  - [ ] Public routes load directly and navigation works at phone, tablet, and desktop widths.
+  - [ ] Public sections load directly by hash and navigation scrolls correctly at phone, tablet, and desktop widths.
   - [ ] Unknown and deleted project routes can show a not-found page with a link Home.
   - [ ] Basic keyboard navigation and visible focus work in the shell.
 - **Verify:** Open every route directly and through navigation; check 320px, tablet, and desktop layouts.
+- **Progress:** Single-page public shell with hash navigation, route placeholders, empty/unavailable/loading/error/not-found states, responsive navigation styles, skip link, and visible focus styles are implemented. Legacy `/projects`, `/about`, and `/contact` paths redirect to the relevant section; project detail URLs remain separate. Interactive browser checks at the required widths remain to be completed because no browser surface is available in this session.
 
 #### T-04 — Render Home and Projects lists
 - **Status:** Not started
@@ -76,10 +76,10 @@
 - **Depends on:** T-01, T-03
 - **Related:** F-01, F-02, F-13; J-01
 - **Goal:** Let visitors scan the developer introduction, featured work, skills, and complete project list.
-- **Scope:** Read homepage intro, categorized skills, and projects from Supabase; Home and the initial Projects view render featured projects. Projects provides an "Expand to all" control that reveals every saved project. All views use the shared administrator-defined project order; unfeatured projects remain publicly accessible.
+- **Scope:** Read homepage intro, categorized skills, and projects from Supabase; Home and the initial Projects view render featured projects. Projects provides an "Expand to all" control that reveals every saved project; Home's "Browse projects" action opens the Projects section with all projects already revealed. All views use the shared administrator-defined project order; unfeatured projects remain publicly accessible.
 - **Done when:**
   - [ ] Project entries show name, description, technologies, status, available links, image, and detail link.
-  - [ ] Home and the initial Projects view show the featured subset in stored order; "Expand to all" reveals every project in that order; image/text layout adapts to screen width.
+  - [ ] Home and the initial Projects view show the featured subset in stored order; "Expand to all" reveals every project in that order; Home's "Browse projects" opens the Projects section with the full list already expanded; image/text layout adapts to screen width.
   - [ ] Home links to Projects, each project entry has a "View details" link, and all saved project detail pages remain reachable.
   - [ ] Empty project, category, and skill states are handled without broken sections; empty skill categories are omitted.
 - **Verify:** Check multiple ordered projects, featured-only initial state, expansion to all projects, optional links, multiple skill categories and their order, empty categories, and an empty project collection.

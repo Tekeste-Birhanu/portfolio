@@ -17,6 +17,8 @@
 
 ## 3. Visual foundations
 
+The public Home, Projects, About, and Contact areas are sections on one scrolling page, reached through header anchor links. Project detail pages remain separate routes.
+
 Values below are initial decisions. Verify contrast with a checker during implementation and tune sizes once real content is in.
 
 - **Typography:**
