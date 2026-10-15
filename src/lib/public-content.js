@@ -1,6 +1,6 @@
 import { isSupabaseConfigured, supabase } from './supabase.js';
 
-const PUBLIC_CONTENT_CACHE_KEY = 'portfolio:public-content:v1';
+const PUBLIC_CONTENT_CACHE_KEY = 'portfolio:public-content:v2';
 
 export function getCachedPublicPortfolio() {
   try {
@@ -40,18 +40,27 @@ function mapProject(row) {
     id: row.id,
     name: row.name,
     slug: currentSlug,
+    historicalSlugs: (row.project_slugs ?? []).filter((item) => !item.is_current).map((item) => item.slug),
     shortDescription: row.short_description,
+    longDescription: row.long_description,
+    keyFeatures: row.key_features,
+    technicalDetails: row.technical_details,
+    challengesAndSolutions: row.challenges_and_solutions,
+    whatILearned: row.what_i_learned,
     status: row.status,
     isFeatured: row.is_featured,
     repositoryUrl: safeHttpUrl(row.repository_url),
     liveDemoUrl: safeHttpUrl(row.live_demo_url),
     technologies: technologyLinks.map((item) => item.technologies?.name).filter(Boolean),
-    image: mainMedia
-      ? {
-          ...mainMedia,
-          url: supabase.storage.from('project-media').getPublicUrl(mainMedia.storage_path).data.publicUrl,
-        }
-      : null,
+    media: (mainMedia ? [mainMedia, ...media.filter((item) => item.id !== mainMedia.id)] : media)
+      .map((item) => ({
+        ...item,
+        url: supabase.storage.from('project-media').getPublicUrl(item.storage_path).data.publicUrl,
+      })),
+    image: mainMedia ? {
+      ...mainMedia,
+      url: supabase.storage.from('project-media').getPublicUrl(mainMedia.storage_path).data.publicUrl,
+    } : null,
   };
 }
 
@@ -71,7 +80,8 @@ export async function getPublicPortfolio() {
     supabase
       .from('projects')
       .select(`
-        id, name, short_description, status, is_featured, repository_url,
+        id, name, short_description, long_description, key_features, technical_details,
+        challenges_and_solutions, what_i_learned, status, is_featured, repository_url,
         live_demo_url, sort_order,
         project_slugs(slug, is_current),
         project_technologies(sort_order, technologies(name)),

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { getCachedPublicPortfolio, getPublicPortfolio } from './lib/public-content.js';
 
@@ -14,6 +14,11 @@ const navigation = [
 function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const activeSection = location.pathname.startsWith('/projects/')
+    ? 'projects'
+    : location.pathname === '/'
+      ? (location.hash.slice(1) || 'home')
+      : null;
 
   useEffect(() => {
     setMenuOpen(false);
@@ -53,8 +58,8 @@ function SiteHeader() {
             <Link
               key={to}
               to={to}
-              className={`nav-link${(location.hash === `#${section}` || (!location.hash && section === 'home')) ? ' is-active' : ''}`}
-              aria-current={location.hash === `#${section}` || (!location.hash && section === 'home') ? 'location' : undefined}
+              className={`nav-link${activeSection === section ? ' is-active' : ''}`}
+              aria-current={activeSection === section ? 'location' : undefined}
               onClick={() => {
                 setMenuOpen(false);
                 requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -71,12 +76,15 @@ function SiteHeader() {
   );
 }
 
-function PageLayout({ eyebrow, title, children }) {
+function PageLayout({ eyebrow, title, children, backToProjects = false, panel = false }) {
   return (
     <section className="page-section" aria-labelledby="page-title">
-      <p className="eyebrow">{eyebrow}</p>
-      <h1 id="page-title">{title}</h1>
-      {children}
+      {backToProjects && <Link className="text-link project-back-link" to="/#projects">Back to Projects</Link>}
+      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+      <div className={panel ? 'project-detail-panel' : undefined}>
+        <h1 id="page-title">{title}</h1>
+        {children}
+      </div>
     </section>
   );
 }
@@ -199,7 +207,7 @@ function ProjectDetailPage() {
     getPublicPortfolio()
       .then((portfolio) => {
         if (!current) return;
-        const match = portfolio.projects.find((item) => item.slug === slug);
+        const match = portfolio.projects.find((item) => item.slug === slug || item.historicalSlugs.includes(slug));
         setProject(match ?? null);
         setNotFound(!match);
       })
@@ -210,15 +218,100 @@ function ProjectDetailPage() {
   if (error) return <ServiceUnavailablePage message="The project could not be loaded. Please try again shortly." />;
   if (notFound) return <NotFoundPage project />;
   if (!project) return <LoadingPage title="Loading project" />;
+  if (project.slug !== slug) return <Navigate to={`/projects/${project.slug}`} replace />;
   return (
-    <PageLayout eyebrow="Project" title={project.name}>
+    <PageLayout title={project.name} backToProjects panel>
       <p className="status-tag detail-status">{project.status === 'in_progress' ? 'In progress' : 'Completed'}</p>
       <p className="page-intro">{project.shortDescription}</p>
-      {project.image && <img className="detail-image" src={project.image.url} alt={project.image.alt_text} />}
-      {project.technologies.length > 0 && <p>Technologies: {project.technologies.join(', ')}</p>}
-      <p className="empty-state">More project details will be available here soon.</p>
-      <Link className="text-link" to="/#projects">Back to projects</Link>
+      <ProjectGallery project={project} />
+      {project.technologies.length > 0 && (
+        <div className="detail-block"><h2>Technologies</h2><ul className="technology-list">{project.technologies.map((item) => <li className="technology-tag" key={item}>{item}</li>)}</ul></div>
+      )}
+      {(project.repositoryUrl || project.liveDemoUrl) && (
+        <div className="project-actions detail-actions">
+          {project.repositoryUrl && <a href={project.repositoryUrl} target="_blank" rel="noreferrer">Repository<span className="visually-hidden"> (opens in a new tab)</span></a>}
+          {project.liveDemoUrl && <a href={project.liveDemoUrl} target="_blank" rel="noreferrer">Live demo<span className="visually-hidden"> (opens in a new tab)</span></a>}
+        </div>
+      )}
+      {project.longDescription && <div className="detail-block"><h2>About this project</h2><p className="detail-copy">{project.longDescription}</p></div>}
+      {[
+        ['Key features', project.keyFeatures],
+        ['Technical details', project.technicalDetails],
+        ['Challenges and solutions', project.challengesAndSolutions],
+        ['What I learned', project.whatILearned],
+      ].filter(([, content]) => content?.trim()).map(([heading, content]) => (
+        <div className="detail-block" key={heading}><h2>{heading}</h2><p className="detail-copy">{content}</p></div>
+      ))}
+      <Link className="text-link project-back-link project-back-bottom" to="/#projects">Back to Projects</Link>
     </PageLayout>
+  );
+}
+
+function ProjectGallery({ project }) {
+  const images = project.media;
+  const [selected, setSelected] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
+  const dialogRef = useRef(null);
+  const closeRef = useRef(null);
+  const triggerRef = useRef(null);
+  const touchStartRef = useRef(null);
+  const activeIndex = lightboxIndex ?? selected;
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (lightboxIndex !== null && dialog && !dialog.open) {
+      dialog.showModal();
+      closeRef.current?.focus();
+    }
+  }, [lightboxIndex]);
+
+  if (!images.length) return null;
+  const openLightbox = () => {
+    triggerRef.current = document.activeElement;
+    setLightboxIndex(selected);
+  };
+  const closeLightbox = () => {
+    if (dialogRef.current?.open) dialogRef.current.close();
+    setLightboxIndex(null);
+    requestAnimationFrame(() => triggerRef.current?.focus());
+  };
+  const move = (direction) => {
+    setLightboxIndex((index) => (index + direction + images.length) % images.length);
+  };
+
+  return (
+    <div className="project-gallery" aria-label={`${project.name} screenshots`}>
+      <button className="gallery-main-button" type="button" onClick={openLightbox} aria-label={`Open image viewer: ${images[selected].alt_text}`}>
+        <img className="detail-image" src={images[selected].url} alt={images[selected].alt_text} />
+      </button>
+      {images.length > 1 && <div className="gallery-thumbnails" aria-label="Choose project image">
+        {images.map((image, index) => <button className={`gallery-thumbnail${index === selected ? ' is-selected' : ''}`} type="button" key={image.id} onClick={() => setSelected(index)} aria-label={`Show image ${index + 1}: ${image.alt_text}`} aria-pressed={index === selected}>
+          <img src={image.url} alt="" />
+        </button>)}
+      </div>}
+      <dialog className="lightbox" ref={dialogRef} aria-label={`${project.name} image viewer`} onCancel={() => setLightboxIndex(null)} onClose={() => { setLightboxIndex(null); requestAnimationFrame(() => triggerRef.current?.focus()); }}
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowLeft' && images.length > 1) { event.preventDefault(); move(-1); }
+          if (event.key === 'ArrowRight' && images.length > 1) { event.preventDefault(); move(1); }
+        }}
+        onTouchStart={(event) => { touchStartRef.current = { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY }; }}
+        onTouchEnd={(event) => {
+          const start = touchStartRef.current;
+          if (!start || images.length < 2) return;
+          const dx = event.changedTouches[0].clientX - start.x;
+          const dy = event.changedTouches[0].clientY - start.y;
+          if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) move(dx < 0 ? 1 : -1);
+          touchStartRef.current = null;
+        }}>
+        <div className="lightbox-toolbar">
+          <span aria-live="polite">Image {activeIndex + 1} of {images.length}</span>
+          <button className="button button-secondary" ref={closeRef} type="button" onClick={closeLightbox}>Close image viewer</button>
+        </div>
+        {images.length > 1 && <button className="lightbox-nav lightbox-previous" type="button" onClick={() => move(-1)} aria-label="Previous image">‹</button>}
+        <img className="lightbox-image" src={images[activeIndex].url} alt={images[activeIndex].alt_text} />
+        {images.length > 1 && <button className="lightbox-nav lightbox-next" type="button" onClick={() => move(1)} aria-label="Next image">›</button>}
+      </dialog>
+    </div>
   );
 }
 

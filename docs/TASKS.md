@@ -87,7 +87,7 @@
 - **Progress:** Added the public content data module, featured Projects list, skills display, and public schema/storage migration. The migration is applied and the production build passes. User confirmed seeded projects and skills render. The approved layout change moves skills from Home to About, removes Browse projects, and makes Projects featured-only; this revised layout still needs browser checks. Temporary test records remain in the linked project and must be removed after verification.
 
 #### T-05 — Render project detail, gallery, and URL history
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-04
 - **Related:** F-02, F-03, F-04, F-12; J-01
@@ -98,6 +98,7 @@
   - [ ] Gallery supports one or many images, keyboard controls, touch navigation, and focus return after close.
   - [ ] Old slugs redirect to the current project; deleted slugs show not found.
 - **Verify:** Check empty sections, single/multiple images, keyboard/touch controls, rename history, and deleted slugs.
+- **Progress:** Implemented project detail field mapping and fixed-order optional sections, the single/multiple image gallery and native lightbox, and redirects from historical slugs. Build and browser behavior checks are still pending; T-04's manual walkthrough and temporary-data cleanup also remain outstanding.
 
 #### T-06 — Render About and profile content
 - **Status:** Not started
