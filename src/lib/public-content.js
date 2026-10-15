@@ -1,6 +1,6 @@
 import { isSupabaseConfigured, supabase } from './supabase.js';
 
-const PUBLIC_CONTENT_CACHE_KEY = 'portfolio:public-content:v2';
+const PUBLIC_CONTENT_CACHE_KEY = 'portfolio:public-content:v3';
 
 export function getCachedPublicPortfolio() {
   try {
@@ -71,8 +71,11 @@ export async function getPublicPortfolio() {
     throw error;
   }
 
-  const [homepageResult, categoriesResult, projectsResult] = await Promise.all([
+  const [homepageResult, profileResult, educationResult, experienceResult, categoriesResult, projectsResult] = await Promise.all([
     supabase.from('homepage_content').select('intro_text').eq('id', true).maybeSingle(),
+    supabase.from('profile_content').select('intro, photo_storage_path, cv_storage_path').eq('id', true).maybeSingle(),
+    supabase.from('education_entries').select('id, institution, qualification_or_course, date_range, description, sort_order').order('sort_order', { ascending: true }),
+    supabase.from('experience_entries').select('id, organization, role, date_range, description, sort_order').order('sort_order', { ascending: true }),
     supabase
       .from('skill_categories')
       .select('id, name, sort_order, skills(id, name, sort_order)')
@@ -91,11 +94,25 @@ export async function getPublicPortfolio() {
   ]);
 
   const homepage = unwrap(homepageResult);
+  const profileRow = unwrap(profileResult);
+  const educationRows = unwrap(educationResult);
+  const experienceRows = unwrap(experienceResult);
   const categories = unwrap(categoriesResult);
   const projectRows = unwrap(projectsResult);
 
   const portfolio = {
     intro: homepage?.intro_text?.trim() ?? '',
+    profile: {
+      intro: profileRow?.intro?.trim() ?? '',
+      photoUrl: profileRow?.photo_storage_path
+        ? supabase.storage.from('profile-photo').getPublicUrl(profileRow.photo_storage_path).data.publicUrl
+        : null,
+      cvUrl: profileRow?.cv_storage_path
+        ? supabase.storage.from('profile-cv').getPublicUrl(profileRow.cv_storage_path, { download: true }).data.publicUrl
+        : null,
+    },
+    education: sortByOrder(educationRows ?? []),
+    experience: sortByOrder(experienceRows ?? []),
     skillCategories: sortByOrder(categories)
       .map((category) => ({
         id: category.id,

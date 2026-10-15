@@ -101,7 +101,7 @@
 - **Progress:** Implemented project detail field mapping and fixed-order optional sections, the single/multiple image gallery and native lightbox, and redirects from historical slugs. Build and browser behavior checks are still pending; T-04's manual walkthrough and temporary-data cleanup also remain outstanding.
 
 #### T-06 — Render About and profile content
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-01, T-03
 - **Related:** F-05, F-15; J-02
@@ -111,6 +111,7 @@
   - [ ] Sections without content are omitted and the CV link appears only when a CV exists.
   - [ ] CV is downloadable as PDF and the page adapts to phone and desktop.
 - **Verify:** Check partial and complete profiles, with and without CV/photo.
+- **Progress:** Added public profile/education/experience data reads, conditional About rendering, and the additive schema/storage migration. The migration was applied to the linked Supabase project and the production build passes. Browser checks with partial/complete profile data and photo/CV variants remain pending.
 
 ### M3 — Admin and contact workflows
 

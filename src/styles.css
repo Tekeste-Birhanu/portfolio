@@ -70,6 +70,17 @@ p { margin-block: 0 1rem; }
 .skill-category + .skill-category { margin-top: 1.25rem; }
 .skills-heading { margin: 0 0 1rem; color: var(--color-accent); font-family: var(--font-mono); font-size: 1.05rem; font-weight: 600; }
 .skill-category h4 { margin: 0; color: var(--color-muted); font-family: var(--font-mono); font-size: 0.95rem; font-weight: 500; }
+.profile-intro { margin-top: 1.25rem; }
+.profile-intro.has-photo { display: grid; grid-template-columns: minmax(10rem, 0.32fr) minmax(0, 1fr); align-items: start; gap: 1.5rem; }
+.profile-photo { display: block; width: 100%; max-width: 15rem; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--color-border); border-radius: 4px; }
+.profile-intro-copy, .profile-entry-description { max-width: 70ch; color: var(--color-muted); white-space: pre-wrap; }
+.profile-section { margin-top: 2rem; }
+.profile-section > h3 { margin: 0 0 1rem; color: var(--color-accent); font-family: var(--font-mono); font-size: 1.05rem; font-weight: 600; }
+.profile-entry-list { display: grid; gap: 1.25rem; }
+.profile-entry h4 { margin: 0; font-family: var(--font-mono); font-size: 0.98rem; font-weight: 600; }
+.profile-entry-meta { margin: 0.2rem 0 0; color: var(--color-muted); }
+.profile-entry-description { margin: 0.5rem 0 0; }
+.cv-download { margin-top: 2rem; text-decoration: none; }
 .detail-status { margin-top: 0.75rem; }
 .detail-image { max-height: none; }
 .project-gallery { margin-top: 1.25rem; }
@@ -131,6 +142,8 @@ p { margin-block: 0 1rem; }
   .main-content { min-height: calc(100vh - 8rem); }
   .page-section { padding-block: 2rem; }
   .footer-inner { align-items: center; flex-direction: column; justify-content: center; padding-block: 1rem; }
+  .profile-intro.has-photo { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .profile-photo { max-width: 12rem; }
   .lightbox { padding: 0.75rem; }
   .lightbox-previous { left: 0.5rem; }
   .lightbox-next { right: 0.5rem; }

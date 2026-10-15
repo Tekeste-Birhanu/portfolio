@@ -122,8 +122,7 @@ function HomePage() {
       <ProjectsSection projects={featuredProjects} totalProjects={portfolio.projects.length} />
       <section className="page-section content-section" id="about" aria-labelledby="about-title">
         <h2 id="about-title">About</h2>
-        <p className="empty-state">About information isn’t available yet.</p>
-        <Skills categories={portfolio.skillCategories} />
+        <AboutContent profile={portfolio.profile} education={portfolio.education} experience={portfolio.experience} categories={portfolio.skillCategories} />
       </section>
       <section className="page-section content-section" id="contact" aria-labelledby="contact-title">
         <h2 id="contact-title">Contact</h2>
@@ -190,6 +189,34 @@ function Skills({ categories }) {
         </div>
       ))}
     </div>
+  );
+}
+
+function AboutContent({ profile, education, experience, categories }) {
+  const hasIntro = Boolean(profile.intro || profile.photoUrl);
+  return (
+    <>
+      {hasIntro && <div className={`profile-intro${profile.photoUrl ? ' has-photo' : ''}`}>
+        {profile.photoUrl && <img className="profile-photo" src={profile.photoUrl} alt="Portrait of the portfolio owner" loading="lazy" />}
+        {profile.intro && <p className="profile-intro-copy">{profile.intro}</p>}
+      </div>}
+      {education.length > 0 && <section className="profile-section" aria-labelledby="education-title">
+        <h3 id="education-title">Education</h3>
+        <div className="profile-entry-list">{education.map((entry) => <article className="profile-entry" key={entry.id}>
+          <h4>{entry.qualification_or_course}</h4><p className="profile-entry-meta">{entry.institution}{entry.date_range && <> <span aria-hidden="true">·</span> {entry.date_range}</>}</p>
+          {entry.description && <p className="profile-entry-description">{entry.description}</p>}
+        </article>)}</div>
+      </section>}
+      {experience.length > 0 && <section className="profile-section" aria-labelledby="experience-title">
+        <h3 id="experience-title">Experience</h3>
+        <div className="profile-entry-list">{experience.map((entry) => <article className="profile-entry" key={entry.id}>
+          <h4>{entry.role}</h4><p className="profile-entry-meta">{entry.organization}{entry.date_range && <> <span aria-hidden="true">·</span> {entry.date_range}</>}</p>
+          {entry.description && <p className="profile-entry-description">{entry.description}</p>}
+        </article>)}</div>
+      </section>}
+      <Skills categories={categories} />
+      {profile.cvUrl && <a className="button button-secondary cv-download" href={profile.cvUrl}>Download CV (PDF)</a>}
+    </>
   );
 }
 

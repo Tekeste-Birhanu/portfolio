@@ -33,6 +33,7 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 - **Fields:** Singleton row with `intro` (plain text, optional), `photo_storage_path` (optional), `cv_storage_path` (optional), and `updated_at`.
 - **Constraints:** Empty fields are omitted publicly. The CV is a PDF up to 10 MB. The profile photo accepts JPG, PNG, or WebP up to 5 MB; the original is served without app compression or generated variants.
 - **Related requirements:** F-05, F-15
+- **Implementation:** The singleton row is `public.profile_content` with `id = true`. Its public photo and CV use the `profile-photo` and `profile-cv` storage buckets, respectively; bucket rules enforce allowed types and maximum sizes.
 
 ### Education entry
 
@@ -40,6 +41,7 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 - **Fields:** `id`, `institution` (required), `qualification_or_course` (required), `date_range` (optional plain text), `description` (optional plain text), `sort_order`, and timestamps.
 - **Constraints:** Entries are independently added, edited, removed, and reordered. Date range and description may be omitted; date range can use forms such as `2021–2024` or `2022–Present`.
 - **Related requirements:** F-15
+- **Implementation:** Stored in `public.education_entries`, linked to the singleton profile and ordered by `sort_order`.
 
 ### Work experience entry
 
@@ -47,6 +49,7 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 - **Fields:** `id`, `organization` (required), `role` (required), `date_range` (optional plain text), `description` (optional plain text), `sort_order`, and timestamps.
 - **Constraints:** Entries are independently added, edited, removed, and reordered. Date range and description may be omitted; date range can use forms such as `2021–2024` or `2022–Present`.
 - **Related requirements:** F-15
+- **Implementation:** Stored in `public.experience_entries`, linked to the singleton profile and ordered by `sort_order`.
 
 ### Skill category
 
