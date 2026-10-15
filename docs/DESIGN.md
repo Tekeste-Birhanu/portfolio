@@ -17,7 +17,7 @@
 
 ## 3. Visual foundations
 
-The public Home, Projects, About, and Contact areas are sections on one scrolling page, reached through header anchor links. Project detail pages remain separate routes.
+The public Home, Projects, About, and Contact areas are sections on one scrolling page, reached through header anchor links. Clear horizontal dividers separate these sections. Project detail pages remain separate routes.
 
 Values below are initial decisions. Verify contrast with a checker during implementation and tune sizes once real content is in.
 
@@ -48,7 +48,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
   - Imagery is the owner's actual screenshots and profile photo, never stock illustrations.
   - The owner manually optimizes files before upload. The app stores and serves uploaded originals without compression or generated variants. Images keep their aspect ratio and are not cropped or stretched; gallery thumbnails are display controls using the same uploaded files.
 - **Responsive behavior:** Three ranges: phone (under 640px), tablet (640px to 1023px), desktop (1024px and up). Layouts rearrange rather than shrink. The sticky public header stays compact on phones: brand and a keyboard-operable menu control share one row, and the menu opens as a panel.
-  - Homepage project entries: image beside text from 640px up, stacked below.
+  - Featured Projects entries use a two-column grid from 768px up and one column below; each image stacks above its text.
   - Admin: sidebar from 1024px up; a compact menu below.
   - No horizontal scrolling at 320px width; wide content scrolls inside its own container.
 
@@ -62,12 +62,12 @@ Values below are initial decisions. Verify contrast with a checker during implem
 | Toggle switch                  | Enable or disable a contact method                                                | Labeled, keyboard operable, state announced; the required Email method cannot be disabled.                                            |
 | Site header and navigation     | Public navigation                                                                 | Stays pinned at the top while scrolling; Home, Projects, About, Contact; collapses to a compact menu on phone.                       |
 | Admin sidebar and compact menu | Admin navigation                                                                  | Projects, Profile, Homepage, Mailbox, sign out; sidebar on desktop, compact menu below 1024px.                                      |
-| Project entry                  | Homepage and Projects list                                                        | Name with status beside it, description, technologies on their own line, links, and a "View details" action; image beside text on wide screens, stacked on phone. |
+| Project entry                  | Featured Projects list                                                            | Name with status beside it, description, technologies on their own line, links, and a "View details" action; image stacks above text within each card. |
 | Gallery                        | Project detail screenshots                                                        | One main image; thumbnails below only when there are several; selected thumbnail marked with the accent border.                     |
 | Lightbox                       | Larger screenshot view                                                            | Close button, previous and next, arrow keys and Escape, swipe on touch; focus moves into it and returns to the main image on close. |
 | Confirmation dialog            | Delete project, delete message, delete contact method, leave with unsaved changes | Names the item, clear primary and cancel actions, Escape cancels, focus is trapped while open.                                      |
 | Inline notice                  | "Saved" and error messages                                                        | Appears near the action, announced to screen readers, does not block the page.                                                      |
-| Admin list row                 | Projects list                                                                     | Name, Home featured toggle, last updated, Edit, Delete; drag handle reorders projects; becomes a stacked row on phone.              |
+| Admin list row                 | Projects list                                                                     | Name, featured toggle, last updated, Edit, Delete; drag handle reorders projects; becomes a stacked row on phone.              |
 | Image upload area              | Project screenshots, profile photo, CV                                            | Preview, alt text field for project images, set main image, reorder, replace, remove; shows file type and size errors. Project images are manually optimized and served as uploaded; CV PDF limit is 10 MB. |
 | Notification warning           | Mailbox messages                                                                  | Failed email notification is marked in both the message row and the opened message; the saved message remains available.             |
 | Empty state                    | No content                                                                        | One plain line, with the next action where one exists.                                                                              |
@@ -76,21 +76,21 @@ Values below are initial decisions. Verify contrast with a checker during implem
 
 ### Home
 
-- **Purpose:** Introduce the developer and highlight administrator-selected projects.
-- **Layout:** Centered intro, then the vertical list of featured projects, then a skills section grouped by administrator-defined category headings, with pill-style items under each heading.
-- **Primary action:** Open a project.
-- **Secondary actions:** "Browse projects" opens the Projects page.
-- **Content and behavior:** One short intro, no extra subtitle or multiple call-to-action buttons. Show any number of projects the administrator has featured, in their order in the Projects list. If none are featured, omit the project list. In each project entry, place the status beside the project name and show technologies separately below the description.
-- **Responsive changes:** Project image beside text from 640px up; stacked below.
+- **Purpose:** Introduce the developer.
+- **Layout:** Owner name in bold, followed by the short introduction. A visible divider separates Home from Projects.
+- **Primary action:** Navigate using the section navigation.
+- **Content and behavior:** Show the owner's name and one short intro. The call-to-action link is undecided and omitted for now.
+- **Responsive changes:** The intro remains readable at phone and desktop widths.
 - **Related flow:** J-01
 
 ### Projects
 
-- **Purpose:** Browse featured projects first, then expand the list to include all projects.
-- **Layout:** A vertical list in the same style as the homepage entries.
+- **Purpose:** Browse featured projects and open individual detail pages.
+- **Heading:** "Featured Projects".
+- **Layout:** Two-column card list on wide screens and one column on narrow screens.
 - **Primary action:** View details for a project.
-- **Content and behavior:** Initially lists featured projects in administrator order. A clearly labeled "Expand to all" control reveals every saved project, including those not featured on Home. Each entry places the status beside the project name, shows technologies separately from status, and has a clearly labeled "View details" action to its individual page. If there are no featured projects, explain that and keep "Expand to all" available when unfeatured projects exist. Show "No projects yet" only when there are no saved projects.
-- **Responsive changes:** Same as Home.
+- **Content and behavior:** Lists only projects selected as featured, in administrator order. There is no expand or Browse projects control. Each entry places the status beside the project name, shows technologies separately from status, and has a clearly labeled "View details" action to its individual page. Show "No featured projects yet" when projects exist but none are featured; show "No projects yet" when there are no saved projects.
+- **Responsive changes:** Two columns on wide screens; one column on narrow screens. Project cards stack image and text vertically.
 - **Related flow:** J-01
 
 ### Project detail
@@ -98,15 +98,15 @@ Values below are initial decisions. Verify contrast with a checker during implem
 - **Purpose:** Show one project in full.
 - **Layout:** A prominent "Back to Projects" link directly below the header and above the title; then name and status, short description, gallery, technologies, links, detailed description, and populated optional detail sections. Repeat "Back to Projects" at the bottom of the page.
 - **Primary action:** Open the live demo or repository, when set.
-- **Content and behavior:** Show all saved project information. Optional sections appear in a fixed order and are omitted when empty. Link buttons appear only when a link exists. External links open in a new tab. The back links return to the full Projects list. On top-level public pages, visitors use the persistent site navigation instead of a redundant back button.
+- **Content and behavior:** Show all saved project information. Optional sections appear in a fixed order and are omitted when empty. Link buttons appear only when a link exists. External links open in a new tab. The back links return to the featured Projects section. On top-level public pages, visitors use the persistent site navigation instead of a redundant back button.
 - **Responsive changes:** Gallery fills the column width; thumbnails wrap or scroll within their own row.
 - **Related flow:** J-01
 
 ### About
 
 - **Purpose:** Give background and the CV.
-- **Layout:** Intro, education, and experience sections, followed by a CV download link when a CV exists. When a profile photo has been uploaded, show it beside the intro on wide screens and above it on phones. Without a photo, the intro uses the available width. Skills are shown on Home under category headings, not as About-page sections.
-- **Content and behavior:** The administrator edits the intro, education entries, experience entries, optional photo, and CV in Profile. Show the intro, education, and experience sections only when they have content. Omit empty sections; show the CV link only when a CV exists.
+- **Layout:** Intro, education, and experience sections, followed by a Skills subsection with category labels and pills, then a CV download link when a CV exists. The Skills heading is visually subordinate to About. When a profile photo has been uploaded, show it beside the intro on wide screens and above it on phones. Without a photo, the intro uses the available width.
+- **Content and behavior:** The administrator edits the intro, education entries, experience entries, skill categories and skills, optional photo, and CV in Profile. Show categorized skill pills and show the intro, education, and experience sections only when they have content. Omit empty categories and sections; show the CV link only when a CV exists.
 - **Related flow:** J-02
 
 ### Contact
@@ -127,10 +127,10 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### Admin Projects list
 
 - **Purpose:** Manage projects; the landing page after login.
-- **Layout:** Search field and Add project button above a compact table: name, Home featured toggle, last updated, actions, and a drag handle.
+- **Layout:** Search field and Add project button above a compact table: name, featured toggle, last updated, actions, and a drag handle.
 - **Primary action:** Add project.
 - **Secondary actions:** Feature or unfeature, Edit, Delete, and drag rows to set project order.
-- **Content and behavior:** Any number of projects can be featured. Home displays the featured subset in the same order as the Projects list; every project remains on the public Projects page. Dragging also works by keyboard. Delete opens a confirmation naming the project.
+- **Content and behavior:** Any number of projects can be featured. The public Projects section displays the featured subset in the shared project order; unfeatured projects do not appear in that section. Dragging also works by keyboard. Delete opens a confirmation naming the project.
 - **Responsive changes:** Rows become stacked on phone.
 - **Related flow:** J-03, J-06
 

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, Route, Routes, useLocation, useSearchParams, useParams } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { getCachedPublicPortfolio, getPublicPortfolio } from './lib/public-content.js';
+
+const SITE_OWNER_NAME = 'Your Name';
 
 const navigation = [
   { label: 'Home', to: '/#home', section: 'home' },
@@ -80,7 +82,6 @@ function PageLayout({ eyebrow, title, children }) {
 }
 
 function HomePage() {
-  const [searchParams] = useSearchParams();
   const [portfolio, setPortfolio] = useState(getCachedPublicPortfolio);
   const [loadError, setLoadError] = useState(null);
   const [attempt, setAttempt] = useState(0);
@@ -104,32 +105,19 @@ function HomePage() {
   if (!portfolio) return <LoadingPage title="Loading portfolio" />;
 
   const featuredProjects = portfolio.projects.filter((project) => project.isFeatured);
-  const showAllProjects = searchParams.get('projects') === 'all';
   return (
     <>
       <section className="page-section" id="home" aria-labelledby="home-title">
-        <p className="eyebrow">Developer Portfolio</p>
-        <h1 id="home-title">Hello, I’m a developer.</h1>
+        <h1 className="home-name" id="home-title">{SITE_OWNER_NAME}</h1>
         <p className="page-intro">{portfolio.intro || 'A portfolio introduction has not been added yet.'}</p>
-        <p><Link className="text-link" to="/?projects=all#projects">Browse projects <span aria-hidden="true">→</span></Link></p>
-        {featuredProjects.length > 0 && (
-          <section className="content-block" aria-labelledby="featured-heading">
-            <h2 id="featured-heading">Featured projects</h2>
-            <div className="project-list">
-              {featuredProjects.map((project) => <ProjectEntry key={project.id} project={project} />)}
-            </div>
-          </section>
-        )}
-        <Skills categories={portfolio.skillCategories} />
       </section>
-      <ProjectsSection projects={portfolio.projects} expandedInitially={showAllProjects} />
+      <ProjectsSection projects={featuredProjects} totalProjects={portfolio.projects.length} />
       <section className="page-section content-section" id="about" aria-labelledby="about-title">
-        <p className="eyebrow">Background</p>
         <h2 id="about-title">About</h2>
         <p className="empty-state">About information isn’t available yet.</p>
+        <Skills categories={portfolio.skillCategories} />
       </section>
       <section className="page-section content-section" id="contact" aria-labelledby="contact-title">
-        <p className="eyebrow">Get in touch</p>
         <h2 id="contact-title">Contact</h2>
         <p className="empty-state">Contact details aren’t available yet.</p>
       </section>
@@ -137,30 +125,16 @@ function HomePage() {
   );
 }
 
-function ProjectsSection({ projects, expandedInitially }) {
-  const [expanded, setExpanded] = useState(expandedInitially);
-  useEffect(() => setExpanded(expandedInitially), [expandedInitially]);
-  const featured = projects.filter((project) => project.isFeatured);
-  const visibleProjects = expanded ? projects : featured;
-
+function ProjectsSection({ projects, totalProjects }) {
   return (
     <section className="page-section content-section" id="projects" aria-labelledby="projects-title">
-      <p className="eyebrow">Portfolio</p>
-      <h2 id="projects-title">Projects</h2>
+      <h2 id="projects-title">Featured Projects</h2>
       {projects.length === 0 ? (
-        <p className="empty-state">No projects yet.</p>
+        <p className="empty-state">{totalProjects > 0 ? 'No featured projects yet.' : 'No projects yet.'}</p>
       ) : (
-        <>
-          {visibleProjects.length === 0 && <p className="empty-state">No projects are featured yet.</p>}
-          <div className="project-list">
-            {visibleProjects.map((project) => <ProjectEntry key={project.id} project={project} />)}
-          </div>
-          {!expanded && projects.length > featured.length && (
-            <button className="button button-secondary expand-projects" type="button" onClick={() => setExpanded(true)}>
-              Expand to all
-            </button>
-          )}
-        </>
+        <div className="project-list project-grid">
+          {projects.map((project) => <ProjectEntry key={project.id} project={project} />)}
+        </div>
       )}
     </section>
   );
@@ -197,17 +171,17 @@ function ProjectEntry({ project }) {
 function Skills({ categories }) {
   if (categories.length === 0) return null;
   return (
-    <section className="content-block skills-section" aria-labelledby="skills-heading">
-      <h2 id="skills-heading">Skills</h2>
+    <div className="content-block skills-section">
+      <h3 className="skills-heading">Skills</h3>
       {categories.map((category) => (
         <div className="skill-category" key={category.id}>
-          <h3>{category.name}</h3>
+          <h4>{category.name}</h4>
           <ul className="technology-list">
             {category.skills.map((skill) => <li className="technology-tag" key={skill.id}>{skill.name}</li>)}
           </ul>
         </div>
       ))}
-    </section>
+    </div>
   );
 }
 
@@ -318,7 +292,7 @@ function App() {
       </main>
       <footer className="site-footer">
         <div className="footer-inner">
-          <span>© {new Date().getFullYear()} Your Name</span>
+          <span>© {new Date().getFullYear()} {SITE_OWNER_NAME}</span>
         </div>
       </footer>
     </>

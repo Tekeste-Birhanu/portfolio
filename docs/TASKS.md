@@ -32,7 +32,7 @@
 - **Depends on:** None
 - **Related:** F-01–F-06, F-08–F-19; J-01–J-06
 - **Goal:** Make the product and data decisions complete and consistent enough that implementation agents do not need to guess.
-- **Scope:** Complete the `SCHEMA.md` draft with entities, relationships, constraints, indexes, RLS/storage rules, deletion behavior, migrations, and seed approach. Align PRD, App Flow, Architecture, and Design with approved decisions: the designated administrator can sign in with email/password or Google; Supabase Auth uses Brevo for email verification and password recovery; public registration is disabled and Google sign-in alone does not grant admin access; any contact platform is allowed with a generic icon fallback; exactly one non-removable Email contact method is the public and notification address; all projects stay public in Projects and on their detail pages, while the administrator can feature any number on Home; project deletion is permanent with no archive state; no CAPTCHA or app-level rate limiting; original uploads are served without app compression; no product-level text-length caps apply outside contact-form limits.
+- **Scope:** Complete the `SCHEMA.md` draft with entities, relationships, constraints, indexes, RLS/storage rules, deletion behavior, migrations, and seed approach. Align PRD, App Flow, Architecture, and Design with approved decisions: the designated administrator can sign in with email/password or Google; Supabase Auth uses Brevo for email verification and password recovery; public registration is disabled and Google sign-in alone does not grant admin access; any contact platform is allowed with a generic icon fallback; exactly one non-removable Email contact method is the public and notification address; projects have public detail routes and only featured projects appear in the Projects section; project deletion is permanent with no archive state; no CAPTCHA or app-level rate limiting; original uploads are served without app compression; no product-level text-length caps apply outside contact-form limits.
 - **Done when:**
   - [x] The schema covers public content, admin data, messages, notification status, files, and project URL history.
   - [x] The specifications agree that Google sign-in is an admin option only, and agree on authorization, contact, uploads, and deletion rules.
@@ -75,15 +75,16 @@
 - **Priority:** Must
 - **Depends on:** T-01, T-03
 - **Related:** F-01, F-02, F-13; J-01
-- **Goal:** Let visitors scan the developer introduction, featured work, skills, and complete project list.
-- **Scope:** Read homepage intro, categorized skills, and projects from Supabase; Home and the initial Projects view render featured projects. Projects provides an "Expand to all" control that reveals every saved project; Home's "Browse projects" action opens the Projects section with all projects already revealed. All views use the shared administrator-defined project order; unfeatured projects remain publicly accessible.
+- **Goal:** Let visitors read the introduction, browse featured projects, and review skills under About.
+- **Scope:** Read homepage intro, categorized skills, and projects from Supabase. Home contains the intro only; Projects lists featured projects in shared administrator-defined order using two columns on wide screens and one on narrow screens; About shows categorized skills. There is no Browse projects action or expand control. Each listed project links to a separate detail view. Add clear visual dividers between the Home, Projects, About, and Contact sections.
 - **Done when:**
   - [ ] Project entries show name, description, technologies, status, available links, image, and detail link.
-  - [ ] Home and the initial Projects view show the featured subset in stored order; "Expand to all" reveals every project in that order; Home's "Browse projects" opens the Projects section with the full list already expanded; image/text layout adapts to screen width.
-  - [ ] Home links to Projects, each project entry has a "View details" link, and all saved project detail pages remain reachable.
-  - [ ] Empty project, category, and skill states are handled without broken sections; empty skill categories are omitted.
-- **Verify:** Check multiple ordered projects, featured-only initial state, expansion to all projects, optional links, multiple skill categories and their order, empty categories, and an empty project collection.
-- **Progress:** Added a public content data module, Home and Projects rendering, featured/full-list behavior, project summary links, and the initial public schema/storage migration. Production build passes. The migration dry-run identified `20261015222849_public_portfolio_content.sql`; `npm.cmd run db:push` then reported `Finished supabase db push.` No demo content is seeded. Public content rendering and empty-state behavior still need to be checked against the linked project.
+  - [ ] Home contains the bold owner name and short intro, with no link until its destination is decided; the "Featured Projects" section lists only featured projects in stored order without Browse or expand controls; the list uses two columns on wide screens and one on narrow screens.
+  - [ ] Projects navigation reaches the featured list, and every featured project has a "View details" link to its separate route.
+  - [ ] Skills appear under About, empty categories are omitted, and project empty states distinguish no projects from no featured projects.
+  - [ ] Public section boundaries are visually clear.
+- **Verify:** Check multiple ordered featured projects, that unfeatured projects are omitted from Projects, separate detail links, optional links, responsive columns, skills under About with multiple categories and their order, empty categories, no-featured and no-project states, and visible section dividers.
+- **Progress:** Added the public content data module, featured Projects list, skills display, and public schema/storage migration. The migration is applied and the production build passes. User confirmed seeded projects and skills render. The approved layout change moves skills from Home to About, removes Browse projects, and makes Projects featured-only; this revised layout still needs browser checks. Temporary test records remain in the linked project and must be removed after verification.
 
 #### T-05 — Render project detail, gallery, and URL history
 - **Status:** Not started
@@ -104,7 +105,7 @@
 - **Depends on:** T-01, T-03
 - **Related:** F-05, F-15; J-02
 - **Goal:** Present the owner's background and optional CV.
-- **Scope:** Render the About intro, education, experience, profile photo, and CV from stored content. Render intro, education, and experience only when populated; render categorized skill pills on Home, omitting empty categories.
+- **Scope:** Render the About intro, education, experience, profile photo, and CV from stored content. Render intro, education, experience, and categorized skill pills only when populated; omit empty categories.
 - **Done when:**
   - [ ] Sections without content are omitted and the CV link appears only when a CV exists.
   - [ ] CV is downloadable as PDF and the page adapts to phone and desktop.
@@ -134,7 +135,7 @@
 - **Scope:** Implement admin navigation and Projects list with search, last-updated information, add/edit entry points, a feature/unfeature control for each project, and ordering by pointer and keyboard.
 - **Done when:**
   - [ ] The list shows project name, last updated, and actions; search filters by name.
-  - [ ] The administrator can feature or unfeature any number of projects; unfeatured projects remain on the public Projects page.
+  - [ ] The administrator can feature or unfeature any number of projects; the public Projects section lists only featured projects.
   - [ ] Project order can be changed by drag interaction and keyboard controls.
   - [ ] Admin navigation adapts to desktop and mobile.
 - **Verify:** Check filtering, ordering, empty state, responsive layout, and authorization.
@@ -177,7 +178,7 @@
 - **Done when:**
   - [ ] Profile content saves and appears on About; empty sections and categories are omitted publicly.
   - [ ] Categories can be added, renamed, and reordered; a category can be removed only when empty.
-  - [ ] Skills can be added, renamed, reordered within a category, moved between categories, and removed; Home groups skill pills under category names and omits empty categories.
+  - [ ] Skills can be added, renamed, reordered within a category, moved between categories, and removed; About groups skill pills under category names and omits empty categories.
   - [ ] Profile photo accepts JPG, PNG, or WebP up to 5 MB; CV accepts PDF up to 10 MB; both can be replaced or removed.
 - **Verify:** Check validation, media handling, category and skill operations, that non-empty categories cannot be deleted, empty-state behavior, and public updates.
 

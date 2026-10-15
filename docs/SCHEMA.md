@@ -52,21 +52,21 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 
 - **Purpose:** Store an administrator-defined heading that groups related skills.
 - **Fields:** `id`, `name`, `sort_order`, `created_at`, and `updated_at`.
-- **Constraints:** Categories can be added, renamed, reordered, and removed only when empty. Categories with no skills are omitted from the public Home page.
-- **Related requirements:** F-01, F-15
+- **Constraints:** Categories can be added, renamed, reordered, and removed only when empty. Categories with no skills are omitted from the public About section.
+- **Related requirements:** F-15
 
 ### Skill
 
 - **Purpose:** Store one skill within a category.
 - **Fields:** `id`, `category_id`, `name`, `sort_order`, `created_at`, and `updated_at`.
 - **Constraints:** Each skill belongs to exactly one category. Skills can be added, renamed, reordered within their category, moved to another category, and removed. Public skills render as pill-style items grouped under their category name.
-- **Related requirements:** F-01, F-15
+- **Related requirements:** F-15
 
 ### Project
 
 - **Purpose:** Store a public portfolio project.
 - **Fields:** `id`, `name`, `short_description`, optional `long_description`, `status` (`in_progress` or `completed`), `is_featured` (boolean, default `false`), optional `repository_url`, optional `live_demo_url`, optional `key_features`, `technical_details`, `challenges_and_solutions`, and `what_i_learned`, plus `sort_order`, `created_at`, and `updated_at`.
-- **Constraints:** Name, short description, and status are required on first save. Every saved project is reachable from the public Projects section and has a public detail page. Home and the initial Projects view show projects with `is_featured = true`, in `sort_order`; "Expand to all" reveals the full list, including unfeatured projects. Home's "Browse projects" action opens the Projects section with all projects revealed. Any number may be featured. There is no archive state or soft delete. URLs must be validated. Saving makes changes live. Project deletion reports success only after all associated Storage files and database records are removed. If Storage cleanup fails, keep the project record and show an error with a retry option; retries must safely handle files already removed.
+- **Constraints:** Name, short description, and status are required on first save. Every saved project has a public detail route. The public Projects section lists only projects with `is_featured = true`, in `sort_order`; unfeatured projects do not appear in that section. Any number may be featured. There is no archive state or soft delete. URLs must be validated. Saving makes changes live. Project deletion reports success only after all associated Storage files and database records are removed. If Storage cleanup fails, keep the project record and show an error with a retry option; retries must safely handle files already removed.
 - **Related requirements:** F-01, F-02, F-03, F-09, F-10, F-13, F-14
 
 ### Project slug
@@ -122,19 +122,19 @@ Homepage content, Profile, administrator configuration, and the Email contact me
 
 - **INV-01:** All admin reads and writes are limited to the designated Supabase Auth user through database/storage policies or trusted server functions; hiding routes is not authorization.
 - **INV-02:** Public content can be read without authentication. Visitor messages and administrator configuration are never publicly readable.
-- **INV-03:** Every saved project is public on Projects and has a detail page. Home displays only featured projects in shared project order. Project deletion permanently removes the project, media, technology relationships, and slug history.
+- **INV-03:** Every saved project has a public detail route. The Projects section lists only featured projects in shared project order. Project deletion permanently removes the project, media, technology relationships, and slug history.
 - **INV-04:** Every project has exactly one current slug; all retained historical slugs redirect to that project.
 - **INV-05:** Each project has at most 10 still images, 2 GIFs, and one main image; every image has alt text.
 - **INV-06:** Exactly one enabled Email contact method exists and is the recipient for contact-message notifications.
 - **INV-07:** A visitor message is committed before notification delivery is attempted; notification failure never deletes or hides the message.
 - **INV-08:** All editable text is plain text and is never interpreted as HTML or script.
-- **INV-09:** Every skill belongs to exactly one category. A category can be deleted only when empty; empty categories are omitted from Home.
+- **INV-09:** Every skill belongs to exactly one category. A category can be deleted only when empty; empty categories are omitted from About.
 
 ## 5. Indexes and query needs
 
 | Data / query pattern | Index or optimization | Reason |
 | --- | --- | --- |
-| Projects ordered for Home and Projects | Index on `sort_order` and a composite index on `(is_featured, sort_order)` | Home and the initial Projects view load featured projects in order; expanding loads all projects in order. |
+| Projects in administrator order | Index on `sort_order` and a composite index on `(is_featured, sort_order)` | The Projects section filters to featured projects while preserving the shared order. |
 | Project lookup by URL | Unique index on `slug`; partial unique index for one current slug per project | Resolve current and historical routes quickly and preserve uniqueness. |
 | Project media by project/order | Index on `(project_id, sort_order)` | Load each gallery in display order. |
 | Project technologies by project/order | Index on `(project_id, sort_order)` and unique `(project_id, technology_id)` | Render ordered technology tags without duplicates. |
