@@ -52,7 +52,7 @@
   - [x] Supabase migrations can be applied from the repository and public settings are separated from secrets.
   - [x] Nested routes load directly and no real credentials are committed.
 - **Verify:** `npm.cmd ci`, `npm.cmd run dev`, and `npm.cmd run build` passed. CLI authentication and project linking succeeded; `npm.cmd run db:push -- --dry-run` connected to the remote database and reported it was up to date. Secret-pattern scan found no credential values in project files. Direct nested-route response and built Cloudflare fallback were checked.
-- **Notes:** Hosted Supabase migrations are used; Docker is not required. No schema SQL migration exists yet, so no database changes were pushed. The first schema migration will be created with the relevant data implementation task and pushed only after review.
+- **Notes:** Hosted Supabase migrations are used; Docker is not required. The first schema migration was created with T-04 and applied to the linked hosted project after review. See T-04 for the migration result.
 
 ### M2 — Public portfolio
 
@@ -71,7 +71,7 @@
 - **Progress:** Single-page public shell with hash navigation, route placeholders, empty/unavailable/loading/error/not-found states, responsive navigation styles, skip link, and visible focus styles are implemented. Legacy `/projects`, `/about`, and `/contact` paths redirect to the relevant section; project detail URLs remain separate. Interactive browser checks at the required widths remain to be completed because no browser surface is available in this session.
 
 #### T-04 — Render Home and Projects lists
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-01, T-03
 - **Related:** F-01, F-02, F-13; J-01
@@ -83,6 +83,7 @@
   - [ ] Home links to Projects, each project entry has a "View details" link, and all saved project detail pages remain reachable.
   - [ ] Empty project, category, and skill states are handled without broken sections; empty skill categories are omitted.
 - **Verify:** Check multiple ordered projects, featured-only initial state, expansion to all projects, optional links, multiple skill categories and their order, empty categories, and an empty project collection.
+- **Progress:** Added a public content data module, Home and Projects rendering, featured/full-list behavior, project summary links, and the initial public schema/storage migration. Production build passes. The migration dry-run identified `20261015222849_public_portfolio_content.sql`; `npm.cmd run db:push` then reported `Finished supabase db push.` No demo content is seeded. Public content rendering and empty-state behavior still need to be checked against the linked project.
 
 #### T-05 — Render project detail, gallery, and URL history
 - **Status:** Not started
