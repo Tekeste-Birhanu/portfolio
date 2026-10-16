@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAdminAuth } from './auth-context.jsx';
 import { supabase } from '../lib/supabase.js';
 
@@ -20,6 +20,52 @@ const adminSections = [
 export function AdminLayout({ title, activeSection = 'projects', children }) {
   const { signOut } = useAdminAuth();
   const [signingOut, setSigningOut] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+  const menuToggleRef = useRef(null);
+  const sidebarPanelRef = useRef(null);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
+    const focusableItems = () => [...(sidebarPanelRef.current?.querySelectorAll('a[href], button:not([disabled])') ?? [])];
+    focusableItems()[0]?.focus();
+    const handleKeydown = (event) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const items = focusableItems();
+      if (!items.length) return;
+      if (event.shiftKey && document.activeElement === items[0]) {
+        event.preventDefault();
+        items.at(-1).focus();
+      } else if (!event.shiftKey && document.activeElement === items.at(-1)) {
+        event.preventDefault();
+        items[0].focus();
+      }
+    };
+    const breakpoint = window.matchMedia('(min-width: 1024px)');
+    const closeOnDesktop = (event) => { if (event.matches) setMenuOpen(false); };
+    window.addEventListener('keydown', handleKeydown);
+    breakpoint.addEventListener('change', closeOnDesktop);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      breakpoint.removeEventListener('change', closeOnDesktop);
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
+      if (menuToggleRef.current?.isConnected) menuToggleRef.current.focus();
+    };
+  }, [menuOpen]);
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -29,18 +75,39 @@ export function AdminLayout({ title, activeSection = 'projects', children }) {
 
   return <div className="admin-shell">
     <aside className="admin-sidebar">
-      <Link className="admin-brand" to="/admin/projects">Administrator</Link>
-      <nav className="admin-navigation" aria-label="Administrator navigation">
-        {adminSections.map((section) => <Link
-          className={`admin-nav-link${activeSection === section.id ? ' is-current' : ''}`}
-          to={section.to}
-          key={section.id}
-          aria-current={activeSection === section.id ? 'page' : undefined}
-        >{section.label}</Link>)}
-      </nav>
-      <button className="button button-secondary admin-signout" type="button" disabled={signingOut} onClick={handleSignOut}>
-        {signingOut ? 'Signing out…' : 'Sign out'}
-      </button>
+      <div className={`admin-sidebar-header${menuOpen ? ' is-menu-open' : ''}`}>
+        <Link className="admin-brand" to="/admin/projects">Administrator</Link>
+        <button
+          className="admin-menu-toggle"
+          type="button"
+          ref={menuToggleRef}
+          aria-expanded={menuOpen}
+          aria-controls="admin-navigation-panel"
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <span>{menuOpen ? 'Close' : 'Menu'}</span>
+          <span aria-hidden="true">{menuOpen ? '×' : '☰'}</span>
+        </button>
+      </div>
+      {menuOpen && <button className="admin-menu-backdrop" type="button" tabIndex={-1} aria-label="Close administrator navigation" onClick={() => setMenuOpen(false)} />}
+      <div
+        className={`admin-sidebar-panel${menuOpen ? ' is-open' : ''}`}
+        id="admin-navigation-panel"
+        ref={sidebarPanelRef}
+      >
+        <nav className="admin-navigation" aria-label="Administrator navigation">
+          {adminSections.map((section) => <Link
+            className={`admin-nav-link${activeSection === section.id ? ' is-current' : ''}`}
+            to={section.to}
+            key={section.id}
+            aria-current={activeSection === section.id ? 'page' : undefined}
+            onClick={() => setMenuOpen(false)}
+          >{section.label}</Link>)}
+        </nav>
+        <button className="button button-secondary admin-signout" type="button" disabled={signingOut} onClick={handleSignOut}>
+          {signingOut ? 'Signing out…' : 'Sign out'}
+        </button>
+      </div>
     </aside>
     <section className="admin-content" aria-labelledby="admin-page-title">
       <div className="admin-page-heading">

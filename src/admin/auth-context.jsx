@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { supabase } from '../lib/supabase.js';
 
 const AdminAuthContext = createContext(null);
+const INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000;
+const LAST_ACTIVITY_KEY = 'portfolio-admin-last-activity';
 
 export function AdminAuthProvider({ children }) {
   const [status, setStatus] = useState('checking');
@@ -17,13 +19,25 @@ export function AdminAuthProvider({ children }) {
       setStatus('signed_out');
       return;
     }
+    try {
+      const lastActivity = Number(window.sessionStorage.getItem(LAST_ACTIVITY_KEY));
+      if (lastActivity > 0 && Date.now() - lastActivity >= INACTIVITY_TIMEOUT_MS) {
+        window.sessionStorage.removeItem(LAST_ACTIVITY_KEY);
+        setUser(null);
+        setStatus('signed_out');
+        await supabase.auth.signOut({ scope: 'local' });
+        return;
+      }
+    } catch {
+      // Continue with normal authorization if browser storage is unavailable.
+    }
     setUser(session.user);
     setStatus('checking');
     if (!session.user.email_confirmed_at) {
       setIssue('email_unverified');
       setUser(null);
       setStatus('signed_out');
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
       return;
     }
     const { data, error } = await supabase.rpc('is_designated_admin');
@@ -36,7 +50,7 @@ export function AdminAuthProvider({ children }) {
       setIssue('not_admin');
       setUser(null);
       setStatus('signed_out');
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
       return;
     }
     setIssue(null);
@@ -118,9 +132,76 @@ export function AdminAuthProvider({ children }) {
   const signOut = useCallback(async () => {
     setIssue(null);
     setRecoverySession(false);
-    if (supabase) return supabase.auth.signOut();
+    try {
+      window.sessionStorage.removeItem(LAST_ACTIVITY_KEY);
+    } catch {
+      // Sign-out still proceeds if browser storage is unavailable.
+    }
+    if (supabase) return supabase.auth.signOut({ scope: 'local' });
     return { error: null };
   }, []);
+
+  useEffect(() => {
+    if (status !== 'admin' || !supabase) return undefined;
+
+    const readLastActivity = () => {
+      try {
+        const stored = Number(window.sessionStorage.getItem(LAST_ACTIVITY_KEY));
+        return Number.isFinite(stored) && stored > 0 ? stored : Date.now();
+      } catch {
+        return Date.now();
+      }
+    };
+
+    let timer;
+    let lastActivity = readLastActivity();
+    let lastStoredActivity = 0;
+    const saveActivity = (timestamp) => {
+      lastActivity = timestamp;
+      if (timestamp - lastStoredActivity < 5000) return;
+      lastStoredActivity = timestamp;
+      try {
+        window.sessionStorage.setItem(LAST_ACTIVITY_KEY, String(timestamp));
+      } catch {
+        // The in-memory timer still protects this tab if storage is unavailable.
+      }
+    };
+    const hasExpired = () => Date.now() - lastActivity >= INACTIVITY_TIMEOUT_MS;
+    const checkInactivity = () => {
+      if (hasExpired()) {
+        void signOut();
+        return;
+      }
+      timer = window.setTimeout(checkInactivity, INACTIVITY_TIMEOUT_MS - (Date.now() - lastActivity));
+    };
+    const handleActivity = () => {
+      if (hasExpired()) {
+        void signOut();
+        return;
+      }
+      saveActivity(Date.now());
+      window.clearTimeout(timer);
+      checkInactivity();
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        window.clearTimeout(timer);
+        checkInactivity();
+      }
+    };
+
+    saveActivity(lastActivity);
+    checkInactivity();
+    const activityEvents = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart'];
+    activityEvents.forEach((eventName) => window.addEventListener(eventName, handleActivity, { passive: true }));
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.clearTimeout(timer);
+      activityEvents.forEach((eventName) => window.removeEventListener(eventName, handleActivity));
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [status, signOut]);
 
   const value = useMemo(() => ({
     status,

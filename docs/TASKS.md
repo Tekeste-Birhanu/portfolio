@@ -116,7 +116,7 @@
 ### M3 — Admin and contact workflows
 
 #### T-07 — Implement administrator sign-in and authorization
-- **Status:** Done
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-01, T-02
 - **Related:** F-08; J-03
@@ -126,8 +126,9 @@
   - [x] The provisioned admin can sign in, verify the account, recover a password, and sign out.
   - [x] Unauthenticated users and non-designated accounts cannot access admin data or actions.
   - [x] No public sign-up is available; Google sign-in grants access only to the designated administrator account.
+  - [ ] The session is stored for the current tab and the app signs out after 10 minutes without activity.
 - **Verify:** Check sign-in, verification, recovery, expiration, sign-out, and denied access using a non-admin account.
-- **Progress:** Added email/password and Google sign-in screens, password recovery/update, session checks against the designated-admin RPC, protected admin routes, and database/Storage authorization policies. The authorization migration is applied. Hosted Auth providers and redirect URLs are configured, the designated user is provisioned in `admin_config`, and the user reached the authorized admin page. Brevo SMTP delivery succeeded after authorizing the blocked SMTP source IP; password recovery completed, and replaying a used link returned `otp_expired`. Fixed the sign-in page's duplicate success notice and the recovery route's mistaken reliance on any admin session; it now requires Supabase's `PASSWORD_RECOVERY` event and handles invalid/expired-link redirects. The user confirmed the remaining sign-in, recovery, sign-out, Google, expired-link, and denied-access checks are working.
+- **Progress:** Added email/password and Google sign-in screens, password recovery/update, session checks against the designated-admin RPC, protected admin routes, and database/Storage authorization policies. The authorization migration is applied. Hosted Auth providers and redirect URLs are configured, the designated user is provisioned in `admin_config`, and the user reached the authorized admin page. Brevo SMTP delivery succeeded after authorizing the blocked SMTP source IP; password recovery completed, and replaying a used link returned `otp_expired`. Fixed the sign-in page's duplicate success notice and the recovery route's mistaken reliance on any admin session; it now requires Supabase's `PASSWORD_RECOVERY` event and handles invalid/expired-link redirects. The user confirmed the sign-in, recovery, sign-out, Google, expired-link, and denied-access checks. Updated the client to store auth sessions per tab and sign out after 10 minutes without activity; browser verification of the new session behavior is pending.
 
 #### T-08 — Build admin navigation and Projects list
 - **Status:** In progress
@@ -142,7 +143,7 @@
   - [ ] Project order can be changed by dragging.
   - [ ] Admin navigation adapts to desktop and mobile.
 - **Verify:** Check filtering, ordering, empty state, responsive layout, and authorization.
-- **Progress:** Added protected responsive sidebar navigation, a Supabase-backed two-column Projects dashboard with search, last-updated dates, add/edit entry points, and drag ordering. Removed the featured toggle; the complete admin list order drives the public list. A database migration drops the unused featured flag. Build and browser verification remain pending.
+- **Progress:** Added protected responsive sidebar navigation, a Supabase-backed two-column Projects dashboard with search, last-updated dates, add/edit entry points, and drag ordering. Removed the featured toggle; the complete admin list order drives the public list. A database migration drops the unused featured flag. Below 1024px, the admin navigation opens as an accessible side drawer. Production build passes; rendered viewport checks remain pending.
 
 #### T-09 — Implement project editor and permanent deletion
 - **Status:** Not started

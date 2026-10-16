@@ -15,6 +15,8 @@ const navigation = [
 
 function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuToggleRef = useRef(null);
+  const navigationRef = useRef(null);
   const location = useLocation();
   const activeSection = location.pathname.startsWith('/projects/')
     ? 'projects'
@@ -28,11 +30,40 @@ function SiteHeader() {
 
   useEffect(() => {
     if (!menuOpen) return undefined;
-    const closeOnEscape = (event) => {
-      if (event.key === 'Escape') setMenuOpen(false);
+    const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
+    const focusableItems = () => [...(navigationRef.current?.querySelectorAll('a[href], button:not([disabled])') ?? [])];
+    focusableItems()[0]?.focus();
+    const handleKeydown = (event) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const items = focusableItems();
+      if (!items.length) return;
+      if (event.shiftKey && document.activeElement === items[0]) {
+        event.preventDefault();
+        items.at(-1).focus();
+      } else if (!event.shiftKey && document.activeElement === items.at(-1)) {
+        event.preventDefault();
+        items[0].focus();
+      }
     };
-    window.addEventListener('keydown', closeOnEscape);
-    return () => window.removeEventListener('keydown', closeOnEscape);
+    const breakpoint = window.matchMedia('(min-width: 640px)');
+    const closeOnDesktop = (event) => { if (event.matches) setMenuOpen(false); };
+    window.addEventListener('keydown', handleKeydown);
+    breakpoint.addEventListener('change', closeOnDesktop);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      breakpoint.removeEventListener('change', closeOnDesktop);
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
+      if (menuToggleRef.current?.isConnected) menuToggleRef.current.focus();
+    };
   }, [menuOpen]);
 
   return (
@@ -44,6 +75,7 @@ function SiteHeader() {
         <button
           className="menu-toggle"
           type="button"
+          ref={menuToggleRef}
           aria-expanded={menuOpen}
           aria-controls="primary-navigation"
           onClick={() => setMenuOpen((open) => !open)}
@@ -54,6 +86,7 @@ function SiteHeader() {
         <nav
           className={`primary-navigation${menuOpen ? ' is-open' : ''}`}
           id="primary-navigation"
+          ref={navigationRef}
           aria-label="Main navigation"
         >
           {navigation.map(({ label, to, section }) => (
@@ -74,6 +107,7 @@ function SiteHeader() {
           ))}
         </nav>
       </div>
+      {menuOpen && <button className="public-menu-backdrop" type="button" tabIndex={-1} aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
     </header>
   );
 }
