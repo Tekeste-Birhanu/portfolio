@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { getCachedPublicPortfolio, getPublicPortfolio } from './lib/public-content.js';
 import { AdminCallbackPage, AdminLoginPage, AdminReadyPage, PasswordRecoveryPage, RequireAdmin } from './admin/auth-pages.jsx';
+import { AdminProjectPlaceholder, AdminProjectsPage, AdminSectionPlaceholder } from './admin/projects-page.jsx';
 
 const SITE_OWNER_NAME = 'Your Name';
 
@@ -113,14 +114,13 @@ function HomePage() {
 
   if (!portfolio) return <LoadingPage title="Loading portfolio" />;
 
-  const featuredProjects = portfolio.projects.filter((project) => project.isFeatured);
   return (
     <>
       <section className="page-section" id="home" aria-labelledby="home-title">
         <h1 className="home-name" id="home-title">{SITE_OWNER_NAME}</h1>
         <p className="page-intro">{portfolio.intro || 'A portfolio introduction has not been added yet.'}</p>
       </section>
-      <ProjectsSection projects={featuredProjects} totalProjects={portfolio.projects.length} />
+      <ProjectsSection projects={portfolio.projects} />
       <section className="page-section content-section" id="about" aria-labelledby="about-title">
         <h2 id="about-title">About</h2>
         <AboutContent profile={portfolio.profile} education={portfolio.education} experience={portfolio.experience} categories={portfolio.skillCategories} />
@@ -133,12 +133,12 @@ function HomePage() {
   );
 }
 
-function ProjectsSection({ projects, totalProjects }) {
+function ProjectsSection({ projects }) {
   return (
     <section className="page-section content-section" id="projects" aria-labelledby="projects-title">
       <h2 id="projects-title">Featured Projects</h2>
       {projects.length === 0 ? (
-        <p className="empty-state">{totalProjects > 0 ? 'No featured projects yet.' : 'No projects yet.'}</p>
+        <p className="empty-state">No projects yet.</p>
       ) : (
         <div className="project-list project-grid">
           {projects.map((project) => <ProjectEntry key={project.id} project={project} />)}
@@ -402,7 +402,7 @@ function App() {
     <>
       <a className="skip-link" href="#main-content">Skip to content</a>
       {!isAdminPath && <SiteHeader />}
-      <main className="main-content" id="main-content" tabIndex="-1">
+      <main className={`main-content${isAdminPath ? ' admin-main-content' : ''}`} id="main-content" tabIndex="-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/projects" element={<Navigate to="/#projects" replace />} />
@@ -412,6 +412,12 @@ function App() {
           <Route path="/admin" element={<AdminLoginPage />} />
           <Route path="/admin/callback" element={<AdminCallbackPage />} />
           <Route path="/admin/reset-password" element={<PasswordRecoveryPage />} />
+          <Route path="/admin/projects" element={<RequireAdmin><AdminProjectsPage /></RequireAdmin>} />
+          <Route path="/admin/projects/new" element={<RequireAdmin><AdminProjectPlaceholder isNew /></RequireAdmin>} />
+          <Route path="/admin/projects/:projectId" element={<RequireAdmin><AdminProjectPlaceholder /></RequireAdmin>} />
+          <Route path="/admin/profile" element={<RequireAdmin><AdminSectionPlaceholder title="Profile" /></RequireAdmin>} />
+          <Route path="/admin/homepage" element={<RequireAdmin><AdminSectionPlaceholder title="Homepage" /></RequireAdmin>} />
+          <Route path="/admin/mailbox" element={<RequireAdmin><AdminSectionPlaceholder title="Mailbox" /></RequireAdmin>} />
           <Route path="/admin/*" element={<RequireAdmin><AdminReadyPage /></RequireAdmin>} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

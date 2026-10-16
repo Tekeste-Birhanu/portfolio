@@ -67,7 +67,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 | Lightbox                       | Larger screenshot view                                                            | Close button, previous and next, arrow keys and Escape, swipe on touch; focus moves into it and returns to the main image on close. |
 | Confirmation dialog            | Delete project, delete message, delete contact method, leave with unsaved changes | Names the item, clear primary and cancel actions, Escape cancels, focus is trapped while open.                                      |
 | Inline notice                  | "Saved" and error messages                                                        | Appears near the action, announced to screen readers, does not block the page.                                                      |
-| Admin list row                 | Projects list                                                                     | Name, featured toggle, last updated, Edit, Delete; drag handle reorders projects; becomes a stacked row on phone.              |
+| Admin project card             | Projects dashboard                                                               | Name, last updated, Edit, Delete; drag handle and move controls set public order. Two columns on wide screens, one on narrow screens. |
 | Image upload area              | Project screenshots, profile photo, CV                                            | Preview, alt text field for project images, set main image, reorder, replace, remove; shows file type and size errors. Project images are manually optimized and served as uploaded; CV PDF limit is 10 MB. |
 | Notification warning           | Mailbox messages                                                                  | Failed email notification is marked in both the message row and the opened message; the saved message remains available.             |
 | Empty state                    | No content                                                                        | One plain line, with the next action where one exists.                                                                              |
@@ -85,11 +85,11 @@ Values below are initial decisions. Verify contrast with a checker during implem
 
 ### Projects
 
-- **Purpose:** Browse featured projects and open individual detail pages.
+- **Purpose:** Browse projects and open individual detail pages.
 - **Heading:** "Featured Projects".
 - **Layout:** Two-column card list on wide screens and one column on narrow screens.
 - **Primary action:** View details for a project.
-- **Content and behavior:** Lists only projects selected as featured, in administrator order. There is no expand or Browse projects control. Each entry places the status beside the project name, shows technologies separately from status, and has a clearly labeled "View details" action to its individual page. Show "No featured projects yet" when projects exist but none are featured; show "No projects yet" when there are no saved projects.
+- **Content and behavior:** Lists every saved project in administrator order. There is no featured/unfeatured control, expand, or Browse projects action. Each entry places the status beside the project name, shows technologies separately from status, and has a clearly labeled "View details" action to its individual page. Show "No projects yet" when there are no saved projects.
 - **Responsive changes:** Two columns on wide screens; one column on narrow screens. Project cards stack image and text vertically.
 - **Related flow:** J-01
 
@@ -127,10 +127,10 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### Admin Projects list
 
 - **Purpose:** Manage projects; the landing page after login.
-- **Layout:** Search field and Add project button above a compact table: name, featured toggle, last updated, actions, and a drag handle.
+- **Layout:** Dashboard with a responsive left sidebar and a two-column project card grid on wide screens (one column on phones). Place search and Add project above the grid. Each card shows name, last updated, actions, and a drag handle.
 - **Primary action:** Add project.
-- **Secondary actions:** Feature or unfeature, Edit, Delete, and drag rows to set project order.
-- **Content and behavior:** Any number of projects can be featured. The public Projects section displays the featured subset in the shared project order; unfeatured projects do not appear in that section. Dragging also works by keyboard. Delete opens a confirmation naming the project.
+- **Secondary actions:** Edit, Delete, and reorder projects by dragging.
+- **Content and behavior:** All saved projects appear on the public homepage in the same order shown here. Dragging changes that shared order. The project editor and delete confirmation are implemented in later tasks.
 - **Responsive changes:** Rows become stacked on phone.
 - **Related flow:** J-03, J-06
 

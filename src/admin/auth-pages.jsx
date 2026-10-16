@@ -145,9 +145,5 @@ export function RequireAdmin({ children }) {
 }
 
 export function AdminReadyPage() {
-  const { signOut } = useAdminAuth();
-  return <AdminAuthLayout title="Administrator access ready">
-    <p className="page-intro">The account is authorized. Admin tools will appear here as they are implemented.</p>
-    <button className="button button-secondary" type="button" onClick={() => signOut()}>Sign out</button>
-  </AdminAuthLayout>;
+  return <Navigate to="/admin/projects" replace />;
 }

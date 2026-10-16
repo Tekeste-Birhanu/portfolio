@@ -32,7 +32,7 @@
 - **Depends on:** None
 - **Related:** F-01–F-06, F-08–F-19; J-01–J-06
 - **Goal:** Make the product and data decisions complete and consistent enough that implementation agents do not need to guess.
-- **Scope:** Complete the `SCHEMA.md` draft with entities, relationships, constraints, indexes, RLS/storage rules, deletion behavior, migrations, and seed approach. Align PRD, App Flow, Architecture, and Design with approved decisions: the designated administrator can sign in with email/password or Google; Supabase Auth uses Brevo for email verification and password recovery; public registration is disabled and Google sign-in alone does not grant admin access; any contact platform is allowed with a generic icon fallback; exactly one non-removable Email contact method is the public and notification address; projects have public detail routes and only featured projects appear in the Projects section; project deletion is permanent with no archive state; no CAPTCHA or app-level rate limiting; original uploads are served without app compression; no product-level text-length caps apply outside contact-form limits.
+- **Scope:** Complete the `SCHEMA.md` draft with entities, relationships, constraints, indexes, RLS/storage rules, deletion behavior, migrations, and seed approach. Align PRD, App Flow, Architecture, and Design with approved decisions: the designated administrator can sign in with email/password or Google; Supabase Auth uses Brevo for email verification and password recovery; public registration is disabled and Google sign-in alone does not grant admin access; any contact platform is allowed with a generic icon fallback; exactly one non-removable Email contact method is the public and notification address; all saved projects have public detail routes and appear in the Projects section in shared administrator order; project deletion is permanent with no archive state; no CAPTCHA or app-level rate limiting; original uploads are served without app compression; no product-level text-length caps apply outside contact-form limits.
 - **Done when:**
   - [x] The schema covers public content, admin data, messages, notification status, files, and project URL history.
   - [x] The specifications agree that Google sign-in is an admin option only, and agree on authorization, contact, uploads, and deletion rules.
@@ -75,16 +75,16 @@
 - **Priority:** Must
 - **Depends on:** T-01, T-03
 - **Related:** F-01, F-02, F-13; J-01
-- **Goal:** Let visitors read the introduction, browse featured projects, and review skills under About.
-- **Scope:** Read homepage intro, categorized skills, and projects from Supabase. Home contains the intro only; Projects lists featured projects in shared administrator-defined order using two columns on wide screens and one on narrow screens; About shows categorized skills. There is no Browse projects action or expand control. Each listed project links to a separate detail view. Add clear visual dividers between the Home, Projects, About, and Contact sections.
+- **Goal:** Let visitors read the introduction, browse all projects, and review skills under About.
+- **Scope:** Read homepage intro, categorized skills, and projects from Supabase. Home contains the intro only; Projects lists all saved projects in shared administrator-defined order using two columns on wide screens and one on narrow screens; About shows categorized skills. There is no Browse projects action or expand control. Each listed project links to a separate detail view. Add clear visual dividers between the Home, Projects, About, and Contact sections.
 - **Done when:**
   - [ ] Project entries show name, description, technologies, status, available links, image, and detail link.
-  - [ ] Home contains the bold owner name and short intro, with no link until its destination is decided; the "Featured Projects" section lists only featured projects in stored order without Browse or expand controls; the list uses two columns on wide screens and one on narrow screens.
-  - [ ] Projects navigation reaches the featured list, and every featured project has a "View details" link to its separate route.
-  - [ ] Skills appear under About, empty categories are omitted, and project empty states distinguish no projects from no featured projects.
+  - [ ] Home contains the bold owner name and short intro, with no link until its destination is decided; the "Featured Projects" section lists all projects in stored order without Browse or expand controls; the list uses two columns on wide screens and one on narrow screens.
+  - [ ] Projects navigation reaches the project list, and every project has a "View details" link to its separate route.
+  - [ ] Skills appear under About, empty categories are omitted, and the project empty state appears when no projects exist.
   - [ ] Public section boundaries are visually clear.
-- **Verify:** Check multiple ordered featured projects, that unfeatured projects are omitted from Projects, separate detail links, optional links, responsive columns, skills under About with multiple categories and their order, empty categories, no-featured and no-project states, and visible section dividers.
-- **Progress:** Added the public content data module, featured Projects list, skills display, and public schema/storage migration. The migration is applied and the production build passes. User confirmed seeded projects and skills render. The approved layout change moves skills from Home to About, removes Browse projects, and makes Projects featured-only; this revised layout still needs browser checks. Temporary test records remain in the linked project and must be removed after verification.
+- **Verify:** Check multiple ordered projects, all saved projects appearing on Projects, separate detail links, optional links, responsive columns, skills under About with multiple categories and their order, empty categories, no-project state, and visible section dividers.
+- **Progress:** Added the public content data module, project list, skills display, and public schema/storage migration. The migration is applied and the production build passes. User confirmed seeded projects and skills render. Projects now shows all saved projects in the shared order; this change still needs browser checks. Temporary test records remain in the linked project and must be removed after verification.
 
 #### T-05 — Render project detail, gallery, and URL history
 - **Status:** In progress
@@ -116,32 +116,33 @@
 ### M3 — Admin and contact workflows
 
 #### T-07 — Implement administrator sign-in and authorization
-- **Status:** In progress
+- **Status:** Done
 - **Priority:** Must
 - **Depends on:** T-01, T-02
 - **Related:** F-08; J-03
 - **Goal:** Allow only the designated owner to use admin features.
 - **Scope:** Implement email/password and Google sign-in for the designated administrator, email verification and password recovery through Supabase Auth/Brevo, session handling, protected routes, and database-enforced authorization. Disable public registration.
 - **Done when:**
-  - [ ] The provisioned admin can sign in, verify the account, recover a password, and sign out.
-  - [ ] Unauthenticated users and non-designated accounts cannot access admin data or actions.
-  - [ ] No public sign-up is available; Google sign-in grants access only to the designated administrator account.
+  - [x] The provisioned admin can sign in, verify the account, recover a password, and sign out.
+  - [x] Unauthenticated users and non-designated accounts cannot access admin data or actions.
+  - [x] No public sign-up is available; Google sign-in grants access only to the designated administrator account.
 - **Verify:** Check sign-in, verification, recovery, expiration, sign-out, and denied access using a non-admin account.
-- **Progress:** Added email/password and Google sign-in screens, password recovery/update, session checks against the designated-admin RPC, protected admin routes, and database/Storage authorization policies. The authorization migration is applied. Hosted Auth providers and redirect URLs are configured, the designated user is provisioned in `admin_config`, and the user reached the authorized admin page. Brevo SMTP delivery succeeded after authorizing the blocked SMTP source IP; password recovery completed, and replaying a used link returned `otp_expired`. Fixed the sign-in page's duplicate success notice and the recovery route's mistaken reliance on any admin session; it now requires Supabase's `PASSWORD_RECOVERY` event and handles invalid/expired-link redirects. Remaining checks: confirm the expired-link page behavior, sign in with the updated password, test Google sign-in and manual sign-out, and confirm a non-admin account is denied.
+- **Progress:** Added email/password and Google sign-in screens, password recovery/update, session checks against the designated-admin RPC, protected admin routes, and database/Storage authorization policies. The authorization migration is applied. Hosted Auth providers and redirect URLs are configured, the designated user is provisioned in `admin_config`, and the user reached the authorized admin page. Brevo SMTP delivery succeeded after authorizing the blocked SMTP source IP; password recovery completed, and replaying a used link returned `otp_expired`. Fixed the sign-in page's duplicate success notice and the recovery route's mistaken reliance on any admin session; it now requires Supabase's `PASSWORD_RECOVERY` event and handles invalid/expired-link redirects. The user confirmed the remaining sign-in, recovery, sign-out, Google, expired-link, and denied-access checks are working.
 
 #### T-08 — Build admin navigation and Projects list
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-07
 - **Related:** F-09, F-13; J-03
 - **Goal:** Give the administrator a responsive home for project management.
-- **Scope:** Implement admin navigation and Projects list with search, last-updated information, add/edit entry points, a feature/unfeature control for each project, and ordering by pointer and keyboard.
+- **Scope:** Implement responsive sidebar navigation and a two-column Projects dashboard landing page with search, last-updated information, add/edit entry points, and pointer-based drag ordering. Project order is also the public Projects section order; there is no featured toggle.
 - **Done when:**
   - [ ] The list shows project name, last updated, and actions; search filters by name.
-  - [ ] The administrator can feature or unfeature any number of projects; the public Projects section lists only featured projects.
-  - [ ] Project order can be changed by drag interaction and keyboard controls.
+  - [ ] All saved projects appear in the public Projects section in the same order as the admin list.
+  - [ ] Project order can be changed by dragging.
   - [ ] Admin navigation adapts to desktop and mobile.
 - **Verify:** Check filtering, ordering, empty state, responsive layout, and authorization.
+- **Progress:** Added protected responsive sidebar navigation, a Supabase-backed two-column Projects dashboard with search, last-updated dates, add/edit entry points, and drag ordering. Removed the featured toggle; the complete admin list order drives the public list. A database migration drops the unused featured flag. Build and browser verification remain pending.
 
 #### T-09 — Implement project editor and permanent deletion
 - **Status:** Not started

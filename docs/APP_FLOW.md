@@ -10,7 +10,7 @@ Describes how visitors and the administrator move through the site, including na
 Public (any visitor)
 [/] Single scrolling public page
   ├── #home                 Owner name and short introduction
-  ├── #projects             Featured projects; each opens a separate detail page
+  ├── #projects             All projects in admin order; each opens a separate detail page
   ├── #about                Background, categorized skills, and optional CV download
   └── #contact              Configured contact links and message form
       /projects/<slug>      Separate project detail and screenshot lightbox
@@ -29,7 +29,7 @@ Admin (not linked publicly)
         └── /admin/mailbox        Messages and contact methods
 ```
 
-The Home section contains the owner's name and short introduction. The call-to-action link is undecided and omitted for now. The Projects section on the same scrolling page lists only projects selected as featured, in administrator-defined order, using two columns on wide screens and one on narrow screens. There is no Browse projects action or expand control. Each listed project links to its separate detail URL. A deleted project and its files are removed; its old URL shows the 404 page. Renaming a project redirects its old URL to the current one.
+The Home section contains the owner's name and short introduction. The call-to-action link is undecided and omitted for now. The Projects section on the same scrolling page lists every saved project in administrator-defined order, using two columns on wide screens and one on narrow screens. There is no Browse projects action or expand control. Each listed project links to its separate detail URL. A deleted project and its files are removed; its old URL shows the 404 page. Renaming a project redirects its old URL to the current one.
 
 ## 3. Main journeys
 
@@ -37,7 +37,7 @@ The Home section contains the owner's name and short introduction. The call-to-a
 
 - **Actor:** Visitor
 - **Entry point:** Home, Projects, or a direct project URL
-- **Steps:** Read the Home introduction; navigate to Projects and scan featured projects; select "View details" on a project; review its description, screenshots, technologies, status, links, and populated detail sections; use the lightbox to navigate its images; follow a repository or demo link if present.
+- **Steps:** Read the Home introduction; navigate to Projects and scan the ordered project list; select "View details" on a project; review its description, screenshots, technologies, status, links, and populated detail sections; use the lightbox to navigate its images; follow a repository or demo link if present.
 - **Success:** The visitor understands the project and can reach its repository or demo.
 - **Failure and recovery:** Unknown or deleted project URLs show a 404 page with a link home. Old project URLs redirect to the current slug. A failed image shows its alt text or a placeholder.
 - **Related requirements:** F-01, F-02, F-03, F-04
@@ -59,7 +59,7 @@ The Home section contains the owner's name and short introduction. The call-to-a
 - **Entry point:** `/admin`, typed or bookmarked
 - **Preconditions:** The administrator account has been provisioned; an enabled contact email has been configured before the public Contact page goes live.
 - **Steps:** Sign in with email/password or Google; open Projects; add a project or edit an existing one; enter project details, links, status, and optional sections; choose technologies from the existing list or create a new one in the picker; upload screenshots or GIFs, enter alt text, choose the main image, and order the gallery; save. In the Projects list, choose whether to feature the project in the public Projects section.
-- **Success:** The saved project detail route is live immediately. If featured, it also appears in the public Projects section in the administrator's chosen order. The editor remains open and shows a saved confirmation.
+- **Success:** The saved project detail route is live immediately, and the project appears in the public Projects section in the administrator's chosen order. The editor remains open and shows a saved confirmation.
 - **Failure and recovery:** Required-field errors, upload errors, or save errors preserve entered values. Leaving with unsaved changes asks whether to stay or discard changes. A forgotten password starts the email recovery flow. Invalid or expired recovery links show an error and offer a new reset request; a password form is available only after Supabase confirms a recovery event. An authenticated user who is not the designated administrator is denied and signed out. An expired session returns to sign-in. Email sign-in requires a verified account; no public registration is available.
 - **Related requirements:** F-08, F-09, F-10, F-11, F-12, F-13
 
@@ -98,12 +98,12 @@ The Home section contains the owner's name and short introduction. The call-to-a
 | Screen / route | Purpose | Access | Related journeys |
 | --- | --- | --- | --- |
 | `/` and `/#home` | Single scrolling public portfolio, starting at the intro | Anyone | J-01, J-02 |
-| `/#projects` | Featured projects; two columns on wide screens, one on narrow screens | Anyone | J-01 |
+| `/#projects` | All projects in admin order; two columns on wide screens, one on narrow screens | Anyone | J-01 |
 | `/projects/<slug>` | Project detail and screenshot lightbox | Anyone | J-01 |
 | `/#about` | About section, categorized skills, and optional CV download | Anyone | J-02 |
 | `/#contact` | Enabled contact methods and email/message form | Anyone | J-02 |
 | 404 | Unknown or deleted addresses | Anyone | J-01, J-06 |
-| `/admin` | Sign-in or Projects landing page | Sign-in is public; dashboard is administrator-only | J-03 |
+| `/admin` | Sign-in, then redirect to Projects when signed in | Sign-in is public; dashboard is administrator-only | J-03 |
 | `/admin/reset-password` | Request a reset link, or set a new password after a valid recovery event; invalid/expired links show an error and allow a new request | Anyone | J-03 |
 | `/admin/projects` | Search, order, edit, and delete projects | Designated administrator | J-03, J-06 |
 | `/admin/projects/new`, `/admin/projects/<id>` | Add or edit a project | Designated administrator | J-03 |
@@ -114,7 +114,7 @@ The Home section contains the owner's name and short introduction. The call-to-a
 ## 5. Shared states and edge cases
 
 - **Loading:** Public pages and admin screens show a loading state while content is fetched. Forms and save buttons block duplicate submissions while working.
-- **Empty:** Projects and Mailbox show clear empty states. Empty skill categories are omitted from About; empty About subsections are omitted. If no projects are featured, Projects shows "No featured projects yet." If no projects are saved, Projects shows "No projects yet".
+- **Empty:** Projects and Mailbox show clear empty states. Empty skill categories are omitted from About; empty About subsections are omitted. If no projects are saved, Projects shows "No projects yet".
 - **Success:** Saves show confirmation. The contact form shows success only after its message has been saved, regardless of notification delivery.
 - **Errors:** Explain what failed and what to do next. Form input is retained after validation or save errors. A failed email notification is shown as a warning on the saved message in Mailbox.
 - **Supabase unavailable:** Public pages show a clear temporary-unavailability message and a retry option when content cannot be fetched. Admin screens show a service-unavailable message. No cached copy of site content is promised.
@@ -126,7 +126,7 @@ The Home section contains the owner's name and short introduction. The call-to-a
 
 - Public content is available to visitors; private admin data and writes require the designated administrator under Supabase authorization policies.
 - Saving content makes it live immediately; there is no draft, preview, or publish step.
-- Every saved project has a separate detail route. The administrator can feature any number; the Projects section lists featured projects in shared administrator-defined order. Skills are displayed on About grouped by category, with empty categories omitted. Deletion is permanent; rename redirects old slugs to the current slug.
+- Every saved project has a separate detail route and appears in the Projects section in shared administrator-defined order. Skills are displayed on About grouped by category, with empty categories omitted. Deletion is permanent; rename redirects old slugs to the current slug.
 - Enabled contact methods appear in the administrator's order. Exactly one Email method exists; it cannot be disabled or removed, and its contact/notification address is not the login email.
 - A contact form submission is stored before email notification is attempted. The visitor's address is the notification's Reply-To. Notification failure does not lose the message or change the visitor's success state; Mailbox shows a warning.
 - Opening a message marks it read; the administrator can mark it unread again.

@@ -48,7 +48,6 @@ function mapProject(row) {
     challengesAndSolutions: row.challenges_and_solutions,
     whatILearned: row.what_i_learned,
     status: row.status,
-    isFeatured: row.is_featured,
     repositoryUrl: safeHttpUrl(row.repository_url),
     liveDemoUrl: safeHttpUrl(row.live_demo_url),
     technologies: technologyLinks.map((item) => item.technologies?.name).filter(Boolean),
@@ -84,7 +83,7 @@ export async function getPublicPortfolio() {
       .from('projects')
       .select(`
         id, name, short_description, long_description, key_features, technical_details,
-        challenges_and_solutions, what_i_learned, status, is_featured, repository_url,
+        challenges_and_solutions, what_i_learned, status, repository_url,
         live_demo_url, sort_order,
         project_slugs(slug, is_current),
         project_technologies(sort_order, technologies(name)),
