@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAdminAuth } from './auth-context.jsx';
 import { supabase } from '../lib/supabase.js';
+import { EMPTY_PROJECT, PROJECT_FIELDS, getProjectEditorData, permanentlyDeleteProject, saveProject, validateProject } from '../lib/project-admin.js';
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
 
@@ -172,6 +173,20 @@ export function AdminProjectsPage() {
     setBusyId(null);
   };
 
+  const deleteProject = async (project) => {
+    if (!window.confirm(`Permanently delete “${project.name}” and all its stored files? This cannot be undone.`)) return;
+    setBusyId(project.id);
+    setActionError('');
+    try {
+      await permanentlyDeleteProject(project.id);
+      setProjects((current) => current?.filter((item) => item.id !== project.id) ?? []);
+    } catch (deleteError) {
+      setActionError(`${deleteError.message} You can retry from this project row.`);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const moveProject = (projectId, targetId) => {
     if (!projects || projectId === targetId || busyId) return;
     const from = projects.findIndex((project) => project.id === projectId);
@@ -212,6 +227,7 @@ export function AdminProjectsPage() {
           </div>
           <div className="admin-row-actions">
             <Link className="button button-secondary admin-edit-link" to={`/admin/projects/${project.id}`}>Edit</Link>
+            <button className="button button-danger admin-edit-link" type="button" disabled={busyId !== null} onClick={() => void deleteProject(project)}>{busyId === project.id ? 'Deleting…' : 'Delete'}</button>
           </div>
           </li>;
         })}
@@ -221,10 +237,178 @@ export function AdminProjectsPage() {
   </AdminLayout>;
 }
 
-export function AdminProjectPlaceholder({ isNew = false }) {
-  return <AdminLayout title={isNew ? 'Add project' : 'Edit project'}>
-    <p className="page-intro">The project editor is the next implementation step.</p>
-    <Link className="button button-secondary" to="/admin/projects">Back to Projects</Link>
+function projectState(values, technologyIds, newTechnologyNames) {
+  return JSON.stringify([values, technologyIds, newTechnologyNames]);
+}
+
+export function AdminProjectEditor({ isNew = false }) {
+  const { projectId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [values, setValues] = useState({ ...EMPTY_PROJECT });
+  const [technologies, setTechnologies] = useState([]);
+  const [technologyIds, setTechnologyIds] = useState([]);
+  const [newTechnologyName, setNewTechnologyName] = useState('');
+  const [newTechnologyNames, setNewTechnologyNames] = useState([]);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [loadState, setLoadState] = useState('loading');
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState('');
+  const [saved, setSaved] = useState(Boolean(location.state?.saved));
+  const initialState = useRef('');
+  const currentState = projectState(values, technologyIds, newTechnologyNames);
+  const isDirty = loadState === 'ready' && initialState.current !== currentState;
+  const blocker = useBlocker(isDirty && !saving && !deleting);
+
+  useEffect(() => {
+    let active = true;
+    setLoadState('loading');
+    getProjectEditorData(isNew ? null : projectId).then((data) => {
+      if (!active) return;
+      setValues(data.project);
+      setTechnologies(data.technologies);
+      setTechnologyIds(data.selectedTechnologyIds);
+      setNewTechnologyNames([]);
+      initialState.current = projectState(data.project, data.selectedTechnologyIds, []);
+      setLoadState('ready');
+    }).catch((loadError) => {
+      if (!active) return;
+      setError(loadError.message || 'The project editor could not be loaded.');
+      setLoadState('error');
+    });
+    return () => { active = false; };
+  }, [isNew, projectId, loadAttempt]);
+
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return;
+    if (window.confirm('You have unsaved changes. Leave this page and discard them?')) blocker.proceed();
+    else blocker.reset();
+  }, [blocker.state, blocker.proceed, blocker.reset]);
+
+  useEffect(() => {
+    if (!isDirty) return undefined;
+    const warnBeforeClose = (event) => { event.preventDefault(); event.returnValue = ''; };
+    window.addEventListener('beforeunload', warnBeforeClose);
+    return () => window.removeEventListener('beforeunload', warnBeforeClose);
+  }, [isDirty]);
+
+  const updateField = (event) => {
+    const { name, value } = event.target;
+    setValues((current) => ({ ...current, [name]: value }));
+    setFieldErrors((current) => ({ ...current, [name]: '' }));
+    setSaved(false);
+  };
+
+  const toggleTechnology = (id) => {
+    setTechnologyIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+    setSaved(false);
+  };
+
+  const addTechnology = (event) => {
+    event.preventDefault();
+    const name = newTechnologyName.trim();
+    if (!name) return;
+    const existing = technologies.find((technology) => technology.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+    if (existing) {
+      setTechnologyIds((current) => current.includes(existing.id) ? current : [...current, existing.id]);
+    } else {
+      setNewTechnologyNames((current) => current.some((item) => item.toLocaleLowerCase() === name.toLocaleLowerCase()) ? current : [...current, name]);
+    }
+    setNewTechnologyName('');
+    setSaved(false);
+  };
+
+  const handleSave = async (event) => {
+    event.preventDefault();
+    const errors = validateProject(values);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      document.getElementById(Object.keys(errors)[0])?.focus();
+      return;
+    }
+    setSaving(true);
+    setError('');
+    const isCreating = isNew;
+    try {
+      const savedId = await saveProject(projectId, values, technologyIds, newTechnologyNames);
+      initialState.current = currentState;
+      setSaved(true);
+      try {
+        const savedData = await getProjectEditorData(savedId);
+        setValues(savedData.project);
+        setTechnologies(savedData.technologies);
+        setTechnologyIds(savedData.selectedTechnologyIds);
+        setNewTechnologyNames([]);
+        initialState.current = projectState(savedData.project, savedData.selectedTechnologyIds, []);
+      } catch {
+        setError('Project saved. Reload this page to refresh its technology list.');
+      }
+      if (isCreating) navigate(`/admin/projects/${savedId}`, { replace: true, state: { saved: true } });
+      else navigate(location.pathname, { replace: true, state: { saved: true } });
+    } catch (saveError) {
+      setError(saveError.message || 'The project could not be saved. Your changes are still here.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Permanently delete “${values.name}” and all its stored files? This cannot be undone.`)) return;
+    setDeleting(true);
+    setError('');
+    try {
+      await permanentlyDeleteProject(projectId);
+      navigate('/admin/projects', { replace: true });
+    } catch (deleteError) {
+      setError(deleteError.message || 'The project could not be completely deleted. Retry to finish.');
+      setDeleting(false);
+    }
+  };
+
+  const title = isNew ? 'Add project' : 'Edit project';
+  return <AdminLayout title={title}>
+    <Link className="button button-secondary admin-editor-back" to="/admin/projects">Back to Projects</Link>
+    {loadState === 'loading' ? <p role="status">Loading project…</p> : loadState === 'error' ? <div className="admin-error-panel" role="alert">
+      <p>{error}</p>
+      <button className="button button-secondary" type="button" onClick={() => { setError(''); setLoadAttempt((count) => count + 1); }}>Retry</button>
+    </div> : <>
+      {saved && <p className="auth-success" role="status">Project saved. Changes are live on the public site.</p>}
+      {error && <p className="admin-error" role="alert">{error}</p>}
+      <form className="admin-project-form" onSubmit={handleSave} noValidate>
+        <div className="admin-project-fields">
+          {PROJECT_FIELDS.map(([name, label, required]) => {
+            const isStatus = name === 'status';
+            const isUrl = name === 'repository_url' || name === 'live_demo_url';
+            const isMultiline = ['short_description', 'long_description', 'key_features', 'technical_details', 'challenges_and_solutions', 'what_i_learned'].includes(name);
+            return <div className={`admin-field${isMultiline ? ' is-wide' : ''}`} key={name}>
+              <label htmlFor={name}>{label}{required && <span aria-hidden="true"> *</span>}</label>
+              {isStatus ? <select id={name} name={name} value={values[name]} onChange={updateField} required aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined}>
+                <option value="">Choose status</option><option value="planning">Planning</option><option value="in_progress">In progress</option><option value="completed">Completed</option>
+              </select> : isMultiline ? <textarea id={name} name={name} value={values[name]} onChange={updateField} rows={name === 'short_description' ? 2 : 4} required={required} aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined} /> : <input id={name} name={name} type={isUrl ? 'url' : 'text'} value={values[name]} onChange={updateField} required={required} aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined} />}
+              {fieldErrors[name] && <span className="admin-field-error" id={`${name}-error`}>{fieldErrors[name]}</span>}
+            </div>;
+          })}
+        </div>
+        <fieldset className="admin-technology-picker">
+          <legend>Technologies</legend>
+          {technologies.length === 0 && newTechnologyNames.length === 0 ? <p className="admin-list-help">No technologies have been used yet. Add one below.</p> : <div className="admin-technology-options">
+            {technologies.map((technology) => <label className="admin-technology-option" key={technology.id}>
+              <input type="checkbox" checked={technologyIds.includes(technology.id)} onChange={() => toggleTechnology(technology.id)} />{technology.name}
+            </label>)}
+          </div>}
+          {newTechnologyNames.length > 0 && <ul className="admin-new-technologies" aria-label="New technologies to add">{newTechnologyNames.map((name) => <li key={name}>
+            {name}<button className="admin-remove-technology" type="button" onClick={() => setNewTechnologyNames((current) => current.filter((item) => item !== name))} aria-label={`Remove ${name}`}>Remove</button>
+          </li>)}</ul>}
+          <div className="admin-add-technology"><label htmlFor="new-technology">Add a reusable technology</label><div><input id="new-technology" value={newTechnologyName} onChange={(event) => setNewTechnologyName(event.target.value)} /><button className="button button-secondary" type="button" onClick={addTechnology} disabled={!newTechnologyName.trim()}>Add</button></div></div>
+        </fieldset>
+        <div className="admin-editor-actions">
+          <button className="button admin-primary-button" type="submit" disabled={saving || deleting}>{saving ? 'Saving…' : 'Save project'}</button>
+          {!isNew && <button className="button button-danger" type="button" disabled={saving || deleting} onClick={handleDelete}>{deleting ? 'Deleting…' : 'Delete project'}</button>}
+        </div>
+      </form>
+    </>}
   </AdminLayout>;
 }
 

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { getCachedPublicPortfolio, getPublicPortfolio } from './lib/public-content.js';
 import { AdminCallbackPage, AdminLoginPage, AdminReadyPage, PasswordRecoveryPage, RequireAdmin } from './admin/auth-pages.jsx';
-import { AdminProjectPlaceholder, AdminProjectsPage, AdminSectionPlaceholder } from './admin/projects-page.jsx';
+import { AdminProjectEditor, AdminProjectsPage, AdminSectionPlaceholder } from './admin/projects-page.jsx';
 
 const SITE_OWNER_NAME = 'Your Name';
 
@@ -183,7 +183,7 @@ function ProjectsSection({ projects }) {
 }
 
 function ProjectEntry({ project }) {
-  const status = project.status === 'in_progress' ? 'In progress' : 'Completed';
+  const status = project.status === 'planning' ? 'Planning' : project.status === 'in_progress' ? 'In progress' : 'Completed';
   return (
     <article className="project-entry">
       {project.image && (
@@ -283,7 +283,7 @@ function ProjectDetailPage() {
   if (project.slug !== slug) return <Navigate to={`/projects/${project.slug}`} replace />;
   return (
     <PageLayout title={project.name} backToProjects panel>
-      <p className="status-tag detail-status">{project.status === 'in_progress' ? 'In progress' : 'Completed'}</p>
+      <p className="status-tag detail-status">{project.status === 'planning' ? 'Planning' : project.status === 'in_progress' ? 'In progress' : 'Completed'}</p>
       <p className="page-intro">{project.shortDescription}</p>
       <ProjectGallery project={project} />
       {project.technologies.length > 0 && (
@@ -447,8 +447,8 @@ function App() {
           <Route path="/admin/callback" element={<AdminCallbackPage />} />
           <Route path="/admin/reset-password" element={<PasswordRecoveryPage />} />
           <Route path="/admin/projects" element={<RequireAdmin><AdminProjectsPage /></RequireAdmin>} />
-          <Route path="/admin/projects/new" element={<RequireAdmin><AdminProjectPlaceholder isNew /></RequireAdmin>} />
-          <Route path="/admin/projects/:projectId" element={<RequireAdmin><AdminProjectPlaceholder /></RequireAdmin>} />
+          <Route path="/admin/projects/new" element={<RequireAdmin><AdminProjectEditor isNew /></RequireAdmin>} />
+          <Route path="/admin/projects/:projectId" element={<RequireAdmin><AdminProjectEditor /></RequireAdmin>} />
           <Route path="/admin/profile" element={<RequireAdmin><AdminSectionPlaceholder title="Profile" /></RequireAdmin>} />
           <Route path="/admin/homepage" element={<RequireAdmin><AdminSectionPlaceholder title="Homepage" /></RequireAdmin>} />
           <Route path="/admin/mailbox" element={<RequireAdmin><AdminSectionPlaceholder title="Mailbox" /></RequireAdmin>} />

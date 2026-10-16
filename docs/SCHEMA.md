@@ -69,7 +69,7 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 ### Project
 
 - **Purpose:** Store a public portfolio project.
-- **Fields:** `id`, `name`, `short_description`, optional `long_description`, `status` (`in_progress` or `completed`), optional `repository_url`, optional `live_demo_url`, optional `key_features`, `technical_details`, `challenges_and_solutions`, and `what_i_learned`, plus `sort_order`, `created_at`, and `updated_at`.
+- **Fields:** `id`, `name`, `short_description`, optional `long_description`, `status` (`planning`, `in_progress`, or `completed`), optional `repository_url`, optional `live_demo_url`, optional `key_features`, `technical_details`, `challenges_and_solutions`, and `what_i_learned`, plus `sort_order`, `created_at`, and `updated_at`.
 - **Constraints:** Name, short description, and status are required on first save. Every saved project appears in the public Projects section in `sort_order` and has a public detail route. There is no featured/unfeatured state, archive state, or soft delete. URLs must be validated. Saving makes changes live. Project deletion reports success only after all associated Storage files and database records are removed. If Storage cleanup fails, keep the project record and show an error with a retry option; retries must safely handle files already removed.
 - **Related requirements:** F-01, F-02, F-03, F-09, F-10, F-13, F-14
 
@@ -162,7 +162,7 @@ Project name search can use a case-insensitive match at the expected small portf
 
 ## 7. Migrations and seed data
 
-- **Migration approach:** Version schema, indexes, constraints, policies, and storage setup in ordered Supabase SQL migrations committed to the repository. Migration `20261017000001_all_projects_ordered_publicly.sql` removes the obsolete `is_featured` project field and its index; every project is public in shared admin order.
+- **Migration approach:** Version schema, indexes, constraints, policies, and storage setup in ordered Supabase SQL migrations committed to the repository. Migration `20261017000001_all_projects_ordered_publicly.sql` removes the obsolete `is_featured` project field and its index; every project is public in shared admin order. Project saves use the designated-admin-only transactional RPC in migration 20261017000002_admin_project_editor.sql to keep project fields, technology links, and current/historical slugs consistent.
 - **Seed data:** Local development may use clearly fictional projects and messages. Production must not receive demo visitor messages or a fake public contact address. Provision the designated Auth user and required Email contact method through documented setup before launch.
 - **Compatibility / rollback:** Review migrations before applying to production. Prefer additive changes; document any migration that could remove or transform owner content. The obsolete `is_featured` values are dropped; this does not delete project content. Backups/exports are not part of this version.
 

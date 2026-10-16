@@ -1,16 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App.jsx';
 import { AdminAuthProvider } from './admin/auth-context.jsx';
 import './styles.css';
 
+const router = createBrowserRouter([{ path: '*', element: <AdminAuthProvider><App /></AdminAuthProvider> }]);
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AdminAuthProvider>
-        <App />
-      </AdminAuthProvider>
-    </BrowserRouter>
+    <RouterProvider router={router} />
   </React.StrictMode>,
 );

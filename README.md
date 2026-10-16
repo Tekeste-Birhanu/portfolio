@@ -9,7 +9,7 @@ A personal portfolio website for showcasing projects, skills, and background to 
 ## Planned features
 
 - One scrolling public page with Home, Projects, About, and Contact sections, plus separate project detail pages.
-- Responsive project galleries and lightbox; the Projects section shows featured work and each project has a separate detail page.
+- Responsive project galleries and lightbox; the Projects section lists every saved project and each has a separate detail page.
 - One light theme and skill pills grouped under admin-managed categories on About.
 - Private admin dashboard for projects, profile, homepage intro, contact methods, and messages.
 - Contact form that saves visitor email and message to Mailbox and sends an email notification.

@@ -146,18 +146,22 @@
 - **Progress:** Added protected responsive sidebar navigation, a Supabase-backed two-column Projects dashboard with search, last-updated dates, add/edit entry points, and drag ordering. Removed the featured toggle; the complete admin list order drives the public list. A database migration drops the unused featured flag. Below 1024px, the admin navigation opens as an accessible side drawer. Production build passes; rendered viewport checks remain pending.
 
 #### T-09 — Implement project editor and permanent deletion
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-08
 - **Related:** F-10, F-12, F-14; J-03, J-06
 - **Goal:** Let the administrator create, edit, and permanently delete projects.
 - **Scope:** Implement explicit-save project editing, required fields, a technology multi-select populated from technologies already used by projects, an option to create and select a new reusable technology, status, links, optional detail fields, unique slug generation/history, unsaved-change guard, and named delete confirmation.
 - **Done when:**
-  - [ ] First save requires name, short description, and status; successful edits become live immediately.
-  - [ ] Existing technologies can be selected; a newly created technology is attached to the current project and appears as an option for later projects.
-  - [ ] Leaving with unsaved edits offers Stay or Leave and discard.
-  - [ ] Rename preserves redirects; confirmed deletion reports success only after all project files and records are removed. If Storage cleanup fails, the project record remains and the admin can retry.
+  - [x] First save requires name, short description, and status; successful edits become live immediately.
+  - [x] Existing technologies can be selected; a newly created technology is attached to the current project and appears as an option for later projects.
+  - [x] Leaving with unsaved edits offers Stay or Leave and discard.
+  - [x] Rename preserves redirects; the user verified the old URL redirects to the current project.
+  - [x] Confirmed deletion removes the project and its public URL returns not found.
+  - [ ] Storage cleanup failure retains the project and supports a safe retry; verify with uploaded media during T-10.
 - **Verify:** Check create/edit validation, existing and newly created reusable technologies, URLs, unsaved changes, and confirmed deletion.
+
+- **Progress:** Implemented the project editor, required-field and URL validation, reusable technology selection/creation, explicit save, a transactional save RPC for project fields/technologies/slug history, unsaved-navigation protection, and named permanent deletion with retryable Storage cleanup. The production build passes and the hosted save RPC is applied. The user verified save/public listing after refresh, project details, existing and reusable new technologies, both unsaved-change choices, rename redirects, and deletion/not-found behavior. Storage cleanup retry with uploaded media remains to be verified after T-10 media management is available.
 
 #### T-10 — Implement project media management
 - **Status:** Not started
