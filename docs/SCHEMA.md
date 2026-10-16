@@ -18,6 +18,7 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 - **Fields:** One configured Supabase Auth user ID (`auth.users.id`). Store the allowlisted ID in a protected singleton configuration record or another server-controlled configuration source.
 - **Constraints:** Exactly one designated administrator. Google sign-in is an admin sign-in option; it does not grant admin access unless the resulting user ID is the configured administrator. Public registration is disabled.
 - **Sensitive data:** Supabase Auth owns password and session data. Never copy credentials or tokens into application tables.
+- **Implementation:** `public.admin_config` stores the single allowlisted Auth user ID and is inaccessible to browser roles. `public.is_designated_admin()` returns only whether the current authenticated user matches that ID; RLS and Storage write policies use this function. Provision the row from the Supabase SQL Editor after creating the administrator account.
 - **Related requirements:** F-08
 
 ### Homepage content

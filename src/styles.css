@@ -113,6 +113,21 @@ p { margin-block: 0 1rem; }
 .button { min-height: 44px; padding: 0.55rem 1rem; border: 1px solid var(--color-accent); border-radius: 4px; font-family: var(--font-mono); cursor: pointer; }
 .button-secondary { color: var(--color-accent); background: transparent; }
 .button-secondary:hover { background: #f4e9e5; }
+.admin-auth-page { width: min(100%, 30rem); margin-inline: auto; padding-block: clamp(3rem, 10vh, 6rem); }
+.admin-auth-page > .eyebrow { margin-bottom: 0.5rem; }
+.admin-auth-page > h1 { margin-bottom: 1.5rem; }
+.admin-auth-card { padding: clamp(1.25rem, 4vw, 2rem); border: 1px solid var(--color-border); border-radius: 5px; background: var(--color-surface); }
+.admin-auth-form { display: grid; gap: 0.6rem; }
+.admin-auth-form label { margin-top: 0.5rem; font-family: var(--font-mono); font-size: 0.9rem; }
+.admin-auth-form input { width: 100%; min-height: 44px; padding: 0.55rem 0.7rem; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-bg); color: var(--color-text); font: inherit; }
+.admin-primary-button { margin-top: 0.75rem; background: var(--color-accent); color: #fff; }
+.admin-primary-button:hover { background: #893a23; }
+.admin-primary-button:disabled, .admin-google-button:disabled { opacity: 0.6; cursor: wait; }
+.admin-google-button { width: 100%; margin-top: 1rem; }
+.admin-forgot-link { display: inline-flex; min-height: 44px; align-items: center; margin-top: 0.5rem; }
+.auth-notice, .auth-success { margin: 0 0 1rem; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 4px; }
+.auth-notice { color: var(--color-error); }
+.auth-success { color: var(--color-text); background: #f2f3ed; }
 .site-footer { border-top: 1px solid var(--color-border); color: var(--color-muted); font-size: 0.875rem; }
 .footer-inner { min-height: 4.5rem; display: flex; align-items: center; justify-content: center; text-align: center; }
 

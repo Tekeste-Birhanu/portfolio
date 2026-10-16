@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { getCachedPublicPortfolio, getPublicPortfolio } from './lib/public-content.js';
+import { AdminCallbackPage, AdminLoginPage, AdminReadyPage, PasswordRecoveryPage, RequireAdmin } from './admin/auth-pages.jsx';
 
 const SITE_OWNER_NAME = 'Your Name';
 
@@ -379,6 +380,7 @@ function ServiceUnavailablePage({ message = 'The portfolio service is unavailabl
 
 function App() {
   const location = useLocation();
+  const isAdminPath = location.pathname.startsWith('/admin');
 
   useEffect(() => {
     if (location.pathname !== '/') return;
@@ -399,7 +401,7 @@ function App() {
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to content</a>
-      <SiteHeader />
+      {!isAdminPath && <SiteHeader />}
       <main className="main-content" id="main-content" tabIndex="-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -407,14 +409,18 @@ function App() {
           <Route path="/projects/:slug" element={<ProjectDetailPage />} />
           <Route path="/about" element={<Navigate to="/#about" replace />} />
           <Route path="/contact" element={<Navigate to="/#contact" replace />} />
+          <Route path="/admin" element={<AdminLoginPage />} />
+          <Route path="/admin/callback" element={<AdminCallbackPage />} />
+          <Route path="/admin/reset-password" element={<PasswordRecoveryPage />} />
+          <Route path="/admin/*" element={<RequireAdmin><AdminReadyPage /></RequireAdmin>} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
-      <footer className="site-footer">
+      {!isAdminPath && <footer className="site-footer">
         <div className="footer-inner">
           <span>© {new Date().getFullYear()} {SITE_OWNER_NAME}</span>
         </div>
-      </footer>
+      </footer>}
     </>
   );
 }

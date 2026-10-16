@@ -19,6 +19,7 @@ Admin (not linked publicly)
 [/admin]
   ├── No session → Sign in (email/password or Google)
   │     └── Forgot password → /admin/reset-password
+  │     └── Google callback → /admin/callback
   └── Designated administrator session → Projects
         ├── /admin/projects       Projects list, search, ordering
         ├── /admin/projects/new   Add project
@@ -59,7 +60,7 @@ The Home section contains the owner's name and short introduction. The call-to-a
 - **Preconditions:** The administrator account has been provisioned; an enabled contact email has been configured before the public Contact page goes live.
 - **Steps:** Sign in with email/password or Google; open Projects; add a project or edit an existing one; enter project details, links, status, and optional sections; choose technologies from the existing list or create a new one in the picker; upload screenshots or GIFs, enter alt text, choose the main image, and order the gallery; save. In the Projects list, choose whether to feature the project in the public Projects section.
 - **Success:** The saved project detail route is live immediately. If featured, it also appears in the public Projects section in the administrator's chosen order. The editor remains open and shows a saved confirmation.
-- **Failure and recovery:** Required-field errors, upload errors, or save errors preserve entered values. Leaving with unsaved changes asks whether to stay or discard changes. A forgotten password starts the email recovery flow. An authenticated user who is not the designated administrator is denied and signed out. An expired session returns to sign-in.
+- **Failure and recovery:** Required-field errors, upload errors, or save errors preserve entered values. Leaving with unsaved changes asks whether to stay or discard changes. A forgotten password starts the email recovery flow. Invalid or expired recovery links show an error and offer a new reset request; a password form is available only after Supabase confirms a recovery event. An authenticated user who is not the designated administrator is denied and signed out. An expired session returns to sign-in. Email sign-in requires a verified account; no public registration is available.
 - **Related requirements:** F-08, F-09, F-10, F-11, F-12, F-13
 
 ### J-04 — Administrator maintains profile, homepage, and contact methods
@@ -103,7 +104,7 @@ The Home section contains the owner's name and short introduction. The call-to-a
 | `/#contact` | Enabled contact methods and email/message form | Anyone | J-02 |
 | 404 | Unknown or deleted addresses | Anyone | J-01, J-06 |
 | `/admin` | Sign-in or Projects landing page | Sign-in is public; dashboard is administrator-only | J-03 |
-| `/admin/reset-password` | Set a new password from a valid recovery link | Anyone with a valid recovery link | J-03 |
+| `/admin/reset-password` | Request a reset link, or set a new password after a valid recovery event; invalid/expired links show an error and allow a new request | Anyone | J-03 |
 | `/admin/projects` | Search, order, edit, and delete projects | Designated administrator | J-03, J-06 |
 | `/admin/projects/new`, `/admin/projects/<id>` | Add or edit a project | Designated administrator | J-03 |
 | `/admin/profile` | About content, photo, CV, and skills | Designated administrator | J-04 |

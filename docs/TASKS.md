@@ -116,7 +116,7 @@
 ### M3 — Admin and contact workflows
 
 #### T-07 — Implement administrator sign-in and authorization
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-01, T-02
 - **Related:** F-08; J-03
@@ -127,6 +127,7 @@
   - [ ] Unauthenticated users and non-designated accounts cannot access admin data or actions.
   - [ ] No public sign-up is available; Google sign-in grants access only to the designated administrator account.
 - **Verify:** Check sign-in, verification, recovery, expiration, sign-out, and denied access using a non-admin account.
+- **Progress:** Added email/password and Google sign-in screens, password recovery/update, session checks against the designated-admin RPC, protected admin routes, and database/Storage authorization policies. The authorization migration is applied. Hosted Auth providers and redirect URLs are configured, the designated user is provisioned in `admin_config`, and the user reached the authorized admin page. Brevo SMTP delivery succeeded after authorizing the blocked SMTP source IP; password recovery completed, and replaying a used link returned `otp_expired`. Fixed the sign-in page's duplicate success notice and the recovery route's mistaken reliance on any admin session; it now requires Supabase's `PASSWORD_RECOVERY` event and handles invalid/expired-link redirects. Remaining checks: confirm the expired-link page behavior, sign in with the updated password, test Google sign-in and manual sign-out, and confirm a non-admin account is denied.
 
 #### T-08 — Build admin navigation and Projects list
 - **Status:** Not started

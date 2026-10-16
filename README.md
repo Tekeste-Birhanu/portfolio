@@ -67,6 +67,20 @@ npm.cmd run db:push
 
 Review migrations before applying them. The project does not require Docker or a local Supabase stack.
 
+### Administrator authentication setup
+
+The client has no sign-up flow. For the hosted Supabase project, disable public sign-ups, enable email confirmations, configure Brevo as the Auth SMTP provider, and enable Google with its OAuth client credentials in the Supabase Dashboard. Set the project's Auth redirect URLs to include the local callback and recovery routes (`http://localhost:5173/admin/callback` and `http://localhost:5173/admin/reset-password`) and the matching routes on the deployed site. For Google, the authorized OAuth callback URI in Google Cloud is the Supabase Auth callback URL shown in the Supabase provider settings.
+
+Create or invite the one administrator from Supabase Auth, then verify that account. After migration `20261017000000_admin_authorization.sql` is applied, set the designated user ID from the Supabase SQL Editor (replace the placeholder with the administrator's Auth user UUID):
+
+```sql
+insert into public.admin_config (id, user_id)
+values (true, '<ADMIN_AUTH_USER_UUID>')
+on conflict (id) do update set user_id = excluded.user_id;
+```
+
+The browser cannot read or change `admin_config`. The designated user ID is checked by `public.is_designated_admin()` in database and Storage policies.
+
 ### Build and preview
 
 ```powershell
