@@ -2,6 +2,14 @@ import { isSupabaseConfigured, supabase } from './supabase.js';
 
 const PUBLIC_CONTENT_CACHE_KEY = 'portfolio:public-content:v3';
 
+export function invalidatePublicPortfolioCache() {
+  try {
+    sessionStorage.removeItem(PUBLIC_CONTENT_CACHE_KEY);
+  } catch {
+    // The cache is optional; the public page will fetch fresh content on reload.
+  }
+}
+
 export function getCachedPublicPortfolio() {
   try {
     const cached = sessionStorage.getItem(PUBLIC_CONTENT_CACHE_KEY);

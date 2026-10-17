@@ -72,9 +72,15 @@ export async function saveProject(projectId, values, technologyIds, newTechnolog
 
 export async function permanentlyDeleteProject(projectId) {
   if (!supabase) throw new Error('Supabase is not configured.');
-  const { data: media, error: mediaError } = await supabase.from('project_media').select('storage_path').eq('project_id', projectId);
-  if (mediaError) throw new Error('Could not check the project files. The project has not been deleted.');
-  const paths = [...new Set((media ?? []).map((item) => item.storage_path).filter(Boolean))];
+  const [mediaResult, cleanupResult] = await Promise.all([
+    supabase.from('project_media').select('storage_path').eq('project_id', projectId),
+    supabase.from('project_media_cleanup').select('storage_path').eq('project_id', projectId),
+  ]);
+  if (mediaResult.error || cleanupResult.error) throw new Error('Could not check all project files. The project has not been deleted.');
+  const paths = [...new Set([
+    ...(mediaResult.data ?? []).map((item) => item.storage_path),
+    ...(cleanupResult.data ?? []).map((item) => item.storage_path),
+  ].filter(Boolean))];
   if (paths.length) {
     const { error: storageError } = await supabase.storage.from('project-media').remove(paths);
     if (storageError) throw new Error('Some project files could not be removed. The project is still saved; retry deletion.');

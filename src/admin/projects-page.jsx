@@ -3,6 +3,7 @@ import { Link, useBlocker, useLocation, useNavigate, useParams } from 'react-rou
 import { useAdminAuth } from './auth-context.jsx';
 import { supabase } from '../lib/supabase.js';
 import { EMPTY_PROJECT, PROJECT_FIELDS, getProjectEditorData, permanentlyDeleteProject, saveProject, validateProject } from '../lib/project-admin.js';
+import { ProjectMediaManager } from './project-media-manager.jsx';
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
 
@@ -255,8 +256,10 @@ export function AdminProjectEditor({ isNew = false }) {
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [mediaPending, setMediaPending] = useState(false);
+  const [mediaAltReady, setMediaAltReady] = useState(false);
+  const pendingMediaUploadRef = useRef(null);
   const [error, setError] = useState('');
-  const [saved, setSaved] = useState(Boolean(location.state?.saved));
   const initialState = useRef('');
   const currentState = projectState(values, technologyIds, newTechnologyNames);
   const isDirty = loadState === 'ready' && initialState.current !== currentState;
@@ -298,12 +301,10 @@ export function AdminProjectEditor({ isNew = false }) {
     const { name, value } = event.target;
     setValues((current) => ({ ...current, [name]: value }));
     setFieldErrors((current) => ({ ...current, [name]: '' }));
-    setSaved(false);
   };
 
   const toggleTechnology = (id) => {
     setTechnologyIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
-    setSaved(false);
   };
 
   const addTechnology = (event) => {
@@ -317,11 +318,15 @@ export function AdminProjectEditor({ isNew = false }) {
       setNewTechnologyNames((current) => current.some((item) => item.toLocaleLowerCase() === name.toLocaleLowerCase()) ? current : [...current, name]);
     }
     setNewTechnologyName('');
-    setSaved(false);
   };
 
   const handleSave = async (event) => {
     event.preventDefault();
+    if (mediaPending && !mediaAltReady) {
+      const altInput = document.getElementById(`project-media-alt-new-${projectId}`);
+      altInput?.focus();
+      return;
+    }
     const errors = validateProject(values);
     setFieldErrors(errors);
     if (Object.keys(errors).length) {
@@ -332,9 +337,15 @@ export function AdminProjectEditor({ isNew = false }) {
     setError('');
     const isCreating = isNew;
     try {
+      if (!isNew && pendingMediaUploadRef.current) {
+        const uploadedMedia = await pendingMediaUploadRef.current?.();
+        if (!uploadedMedia) {
+          setSaving(false);
+          return;
+        }
+      }
       const savedId = await saveProject(projectId, values, technologyIds, newTechnologyNames);
       initialState.current = currentState;
-      setSaved(true);
       try {
         const savedData = await getProjectEditorData(savedId);
         setValues(savedData.project);
@@ -345,8 +356,8 @@ export function AdminProjectEditor({ isNew = false }) {
       } catch {
         setError('Project saved. Reload this page to refresh its technology list.');
       }
-      if (isCreating) navigate(`/admin/projects/${savedId}`, { replace: true, state: { saved: true } });
-      else navigate(location.pathname, { replace: true, state: { saved: true } });
+      if (isCreating) navigate(`/admin/projects/${savedId}`, { replace: true });
+      else navigate(location.pathname, { replace: true });
     } catch (saveError) {
       setError(saveError.message || 'The project could not be saved. Your changes are still here.');
     } finally {
@@ -374,7 +385,6 @@ export function AdminProjectEditor({ isNew = false }) {
       <p>{error}</p>
       <button className="button button-secondary" type="button" onClick={() => { setError(''); setLoadAttempt((count) => count + 1); }}>Retry</button>
     </div> : <>
-      {saved && <p className="auth-success" role="status">Project saved. Changes are live on the public site.</p>}
       {error && <p className="admin-error" role="alert">{error}</p>}
       <form className="admin-project-form" onSubmit={handleSave} noValidate>
         <div className="admin-project-fields">
@@ -403,8 +413,9 @@ export function AdminProjectEditor({ isNew = false }) {
           </li>)}</ul>}
           <div className="admin-add-technology"><label htmlFor="new-technology">Add a reusable technology</label><div><input id="new-technology" value={newTechnologyName} onChange={(event) => setNewTechnologyName(event.target.value)} /><button className="button button-secondary" type="button" onClick={addTechnology} disabled={!newTechnologyName.trim()}>Add</button></div></div>
         </fieldset>
+        {!isNew && <ProjectMediaManager projectId={projectId} onPendingChange={(pending, altReady) => { setMediaPending(pending); setMediaAltReady(altReady); }} onRegisterPendingUpload={(upload) => { pendingMediaUploadRef.current = upload; }} />}
         <div className="admin-editor-actions">
-          <button className="button admin-primary-button" type="submit" disabled={saving || deleting}>{saving ? 'Saving…' : 'Save project'}</button>
+          <button className="button admin-primary-button" type="submit" disabled={saving || deleting || (mediaPending && !mediaAltReady)}>{saving ? 'Saving…' : 'Save project'}</button>
           {!isNew && <button className="button button-danger" type="button" disabled={saving || deleting} onClick={handleDelete}>{deleting ? 'Deleting…' : 'Delete project'}</button>}
         </div>
       </form>

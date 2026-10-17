@@ -92,8 +92,8 @@ See `SCHEMA.md` for tables and `APP_FLOW.md` for user journeys.
 ## 8. Cross-cutting requirements
 
 - **Authentication and authorization:** Identity comes from Supabase Auth. Access is enforced in the database for every admin read and write, never only in the interface.
-- **Validation and data integrity:** Interface checks are for convenience. Database constraints and storage bucket rules are the real validation. The contact function re-validates everything it receives.
+- **Validation and data integrity:** Interface checks are for convenience. Database constraints, a project-media trigger that checks actual uploaded object metadata and project limits, and Storage bucket size/type rules are the real media validation. The contact function re-validates everything it receives.
 - **Errors and logging:** Errors shown to users say what failed and what to do next. Secrets, tokens, and message contents are never logged.
 - **Configuration and secrets:** The Supabase URL and anon key are public by design and live in build-time variables. Brevo SMTP credentials are configured in Supabase Auth; the service-role key and Brevo API key exist only as Edge Function secrets, never in the repository or browser.
 - **Performance and caching:** The app serves manually optimized original uploads without generated variants. Animated GIFs load only in the main image and lightbox. No additional caching layer.
-- **Background work and external services:** There are no queues or automatic retries. Email notification failure does not lose the saved message and is recorded for a warning in Mailbox. Contact submissions do not use CAPTCHA or application-level rate limiting.
+- **Background work and external services:** There are no background queues or automatic retries. A project media cleanup table records failed Storage removals for the administrator to retry manually. Email notification failure does not lose the saved message and is recorded for a warning in Mailbox. Contact submissions do not use CAPTCHA or application-level rate limiting.

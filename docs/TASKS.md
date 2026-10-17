@@ -164,7 +164,7 @@
 - **Progress:** Implemented the project editor, required-field and URL validation, reusable technology selection/creation, explicit save, a transactional save RPC for project fields/technologies/slug history, unsaved-navigation protection, and named permanent deletion with retryable Storage cleanup. The production build passes and the hosted save RPC is applied. The user verified save/public listing after refresh, project details, existing and reusable new technologies, both unsaved-change choices, rename redirects, and deletion/not-found behavior. Storage cleanup retry with uploaded media remains to be verified after T-10 media management is available.
 
 #### T-10 — Implement project media management
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-09
 - **Related:** F-04, F-11, F-14; J-03, J-06
@@ -176,6 +176,7 @@
   - [ ] Originals are served as uploaded; removed files and deleted-project media are removed from storage, with a retryable error and no false success if cleanup fails.
 - **Verify:** Check accepted/rejected uploads, size/count limits, replacements, ordering, public display, and cleanup.
 - **Notes:** JPG/PNG/WebP limit is 5 MB; GIF limit is 10 MB. The owner manually optimizes images.
+- **Progress:** Added the project editor's immediate-save media manager for original image/GIF uploads, alt text, replacement/removal, main-image choice, ordering, and retryable cleanup. Added a migration that validates actual Storage object MIME/size metadata, serializes project count checks, caps stills/GIFs, and records cleanup retries. Production build and interactive hosted checks remain pending; migration must be applied before using the media manager.
 
 #### T-11 — Implement Profile and skills editing
 - **Status:** Not started

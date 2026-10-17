@@ -91,7 +91,8 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 
 - **Purpose:** Store project screenshot and GIF metadata; file bytes live in Supabase Storage.
 - **Fields:** `id`, `project_id`, `storage_path`, `media_type` (still image or GIF), `mime_type`, `size_bytes`, `alt_text`, `sort_order`, `is_main`, and `created_at`.
-- **Constraints:** JPG, PNG, and WebP are limited to 5 MB; GIF is limited to 10 MB. A project allows at most 10 still images and 2 GIFs. Every item has alt text. At most one item per project is the main image. Files are stored and served as uploaded; the app does not compress or create variants. Removing media or its project also removes its stored file.
+- **Constraints:** JPG, PNG, and WebP are limited to 5 MB; GIF is limited to 10 MB. A project allows at most 10 still images and 2 GIFs. A database trigger checks the actual Storage object's MIME type and size and enforces per-project counts; Storage bucket limits provide an additional 10 MB maximum and MIME allowlist. Every item has non-empty alt text. At most one item per project is the main image; deleting the main item selects the next item when one remains. Files are stored and served as uploaded; the app does not compress or create variants. Failed cleanup paths are retained in `project_media_cleanup` for a manual retry. Project deletion removes current and queued Storage paths before deleting records.
+- **Cleanup record:** `project_media_cleanup` stores `id`, `project_id`, `storage_path`, and `created_at` for replaced or rolled-back uploads that could not be removed. Only the designated administrator can access it; retry removes the object and then its record.
 - **Related requirements:** F-04, F-11, F-14
 
 ### Contact method
