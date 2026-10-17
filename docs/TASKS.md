@@ -228,17 +228,17 @@
 - **Depends on:** T-07, T-01
 - **Related:** F-17, F-18; J-04, J-05
 - **Goal:** Let the owner manage visitor messages and public contact links.
-- **Scope:** Build newest-first Mailbox list/detail, read/unread and confirmed delete actions, plus contact-method add/edit/enable/disable/reorder/remove. Support arbitrary platforms with a generic icon fallback.
+- **Scope:** Build newest-first Mailbox list/detail, mark messages read automatically when opened, confirmed deletion, plus contact-method add/edit/enable/disable/reorder/remove. Link methods select a built-in icon; Phone methods accept a phone number and open the device dialer.
 - **Done when:**
   - [ ] Messages show visitor email, message, date, and notification status; opening marks read.
   - [ ] Exactly one Email method exists, is editable but cannot be disabled or removed, and is separate from login email.
   - [ ] Other methods can be managed; enabled methods appear publicly in order.
-- **Verify:** Check message states/deletion, contact-method operations, Email invariant, public order, and authorization.
-- **Progress:** Added the Mailbox messages list and detail route, read/unread updates, confirmed deletion, notification status display, contact-method editor with drag ordering, a database-seeded required Email row protected by database constraints, and public rendering for enabled contact methods. The owner applied migration `20261017000008_mailbox_and_contact_methods.sql` and confirmed Mailbox loads, configured Email and a link appear publicly, and saved order is reflected publicly. Toggle visibility, removal, Email protection, and message-state/deletion walkthroughs remain pending.
+- **Verify:** Check automatic read state on open, confirmed deletion, contact-method operations, Email invariant, public order, and authorization.
+- **Progress:** Added the Mailbox messages list and detail route, automatic read state on open, confirmed deletion, notification status display, contact-method editor with drag ordering, a database-seeded required Email row protected by database constraints, and public rendering for enabled contact methods. The owner applied migration `20261017000008_mailbox_and_contact_methods.sql` and confirmed Mailbox loads, configured Email and a link appear publicly, and saved order is reflected publicly. Administrator-selected contact icons and phone links are implemented locally; migration `20261017000009_contact_method_icons.sql` must be applied before using them. Toggle visibility, removal, Email protection, and message-open/deletion walkthroughs remain pending.
 
 #### T-14 — Implement contact form and Brevo notification
 
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-13
 - **Related:** F-06, F-17–F-19; J-02, J-05
@@ -249,6 +249,7 @@
   - [ ] Message is saved before email is attempted; visitor sees success after save even if notification fails.
   - [ ] Notification failure is recorded and shown in both Mailbox list and detail; save failure shows configured contact email as an alternative.
 - **Verify:** Check validation, save/delivery success, notification failure after save, save failure, and secret boundaries.
+- **Progress:** Added the public Contact form, client and Edge Function validation, save-before-notify behavior, Brevo transactional email delivery with the visitor as Reply-To, and notification-status recording. Function deployment and Edge Function secrets (`BREVO_API_KEY`, verified `BREVO_SENDER_EMAIL`) plus end-to-end success and failure-path checks remain pending. The existing SMTP key is not used for the Brevo API.
 
 ### M4 — Launch readiness
 

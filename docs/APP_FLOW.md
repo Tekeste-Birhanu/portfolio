@@ -67,7 +67,7 @@ The Home section contains the owner's name, editable role, short introduction, a
 
 - **Actor:** Designated administrator
 - **Entry point:** Admin navigation to Profile, Homepage, or Mailbox
-- **Steps:** In Profile, explicitly save the About introduction and education entries; edit experience entries and their order, then save them together with one Save experience action; upload, replace, or remove the CV; and manage skill categories and skills. In Homepage, edit and explicitly save the role, short introduction, and labels and links for the contact and GitHub buttons; upload, replace, or remove the optional profile photo; photo cleanup retries remain available there. In Mailbox, add, edit, enable/disable, reorder, or remove a contact method. A method includes a label and a value or link; the administrator can use any platform. Supported platforms may have a built-in icon; other platforms use a generic link icon.
+- **Steps:** In Profile, explicitly save the About introduction and education entries; edit experience entries and their order, then save them together with one Save experience action; upload, replace, or remove the CV; and manage skill categories and skills. In Homepage, edit and explicitly save the role, short introduction, and labels and links for the contact and GitHub buttons; upload, replace, or remove the optional profile photo; photo cleanup retries remain available there. In Mailbox, add, edit, enable/disable, reorder, or remove a contact method. A method includes a label and value; link methods choose a built-in icon, including Phone, which opens a `tel:` link. The public page shows the label and actual clickable destination.
 - **Skill management:** Add categories; edit category and skill names, then save those edits together with one Save skills action. Reorder categories by dragging their handles. Add or remove skills; drag a skill handle within its category to reorder it, or into another category column to move it. A category can be removed only after all its skills have been moved or removed. About shows skills as pill items grouped under category names and omits empty categories.
 - **Email invariant:** Exactly one Email contact method exists. Its value can be edited, but the method cannot be disabled or removed. This address is shown on Contact and receives message notifications; it is independent of the admin login email. Configure it in Mailbox before public launch.
 - **Success:** Saved changes are live on the public site.
@@ -78,10 +78,10 @@ The Home section contains the owner's name, editable role, short introduction, a
 
 - **Actor:** Designated administrator
 - **Entry point:** Admin navigation → Mailbox
-- **Steps:** See messages ordered newest first, with unread messages marked; open a message (which marks it read); use the sender's email as Reply-To in the notification to reply from the administrator's email app; mark a message unread again or delete it after confirmation.
+- **Steps:** See messages ordered newest first, with unread messages marked; open a message (which marks it read); use the sender's email as Reply-To in the notification to reply from the administrator's email app; delete a message after confirmation. Public contact methods show their configured label and clickable address or URL; a Phone method opens the device dialer.
 - **Notification warning:** If a saved message's notification email fails, Mailbox shows a warning on that message. The saved message remains available.
 - **Success:** The administrator can review and manage the inbox. An empty inbox shows “No messages.”
-- **Failure and recovery:** Cancelling a deletion changes nothing. A failed read-state update or deletion shows an error and keeps the message available for retry.
+- **Failure and recovery:** Cancelling a deletion changes nothing. A failed deletion shows an error and keeps the message available for retry.
 - **Related requirements:** F-18, F-19
 
 ### J-06 — Administrator permanently deletes a project
@@ -129,6 +129,6 @@ The Home section contains the owner's name, editable role, short introduction, a
 - Every saved project has a separate detail route and appears in the Projects section in shared administrator-defined order. Skills are displayed on About grouped by category, with empty categories omitted. Deletion is permanent; rename redirects old slugs to the current slug.
 - Enabled contact methods appear in the administrator's order. Exactly one Email method exists; it cannot be disabled or removed, and its contact/notification address is not the login email.
 - A contact form submission is stored before email notification is attempted. The visitor's address is the notification's Reply-To. Notification failure does not lose the message or change the visitor's success state; Mailbox shows a warning.
-- Opening a message marks it read; the administrator can mark it unread again.
+- Opening a message marks it read automatically. The administrator cannot manually change its read state.
 - External contact, repository, and demo links open in a new tab.
 - Leaving an admin form with unsaved changes asks the administrator to stay or discard changes.

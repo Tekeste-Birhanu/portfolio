@@ -21,10 +21,10 @@ The public Home, Projects, About, and Contact areas are sections on one scrollin
 
 Values below are initial decisions. Verify contrast with a checker during implementation and tune sizes once real content is in.
 
-- **Typography:**
+  - **Typography:**
   - Monospace stack for the site name, navigation, headings, tags, dates, buttons, and labels: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`.
   - System sans-serif for paragraphs and long text: `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`.
-  - Sizes in `rem`, base 1rem. Hierarchy: page title 1.75rem, section heading 1.25rem, body 1rem (line height 1.6), metadata and labels 0.875rem.
+  - Sizes in `rem`, base 1rem. Hierarchy: page title 1.75rem, public section headings 1.65–2rem in the accent color, body 1rem (line height 1.6), metadata and labels 0.875rem.
   - No font files are downloaded.
 - **Color** (CSS variables for the single light theme):
 
@@ -44,7 +44,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 - **Spacing:** Scale in multiples of 4px: 4, 8, 12, 16, 24, 32, 48, 64. Public pages use a centered column about 56rem wide (896px at the 16px base size); keep long text blocks narrower within that column for readability. Admin screens may be wider (about 72rem) for tables.
 - **Shape and elevation:** Corner radius 4px on buttons, inputs, tags, and images. 1px borders. No shadows. The lightbox uses a dimmed backdrop only.
 - **Icons and imagery:**
-  - One monochrome icon set drawn in the current text color. Contact methods always show a text label. Use a built-in icon where available and a generic link icon for any other platform.
+  - One monochrome icon set drawn in the current text color. Contact methods always show a text label. The administrator selects a built-in Website/Other, GitHub, LinkedIn, YouTube, Telegram, Instagram, X, Facebook, WhatsApp, Discord, or Phone icon for link methods; Email uses its fixed icon.
   - Imagery is the owner's actual screenshots and profile photo, never stock illustrations.
   - The owner manually optimizes files before upload. The app stores and serves uploaded originals without compression or generated variants. Images keep their aspect ratio and are not cropped or stretched; gallery thumbnails are display controls using the same uploaded files.
 - **Responsive behavior:** Three ranges: phone (under 640px), tablet (640px to 1023px), desktop (1024px and up). Layouts rearrange rather than shrink. The sticky public header stays compact on phones: brand and a keyboard-operable menu control share one row. The public and admin menus open as vertically stacked side drawers over the page without shifting its content.
@@ -112,7 +112,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### Contact
 
 - **Purpose:** Let visitors reach the owner.
-- **Layout:** Two side-by-side panels on tablet and desktop: all enabled contact methods in one panel and the message form in the other. Stack the panels on phones.
+- **Layout:** Two side-by-side panels on tablet and desktop: contact methods in one panel and the message form in the other. Stack the panels on phones. Contact methods show the configured label and actual address or URL as a clickable link. Keep the message field compact.
 - **Primary action:** Send message.
 - **Content and behavior:** List every enabled contact method in administrator order. Exactly one Email method is configured and always enabled; it is independent of the admin login email and receives message notifications. Other methods can be for any platform. The form has visitor email and message fields. It shows field errors and a busy state; after the message is saved, it shows success and clears the form. A save error includes the configured contact email and keeps the typed text. If email notification fails after saving, Mailbox shows a warning in both the message row and opened message.
 - **Related flow:** J-02

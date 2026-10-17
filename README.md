@@ -67,6 +67,16 @@ npm.cmd run db:push
 
 Review migrations before applying them. The project does not require Docker or a local Supabase stack.
 
+### Contact-form function
+
+Deploy the public contact Edge Function after applying the mailbox migration:
+
+```powershell
+npx.cmd supabase functions deploy submit-contact
+```
+
+In Supabase Dashboard → Edge Functions → Secrets, set `BREVO_API_KEY` to a Brevo API key and `BREVO_SENDER_EMAIL` to a verified Brevo sender. `BREVO_SENDER_NAME` is optional. The SMTP key used by Supabase Auth is not the Brevo API key. The function reads Supabase URL and server credentials from the Edge Function runtime; never place service-role credentials in browser variables or commit secrets.
+
 ### Administrator authentication setup
 
 The client has no sign-up flow. For the hosted Supabase project, disable public sign-ups, enable email confirmations, configure Brevo as the Auth SMTP provider, and enable Google with its OAuth client credentials in the Supabase Dashboard. Set the project's Auth redirect URLs to include the local callback and recovery routes (`http://localhost:5173/admin/callback` and `http://localhost:5173/admin/reset-password`) and the matching routes on the deployed site. For Google, the authorized OAuth callback URI in Google Cloud is the Supabase Auth callback URL shown in the Supabase provider settings.

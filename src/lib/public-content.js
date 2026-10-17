@@ -1,6 +1,6 @@
 import { isSupabaseConfigured, supabase } from './supabase.js';
 
-const PUBLIC_CONTENT_CACHE_KEY = 'portfolio:public-content:v4';
+const PUBLIC_CONTENT_CACHE_KEY = 'portfolio:public-content:v5';
 
 export function invalidatePublicPortfolioCache() {
   try {
@@ -103,7 +103,7 @@ export async function getPublicPortfolio() {
         project_media(id, storage_path, media_type, alt_text, sort_order, is_main)
       `)
       .order('sort_order', { ascending: true }),
-    supabase.from('contact_methods').select('id, label, method_type, value, sort_order').eq('is_enabled', true).order('sort_order', { ascending: true }),
+    supabase.from('contact_methods').select('id, label, method_type, icon_key, value, sort_order').eq('is_enabled', true).order('sort_order', { ascending: true }),
   ]);
 
   const homepage = unwrap(homepageResult);
@@ -148,14 +148,19 @@ export async function getPublicPortfolio() {
       if (method.method_type === 'email') {
         const address = method.value?.trim() ?? '';
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)
-          ? { id: method.id, label: method.label, href: `mailto:${address}`, icon: 'email' }
+          ? { id: method.id, label: method.label, value: address, href: `mailto:${address}`, icon: 'email' }
+          : null;
+      }
+      if (method.icon_key === 'phone') {
+        const phone = method.value?.trim() ?? '';
+        const digitCount = phone.replace(/\D/g, '').length;
+        return /^\+?[0-9][0-9 ()-]{5,24}$/.test(phone) && digitCount >= 7 && digitCount <= 15
+          ? { id: method.id, label: method.label, value: phone, href: `tel:${phone.replace(/[^+\d]/g, '')}`, icon: 'phone' }
           : null;
       }
       const href = safeHttpUrl(method.value);
       if (!href) return null;
-      const host = new URL(href).hostname.toLocaleLowerCase();
-      const icon = host.includes('github.com') ? 'github' : host.includes('linkedin.com') ? 'linkedin' : 'link';
-      return { id: method.id, label: method.label, href, icon };
+      return { id: method.id, label: method.label, value: method.value.trim(), href, icon: method.icon_key ?? 'website' };
     }).filter(Boolean),
   };
 

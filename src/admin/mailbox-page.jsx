@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AdminLayout } from './projects-page.jsx';
-import { deleteVisitorMessage, getMailboxData, getVisitorMessage, saveContactMethods, updateMessageReadState, validateContactMethods } from '../lib/mailbox-admin.js';
+import { deleteVisitorMessage, getMailboxData, getVisitorMessage, saveContactMethods, validateContactMethods } from '../lib/mailbox-admin.js';
+import { CONTACT_METHOD_ICONS } from '../lib/contact-methods.js';
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -63,6 +64,7 @@ export function AdminMailboxPage() {
       id,
       label: '',
       method_type: 'link',
+      icon_key: 'website',
       value: '',
       is_enabled: true,
       sort_order: current.length,
@@ -116,21 +118,6 @@ export function AdminMailboxPage() {
     }
   };
 
-  const handleReadState = async (message, isRead) => {
-    setBusyMessageId(message.id);
-    setError('');
-    setNotice('');
-    try {
-      await updateMessageReadState(message.id, isRead);
-      setMessages((current) => current.map((item) => item.id === message.id ? { ...item, is_read: isRead } : item));
-      setNotice(isRead ? 'Message marked as read.' : 'Message marked as unread.');
-    } catch (updateError) {
-      setError(updateError.message || 'The message status could not be updated.');
-    } finally {
-      setBusyMessageId(null);
-    }
-  };
-
   const handleDelete = async (message) => {
     if (!window.confirm(`Permanently delete the message from ${message.visitor_email}? This cannot be undone.`)) return;
     setBusyMessageId(message.id);
@@ -164,7 +151,6 @@ export function AdminMailboxPage() {
               <span className={`admin-message-notification${message.notification_status === 'failed' ? ' is-failed' : ''}`}>{notificationLabel(message.notification_status)}</span>
             </Link>
             <div className="admin-message-actions">
-              <button className="button button-secondary" type="button" disabled={busyMessageId === message.id} onClick={() => void handleReadState(message, !message.is_read)}>{message.is_read ? 'Mark unread' : 'Mark read'}</button>
               <button className="button button-danger" type="button" disabled={busyMessageId === message.id} onClick={() => void handleDelete(message)}>Delete</button>
             </div>
           </li>)}
@@ -190,8 +176,17 @@ export function AdminMailboxPage() {
                   {errors.has(`${method.id}-label`) && <span className="admin-field-error">{errors.get(`${method.id}-label`)}</span>}
                 </label>
                 <label>
-                  <span>{method.method_type === 'email' ? 'Email address' : 'Link'}</span>
-                  <input id={`${method.id}-value`} type={method.method_type === 'email' ? 'email' : 'url'} value={method.value} placeholder={method.method_type === 'email' ? 'you@example.com' : 'https://…'} onChange={(event) => updateMethod(method.id, { value: event.target.value })} aria-invalid={errors.has(`${method.id}-value`)} />
+                  <span>Icon</span>
+                  {method.method_type === 'email'
+                    ? <input value="Email" readOnly aria-label="Email icon" />
+                    : <select id={`${method.id}-icon`} value={method.icon_key ?? 'website'} aria-invalid={errors.has(`${method.id}-icon`)} onChange={(event) => updateMethod(method.id, { icon_key: event.target.value })}>
+                      {CONTACT_METHOD_ICONS.map((icon) => <option key={icon.value} value={icon.value}>{icon.label}</option>)}
+                    </select>}
+                  {errors.has(`${method.id}-icon`) && <span className="admin-field-error">{errors.get(`${method.id}-icon`)}</span>}
+                </label>
+                <label className="is-wide">
+                  <span>{method.method_type === 'email' ? 'Email address' : method.icon_key === 'phone' ? 'Phone number' : 'Link address'}</span>
+                  <input id={`${method.id}-value`} type={method.method_type === 'email' ? 'email' : method.icon_key === 'phone' ? 'tel' : 'url'} value={method.value} placeholder={method.method_type === 'email' ? 'you@example.com' : method.icon_key === 'phone' ? '+1 555 123 4567' : 'https://…'} onChange={(event) => updateMethod(method.id, { value: event.target.value })} aria-invalid={errors.has(`${method.id}-value`)} />
                   {errors.has(`${method.id}-value`) && <span className="admin-field-error">{errors.get(`${method.id}-value`)}</span>}
                 </label>
               </div>
@@ -251,32 +246,14 @@ export function AdminMessageDetailPage() {
     }
   };
 
-  const handleReadState = async () => {
-    if (!message) return;
-    setBusy(true);
-    setError('');
-    try {
-      await updateMessageReadState(message.id, !message.is_read);
-      setMessage((current) => ({ ...current, is_read: !current.is_read }));
-    } catch (updateError) {
-      setError(updateError.message || 'The message status could not be updated.');
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return <AdminLayout title="Message" activeSection="mailbox">
     <Link className="admin-editor-back" to="/admin/mailbox">← Mailbox</Link>
     {error && <p className="admin-error" role="alert">{error}</p>}
     {loading ? <p role="status">Loading message…</p> : missing ? <p className="empty-state">This message is no longer available.</p> : error ? <button className="button button-secondary" type="button" onClick={() => void load()}>Retry</button> : message && <article className="admin-profile-section admin-message-detail">
-      <header><a href={`mailto:${message.visitor_email}`}>{message.visitor_email}</a><time dateTime={message.created_at}>{formatDate(message.created_at)}</time></header>
+      <header><div className="admin-message-detail-meta"><a href={`mailto:${message.visitor_email}`}>{message.visitor_email}</a><time dateTime={message.created_at}>{formatDate(message.created_at)}</time></div><button className="button button-danger" type="button" disabled={busy} onClick={() => void handleDelete()}>Delete message</button></header>
       <p className="admin-message-notification is-detail">{notificationLabel(message.notification_status)}</p>
       {message.notification_status === 'failed' && <p className="admin-message-warning" role="status">The message was saved, but its email notification failed.</p>}
       <p className="admin-message-body">{message.message_body}</p>
-      <div className="admin-profile-actions">
-        <button className="button button-secondary" type="button" disabled={busy} onClick={() => void handleReadState()}>{message.is_read ? 'Mark unread' : 'Mark read'}</button>
-        <button className="button button-danger" type="button" disabled={busy} onClick={() => void handleDelete()}>Delete message</button>
-      </div>
     </article>}
   </AdminLayout>;
 }
