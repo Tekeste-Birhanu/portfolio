@@ -105,7 +105,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### About
 
 - **Purpose:** Give background and the CV.
-- **Layout:** Intro, education, and experience sections, followed by a Skills subsection with category labels and pills, then a CV download link when a CV exists. The Skills heading is visually subordinate to About. When a profile photo has been uploaded, show it beside the intro on wide screens and above it on phones. Without a photo, the intro uses the available width.
+- **Layout:** Intro and education, followed by distinct Skills and Experience panels side by side on wide screens and stacked on phones. Place the CV download in its own separated action row below them when a CV exists. The Skills heading is visually subordinate to About. When a profile photo has been uploaded, show it beside the intro on the right on wide screens and below it on phones. Without a photo, the intro uses the available width.
 - **Content and behavior:** The administrator edits the intro, education entries, experience entries, skill categories and skills, optional photo, and CV in Profile. Show categorized skill pills and show the intro, education, and experience sections only when they have content. Omit empty categories and sections; show the CV link only when a CV exists.
 - **Related flow:** J-02
 
@@ -145,9 +145,9 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### Admin Profile, Homepage, and Mailbox
 
 - **Purpose:** Edit About content, photo, CV, skill categories, and skills (Profile); edit homepage text (Homepage); read messages and manage contact methods (Mailbox).
-- **Layout:** Profile uses clear sections for About content, education, experience, media, and skill categories. Each category has its own ordered list of skill pills and controls. Mailbox has a messages list with unread messages marked, and a contact methods section.
+- **Layout:** Profile uses clear sections for About content, education, experience, media, and skill categories. Education and experience entries use two columns on wide screens, with each Add entry form as the final card in its grid. Education entries have individual save and ordering controls; Experience entries share one Save experience action and use drag handles to reorder. Each category is a column with its own ordered skill list. One Save skills action commits category and skill name edits; Remove stays beside each skill. Drag handles reorder categories and skills, and dropping a skill into another category moves it there. Mailbox has a messages list with unread messages marked, and a contact methods section.
 - **Primary action:** Save (Profile, Homepage); open a message (Mailbox).
-- **Content and behavior:** In Profile, category headings and skill lists can be added, renamed, and reordered; skills can be added, renamed, reordered within a category, moved, or removed. A category can be deleted only when it has no skills. Messages are ordered newest first; opening a message marks it read. Notification failure is marked in the message list and opened message. Exactly one Email contact method exists; it can be edited but cannot be deleted or disabled. Other contact methods can be managed with add, edit, enable/disable, reorder, and remove actions.
+- **Content and behavior:** In Profile, category headings and skill lists can be added; category and skill names are edited and saved together with one Save skills action. Category and skill order is changed by dragging the associated handle. Skills can be dragged within a category to reorder or into another category to move. A category can be deleted only when it has no skills. Messages are ordered newest first; opening a message marks it read. Notification failure is marked in the message list and opened message. Exactly one Email contact method exists; it can be edited but cannot be deleted or disabled. Other contact methods can be managed with add, edit, enable/disable, reorder, and remove actions.
 - **Related flow:** J-04, J-05
 
 ## 6. Interaction and UI states

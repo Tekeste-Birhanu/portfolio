@@ -40,7 +40,7 @@
 
 - **Public site (`src/site`):** Public pages, single light theme, gallery and lightbox. Reads only through the Supabase client with the anon key; never writes.
 - **Admin app (`src/admin`):** Login, Projects, Profile, Homepage, and Mailbox screens, including contact-method management. Requires a signed-in administrator; all writes pass through database security rules.
-- **Data layer (`src/lib`):** Supabase client, query functions, slug helper, upload validation helpers, and media metadata handling. The only place that talks to Supabase from the browser. Pages call it and never query directly.
+- **Data layer (`src/lib`):** Supabase client, public and administrator query functions, slug helpers, upload validation helpers, profile/project media metadata handling, and public-content cache invalidation.
 - **Database rules (`supabase/migrations`):** Schema, constraints, security policies, storage bucket rules. The source of truth for who may read or write what.
 - **Contact function (`supabase/functions/submit-contact`):** Validate and save visitor messages, send a Brevo notification, and record notification success or failure. The function alone holds the service-role key and Brevo API key. No CAPTCHA or application-level rate limiting.
 - **Keep-alive workflow (`.github/workflows`):** Daily activity against Supabase. Uses only the public URL and anon key; no admin access.

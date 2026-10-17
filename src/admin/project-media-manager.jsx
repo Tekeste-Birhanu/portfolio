@@ -31,6 +31,12 @@ export function ProjectMediaManager({ projectId, onPendingChange, onRegisterPend
   const [newFilePreview, setNewFilePreview] = useState('');
 
   const reload = useCallback(async () => {
+    if (!projectId) {
+      setMedia([]);
+      setCleanups([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const data = await getProjectMediaData(projectId);
@@ -95,14 +101,15 @@ export function ProjectMediaManager({ projectId, onPendingChange, onRegisterPend
     if (input) input.value = '';
   };
 
-  const upload = async (file = newFile, altText = newAltText) => {
+  const upload = async (file = newFile, altText = newAltText, targetProjectId = projectId) => {
     if (!file || uploadingRef.current) return;
+    if (!targetProjectId) { setError('Save the project before uploading its image.'); return; }
     const validationError = validateProjectMediaFile(file);
     if (validationError) { setError(validationError); return; }
     if (!altText.trim()) { setError('Add alt text describing the image before uploading.'); return; }
     uploadingRef.current = true;
     const result = await perform(
-      () => uploadProjectMedia(projectId, file, altText, makeNewMain),
+      () => uploadProjectMedia(targetProjectId, file, altText, makeNewMain),
       (item) => item.mainError ? `Image uploaded, but setting it as the main image failed. ${item.mainError}` : 'Image uploaded and saved.',
     );
     if (result) {
@@ -116,7 +123,7 @@ export function ProjectMediaManager({ projectId, onPendingChange, onRegisterPend
     uploadingRef.current = false;
   };
 
-  const saveMediaChanges = async () => {
+  const saveMediaChanges = async (targetProjectId = projectId) => {
     const changedAltTexts = media.filter((item) => (altDrafts[item.id] ?? '') !== item.alt_text);
     if (changedAltTexts.some((item) => !(altDrafts[item.id] ?? '').trim())) {
       setError('Alt text cannot be empty. Fill it in before saving.');
@@ -124,7 +131,7 @@ export function ProjectMediaManager({ projectId, onPendingChange, onRegisterPend
     }
 
     if (newFile) {
-      const uploaded = await upload(newFile, newAltText);
+      const uploaded = await upload(newFile, newAltText, targetProjectId);
       if (!uploaded) return false;
     }
 
@@ -165,7 +172,7 @@ export function ProjectMediaManager({ projectId, onPendingChange, onRegisterPend
   return <fieldset className="admin-project-media">
     <legend>Project images and GIFs</legend>
     <p className="admin-list-help">Upload JPG, PNG, or WebP files up to 5 MB, or GIF files up to 10 MB. Each image needs alt text. Uploads and alt text changes save with Save project; image actions save immediately.</p>
-    {error && <div className="admin-error-panel" role="alert"><p>{error}</p>{!error.includes('waiting for a database migration') && !busy && !loading && <button className="button button-secondary" type="button" onClick={() => void reload()}>Reload media</button>}</div>}
+    {error && <div className="admin-error-panel" role="alert"><p>{error}</p>{projectId && !error.includes('waiting for a database migration') && !busy && !loading && <button className="button button-secondary" type="button" onClick={() => void reload()}>Reload media</button>}</div>}
       {message && <p className="auth-success" role="status">{message}</p>}
     {loading ? <p role="status">Loading project media…</p> : media.length === 0 ? <p className="empty-state">No images or GIFs have been added.</p> : <ol className="admin-media-list" aria-label="Project media order">
       {media.map((item, index) => <li className="admin-media-item" key={item.id}>

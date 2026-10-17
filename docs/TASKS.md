@@ -164,22 +164,22 @@
 - **Progress:** Implemented the project editor, required-field and URL validation, reusable technology selection/creation, explicit save, a transactional save RPC for project fields/technologies/slug history, unsaved-navigation protection, and named permanent deletion with retryable Storage cleanup. The production build passes and the hosted save RPC is applied. The user verified save/public listing after refresh, project details, existing and reusable new technologies, both unsaved-change choices, rename redirects, and deletion/not-found behavior. Storage cleanup retry with uploaded media remains to be verified after T-10 media management is available.
 
 #### T-10 — Implement project media management
-- **Status:** In progress
+- **Status:** Done
 - **Priority:** Must
 - **Depends on:** T-09
 - **Related:** F-04, F-11, F-14; J-03, J-06
 - **Goal:** Let the administrator manage project screenshots and GIFs safely.
 - **Scope:** Add original JPG/PNG/WebP/GIF uploads, limits, alt text, main-image selection, ordering, replacement, removal, and storage cleanup. Do not generate compressed or resized variants.
 - **Done when:**
-  - [ ] Server-side rules enforce file types/sizes and limits of 10 still images and 2 GIFs per project.
-  - [ ] Every image has alt text; main image and gallery order can be changed.
-  - [ ] Originals are served as uploaded; removed files and deleted-project media are removed from storage, with a retryable error and no false success if cleanup fails.
+  - [x] Server-side rules enforce file types/sizes and limits of 10 still images and 2 GIFs per project.
+  - [x] Every image has alt text; main image and gallery order can be changed.
+  - [x] Originals are served as uploaded; removed files and deleted-project media are removed from storage, with a retryable error and no false success if cleanup fails.
 - **Verify:** Check accepted/rejected uploads, size/count limits, replacements, ordering, public display, and cleanup.
 - **Notes:** JPG/PNG/WebP limit is 5 MB; GIF limit is 10 MB. The owner manually optimizes images.
-- **Progress:** Added the project editor's immediate-save media manager for original image/GIF uploads, alt text, replacement/removal, main-image choice, ordering, and retryable cleanup. Added a migration that validates actual Storage object MIME/size metadata, serializes project count checks, caps stills/GIFs, and records cleanup retries. Production build and interactive hosted checks remain pending; migration must be applied before using the media manager.
+- **Progress:** Added the project editor's media manager for original image/GIF uploads, required alt text, replacement/removal, main-image choice, ordering, and retryable cleanup. The migration validates actual Storage object MIME/size metadata, serializes project count checks, caps stills/GIFs, and records cleanup retries. The user verified T-10, and the database dry run reported no pending migrations.
 
 #### T-11 — Implement Profile and skills editing
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-07, T-01
 - **Related:** F-05, F-15; J-04
@@ -187,10 +187,11 @@
 - **Scope:** Build explicit-save editors for the About intro, education, experience (including optional free-form date ranges), profile photo, PDF CV, skill categories, and their skills.
 - **Done when:**
   - [ ] Profile content saves and appears on About; empty sections and categories are omitted publicly.
-  - [ ] Categories can be added, renamed, and reordered; a category can be removed only when empty.
-  - [ ] Skills can be added, renamed, reordered within a category, moved between categories, and removed; About groups skill pills under category names and omits empty categories.
+  - [ ] Categories can be added, renamed with one Save skills action, and reordered by dragging; a category can be removed only when empty.
+  - [ ] Skills can be added, renamed with the shared Save skills action, reordered within a category, moved between categories by dragging, and removed; About groups skill pills under category names and omits empty categories.
   - [ ] Profile photo accepts JPG, PNG, or WebP up to 5 MB; CV accepts PDF up to 10 MB; both can be replaced or removed.
-- **Verify:** Check validation, media handling, category and skill operations, that non-empty categories cannot be deleted, empty-state behavior, and public updates.
+- **Verify:** Check validation, media handling, category and skill operations, drag reordering for categories and skills, moving skills between category columns by dragging, that non-empty categories cannot be deleted, empty-state behavior, and public updates.
+- **Progress:** Replaced the Profile placeholder with editors for the About introduction, education, experience, profile photo, CV, skill categories, and skills. Added browser-side type/size checks, retryable cleanup for replaced/removed profile files, and a database trigger that prevents deleting a category with skills. Five profile validation unit tests pass and the production build passes. The migration dry run could not run in this environment because Supabase CLI has no access token; apply and verify migration `20261017000006_profile_editor_rules.sql`, then complete the interactive admin walkthrough before marking Done.
 
 #### T-12 — Implement Homepage text editing
 - **Status:** Not started

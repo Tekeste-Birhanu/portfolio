@@ -258,6 +258,7 @@ export function AdminProjectEditor({ isNew = false }) {
   const [deleting, setDeleting] = useState(false);
   const [mediaPending, setMediaPending] = useState(false);
   const [mediaAltReady, setMediaAltReady] = useState(false);
+  const [createdProjectId, setCreatedProjectId] = useState(null);
   const pendingMediaUploadRef = useRef(null);
   const [error, setError] = useState('');
   const initialState = useRef('');
@@ -335,16 +336,25 @@ export function AdminProjectEditor({ isNew = false }) {
     }
     setSaving(true);
     setError('');
-    const isCreating = isNew;
+    const isCreating = isNew && !createdProjectId;
+    const targetProjectId = createdProjectId || projectId;
     try {
-      if (!isNew && pendingMediaUploadRef.current) {
-        const uploadedMedia = await pendingMediaUploadRef.current?.();
+      if (!isCreating && pendingMediaUploadRef.current) {
+        const uploadedMedia = await pendingMediaUploadRef.current?.(targetProjectId);
         if (!uploadedMedia) {
           setSaving(false);
           return;
         }
       }
-      const savedId = await saveProject(projectId, values, technologyIds, newTechnologyNames);
+      const savedId = await saveProject(isCreating ? null : targetProjectId, values, technologyIds, newTechnologyNames);
+      if (isCreating) setCreatedProjectId(savedId);
+      if (isCreating && pendingMediaUploadRef.current) {
+        const uploadedMedia = await pendingMediaUploadRef.current(savedId);
+        if (!uploadedMedia) {
+          setError('Project saved. Fix the image issue above, then save again to retry the upload.');
+          return;
+        }
+      }
       initialState.current = currentState;
       try {
         const savedData = await getProjectEditorData(savedId);
@@ -356,7 +366,7 @@ export function AdminProjectEditor({ isNew = false }) {
       } catch {
         setError('Project saved. Reload this page to refresh its technology list.');
       }
-      if (isCreating) navigate(`/admin/projects/${savedId}`, { replace: true });
+      if (isNew) navigate(`/admin/projects/${savedId}`, { replace: true });
       else navigate(location.pathname, { replace: true });
     } catch (saveError) {
       setError(saveError.message || 'The project could not be saved. Your changes are still here.');
@@ -366,11 +376,12 @@ export function AdminProjectEditor({ isNew = false }) {
   };
 
   const handleDelete = async () => {
+    const targetProjectId = createdProjectId || projectId;
     if (!window.confirm(`Permanently delete “${values.name}” and all its stored files? This cannot be undone.`)) return;
     setDeleting(true);
     setError('');
     try {
-      await permanentlyDeleteProject(projectId);
+      await permanentlyDeleteProject(targetProjectId);
       navigate('/admin/projects', { replace: true });
     } catch (deleteError) {
       setError(deleteError.message || 'The project could not be completely deleted. Retry to finish.');
@@ -378,7 +389,8 @@ export function AdminProjectEditor({ isNew = false }) {
     }
   };
 
-  const title = isNew ? 'Add project' : 'Edit project';
+  const hasSavedProject = !isNew || Boolean(createdProjectId);
+  const title = hasSavedProject ? 'Edit project' : 'Add project';
   return <AdminLayout title={title}>
     <Link className="button button-secondary admin-editor-back" to="/admin/projects">Back to Projects</Link>
     {loadState === 'loading' ? <p role="status">Loading project…</p> : loadState === 'error' ? <div className="admin-error-panel" role="alert">
@@ -413,10 +425,10 @@ export function AdminProjectEditor({ isNew = false }) {
           </li>)}</ul>}
           <div className="admin-add-technology"><label htmlFor="new-technology">Add a reusable technology</label><div><input id="new-technology" value={newTechnologyName} onChange={(event) => setNewTechnologyName(event.target.value)} /><button className="button button-secondary" type="button" onClick={addTechnology} disabled={!newTechnologyName.trim()}>Add</button></div></div>
         </fieldset>
-        {!isNew && <ProjectMediaManager projectId={projectId} onPendingChange={(pending, altReady) => { setMediaPending(pending); setMediaAltReady(altReady); }} onRegisterPendingUpload={(upload) => { pendingMediaUploadRef.current = upload; }} />}
+        <ProjectMediaManager projectId={createdProjectId || (isNew ? null : projectId)} onPendingChange={(pending, altReady) => { setMediaPending(pending); setMediaAltReady(altReady); }} onRegisterPendingUpload={(upload) => { pendingMediaUploadRef.current = upload; }} />
         <div className="admin-editor-actions">
           <button className="button admin-primary-button" type="submit" disabled={saving || deleting || (mediaPending && !mediaAltReady)}>{saving ? 'Saving…' : 'Save project'}</button>
-          {!isNew && <button className="button button-danger" type="button" disabled={saving || deleting} onClick={handleDelete}>{deleting ? 'Deleting…' : 'Delete project'}</button>}
+          {hasSavedProject && <button className="button button-danger" type="button" disabled={saving || deleting} onClick={handleDelete}>{deleting ? 'Deleting…' : 'Delete project'}</button>}
         </div>
       </form>
     </>}

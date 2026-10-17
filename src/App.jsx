@@ -3,6 +3,7 @@ import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-rou
 import { getCachedPublicPortfolio, getPublicPortfolio } from './lib/public-content.js';
 import { AdminCallbackPage, AdminLoginPage, AdminReadyPage, PasswordRecoveryPage, RequireAdmin } from './admin/auth-pages.jsx';
 import { AdminProjectEditor, AdminProjectsPage, AdminSectionPlaceholder } from './admin/projects-page.jsx';
+import { AdminProfilePage } from './admin/profile-page.jsx';
 
 const SITE_OWNER_NAME = 'Your Name';
 
@@ -232,9 +233,10 @@ function AboutContent({ profile, education, experience, categories }) {
   return (
     <>
       {hasIntro && <div className={`profile-intro${profile.photoUrl ? ' has-photo' : ''}`}>
-        {profile.photoUrl && <img className="profile-photo" src={profile.photoUrl} alt="Portrait of the portfolio owner" loading="lazy" />}
         {profile.intro && <p className="profile-intro-copy">{profile.intro}</p>}
+        {profile.photoUrl && <img className="profile-photo" src={profile.photoUrl} alt="Portrait of the portfolio owner" loading="lazy" />}
       </div>}
+      {profile.photoUrl && <hr className="profile-intro-divider" />}
       {education.length > 0 && <section className="profile-section" aria-labelledby="education-title">
         <h3 id="education-title">Education</h3>
         <div className="profile-entry-list">{education.map((entry) => <article className="profile-entry" key={entry.id}>
@@ -242,15 +244,17 @@ function AboutContent({ profile, education, experience, categories }) {
           {entry.description && <p className="profile-entry-description">{entry.description}</p>}
         </article>)}</div>
       </section>}
-      {experience.length > 0 && <section className="profile-section" aria-labelledby="experience-title">
-        <h3 id="experience-title">Experience</h3>
-        <div className="profile-entry-list">{experience.map((entry) => <article className="profile-entry" key={entry.id}>
-          <h4>{entry.role}</h4><p className="profile-entry-meta">{entry.organization}{entry.date_range && <> <span aria-hidden="true">·</span> {entry.date_range}</>}</p>
-          {entry.description && <p className="profile-entry-description">{entry.description}</p>}
-        </article>)}</div>
-      </section>}
-      <Skills categories={categories} />
-      {profile.cvUrl && <a className="button button-secondary cv-download" href={profile.cvUrl}>Download CV (PDF)</a>}
+      {(categories.length > 0 || experience.length > 0) && <div className="profile-details-grid">
+        <Skills categories={categories} />
+        {experience.length > 0 && <section className="profile-section" aria-labelledby="experience-title">
+          <h3 id="experience-title">Experience</h3>
+          <div className="profile-entry-list">{experience.map((entry) => <article className="profile-entry" key={entry.id}>
+            <h4>{entry.role}</h4><p className="profile-entry-meta">{entry.organization}{entry.date_range && <> <span aria-hidden="true">·</span> {entry.date_range}</>}</p>
+            {entry.description && <p className="profile-entry-description">{entry.description}</p>}
+          </article>)}</div>
+        </section>}
+      </div>}
+      {profile.cvUrl && <div className="profile-cv-actions"><a className="button button-secondary cv-download" href={profile.cvUrl}>Download CV (PDF)</a></div>}
     </>
   );
 }
@@ -449,7 +453,7 @@ function App() {
           <Route path="/admin/projects" element={<RequireAdmin><AdminProjectsPage /></RequireAdmin>} />
           <Route path="/admin/projects/new" element={<RequireAdmin><AdminProjectEditor isNew /></RequireAdmin>} />
           <Route path="/admin/projects/:projectId" element={<RequireAdmin><AdminProjectEditor /></RequireAdmin>} />
-          <Route path="/admin/profile" element={<RequireAdmin><AdminSectionPlaceholder title="Profile" /></RequireAdmin>} />
+          <Route path="/admin/profile" element={<RequireAdmin><AdminProfilePage /></RequireAdmin>} />
           <Route path="/admin/homepage" element={<RequireAdmin><AdminSectionPlaceholder title="Homepage" /></RequireAdmin>} />
           <Route path="/admin/mailbox" element={<RequireAdmin><AdminSectionPlaceholder title="Mailbox" /></RequireAdmin>} />
           <Route path="/admin/*" element={<RequireAdmin><AdminReadyPage /></RequireAdmin>} />

@@ -34,7 +34,14 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 - **Fields:** Singleton row with `intro` (plain text, optional), `photo_storage_path` (optional), `cv_storage_path` (optional), and `updated_at`.
 - **Constraints:** Empty fields are omitted publicly. The CV is a PDF up to 10 MB. The profile photo accepts JPG, PNG, or WebP up to 5 MB; the original is served without app compression or generated variants.
 - **Related requirements:** F-05, F-15
-- **Implementation:** The singleton row is `public.profile_content` with `id = true`. Its public photo and CV use the `profile-photo` and `profile-cv` storage buckets, respectively; bucket rules enforce allowed types and maximum sizes.
+- **Implementation:** The singleton row is `public.profile_content` with `id = true`. Its public photo and CV use the `profile-photo` and `profile-cv` storage buckets, respectively; bucket rules enforce allowed types and maximum sizes. Failed file cleanup is recorded in `public.profile_media_cleanup` for administrator retry.
+
+### Profile media cleanup
+
+- **Purpose:** Retain retryable Storage cleanup work when a profile photo or CV is replaced or removed.
+- **Fields:** `id`, `bucket_id` (`profile-photo` or `profile-cv`), `storage_path`, and `created_at`.
+- **Constraints:** Only the designated administrator can read or manage cleanup rows. Rows are removed only after the corresponding Storage object is deleted.
+- **Implementation:** `public.profile_media_cleanup` is private under RLS and is introduced with the Profile editor.
 
 ### Education entry
 
@@ -56,7 +63,7 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 
 - **Purpose:** Store an administrator-defined heading that groups related skills.
 - **Fields:** `id`, `name`, `sort_order`, `created_at`, and `updated_at`.
-- **Constraints:** Categories can be added, renamed, reordered, and removed only when empty. Categories with no skills are omitted from the public About section.
+- **Constraints:** Categories can be added, renamed, reordered, and removed only when empty. A database trigger rejects deletion while any skill references the category. Categories with no skills are omitted from the public About section.
 - **Related requirements:** F-15
 
 ### Skill

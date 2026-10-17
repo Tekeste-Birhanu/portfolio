@@ -68,11 +68,17 @@ p { margin-block: 0 1rem; }
 .project-actions { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin-top: 1rem; }
 .project-actions a { display: inline-flex; min-height: 44px; align-items: center; font-family: var(--font-mono); font-size: 0.9rem; }
 .skills-section { margin-top: clamp(2rem, 5vw, 3rem); }
-.skill-category + .skill-category { margin-top: 1.25rem; }
+.profile-details-grid { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 1.5rem; margin-top: clamp(2rem, 5vw, 3rem); }
+.profile-details-grid .skills-section, .profile-details-grid .profile-section { margin-top: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.profile-details-grid .profile-section { padding-top: 1.5rem; border-top: 1px solid var(--color-border); }
+.profile-details-grid .skills-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1rem; }
+.profile-details-grid .skills-heading { grid-column: 1 / -1; }
+.profile-details-grid .skill-category + .skill-category { margin-top: 0; }
 .skills-heading { margin: 0 0 1rem; color: var(--color-accent); font-family: var(--font-mono); font-size: 1.05rem; font-weight: 600; }
 .skill-category h4 { margin: 0; color: var(--color-muted); font-family: var(--font-mono); font-size: 0.95rem; font-weight: 500; }
 .profile-intro { margin-top: 1.25rem; }
-.profile-intro.has-photo { display: grid; grid-template-columns: minmax(10rem, 0.32fr) minmax(0, 1fr); align-items: start; gap: 1.5rem; }
+.profile-intro.has-photo { display: grid; width: min(100%, 60rem); grid-template-columns: minmax(0, 1fr) minmax(10rem, 0.32fr); align-items: start; gap: 1.5rem; }
+.profile-intro-divider { width: 100%; margin: 1.5rem 0 0; border: 0; border-top: 1px solid var(--color-border); }
 .profile-photo { display: block; width: 100%; max-width: 15rem; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--color-border); border-radius: 4px; }
 .profile-intro-copy, .profile-entry-description { max-width: 70ch; color: var(--color-muted); white-space: pre-wrap; }
 .profile-section { margin-top: 2rem; }
@@ -81,7 +87,8 @@ p { margin-block: 0 1rem; }
 .profile-entry h4 { margin: 0; font-family: var(--font-mono); font-size: 0.98rem; font-weight: 600; }
 .profile-entry-meta { margin: 0.2rem 0 0; color: var(--color-muted); }
 .profile-entry-description { margin: 0.5rem 0 0; }
-.cv-download { margin-top: 2rem; text-decoration: none; }
+.profile-cv-actions { display: flex; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--color-border); }
+.cv-download { margin-top: 0; text-decoration: none; }
 .detail-status { margin-top: 0.75rem; }
 .detail-image { max-height: none; }
 .project-gallery { margin-top: 1.25rem; }
@@ -139,6 +146,44 @@ p { margin-block: 0 1rem; }
 .admin-nav-link.is-current, .admin-nav-link:hover { border-left-color: var(--color-accent); background: #f4e9e5; color: var(--color-accent); }
 .admin-signout { margin-top: auto; }
 .admin-content { min-width: 0; padding-block: 0.75rem 1.5rem; }
+.admin-profile-page { display: grid; gap: 1.25rem; max-width: 64rem; }
+.admin-profile-section { display: grid; align-content: start; gap: 0.85rem; min-width: 0; padding: 1rem; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-surface); }
+.admin-profile-section > h2 { margin: 0; font-size: 1.2rem; }
+.admin-profile-section h3 { margin: 0; font-family: var(--font-mono); font-size: 1rem; }
+.admin-profile-section textarea, .admin-profile-section input, .admin-profile-section select { width: 100%; min-width: 0; min-height: 44px; padding: 0.6rem 0.7rem; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-bg); color: var(--color-text); font: inherit; }
+.admin-profile-section textarea { resize: vertical; }
+.admin-profile-wide-field, .admin-profile-entry-fields label, .admin-profile-file-card > label, .admin-profile-add-category > label, .admin-profile-add-skill > label, .admin-profile-category-heading > label, .admin-profile-skill-list label { display: grid; gap: 0.35rem; font-family: var(--font-mono); font-size: 0.9rem; }
+.admin-profile-files { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.admin-profile-file-card, .admin-profile-entry, .admin-profile-add-entry, .admin-profile-category { display: grid; align-content: start; gap: 0.75rem; min-width: 0; padding: 0.9rem; border: 1px solid var(--color-border); border-radius: 4px; }
+.admin-profile-photo-preview { display: block; width: min(100%, 14rem); max-height: 14rem; aspect-ratio: 1; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-bg); object-fit: cover; }
+.admin-profile-entry-list, .admin-profile-categories, .admin-profile-skill-list { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
+.admin-profile-entry-list-education, .admin-profile-entry-list-experience { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.admin-profile-entry-add-card { min-width: 0; }
+.admin-profile-categories { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+.admin-profile-entry-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.admin-profile-entry-fields label.is-wide { grid-column: 1 / -1; }
+.admin-profile-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
+.admin-profile-actions > .button, .admin-profile-add-entry > .button { min-height: 40px; margin-top: 0; padding: 0.4rem 0.65rem; font-size: 0.85rem; }
+.admin-profile-add-category, .admin-profile-add-skill { display: grid; justify-items: start; gap: 0.4rem; }
+.admin-profile-add-category > div, .admin-profile-add-skill > div { display: flex; width: min(100%, 32rem); align-items: center; gap: 0.5rem; }
+.admin-profile-add-category .button, .admin-profile-add-skill .button { min-height: 44px; margin-top: 0; white-space: nowrap; }
+.admin-profile-category-add { min-height: 10rem; align-content: center; border-style: dashed; background: #faf8f5; }
+.admin-profile-category-add .admin-profile-add-category, .admin-profile-category-add .admin-profile-add-category > div { width: 100%; }
+.admin-profile-save-skills { width: 100%; justify-self: stretch; }
+.admin-profile-category-heading { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: end; gap: 0.65rem; }
+.admin-profile-category-heading > label { justify-self: stretch; text-align: left; }
+.admin-profile-category-heading > .admin-profile-drag-handle { grid-row: 1; align-self: end; }
+.admin-profile-category-heading > .admin-profile-actions { grid-column: 3; grid-row: 1; }
+.admin-profile-skill-list > li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.65rem; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-bg); }
+.admin-profile-skill-list > li > label { grid-column: 2; grid-row: 1; }
+.admin-profile-skill-list > li > .admin-profile-actions { grid-column: 3; grid-row: 1; flex-direction: column; align-items: stretch; }
+.admin-profile-skill-list > li > .admin-profile-actions > .button { width: 100%; white-space: nowrap; }
+.admin-profile-category.is-dragging, .admin-profile-skill-list > li.is-dragging, .admin-profile-entry.is-dragging { opacity: 0.55; }
+.admin-profile-drag-handle { display: inline-flex; width: 2.5rem; min-width: 2.5rem; height: 2.5rem; align-items: center; justify-content: center; padding: 0; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-surface); color: var(--color-muted); cursor: grab; font-size: 1.35rem; touch-action: none; }
+.admin-profile-drag-handle:active { cursor: grabbing; }
+.admin-profile-cleanups { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.admin-profile-cleanups li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.admin-profile-cleanups code { overflow-wrap: anywhere; }
 .admin-page-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--color-border); }
 .admin-page-heading h1 { max-width: none; font-size: clamp(1.5rem, 2.5vw, 2rem); }
 .admin-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
@@ -232,10 +277,19 @@ p { margin-block: 0 1rem; }
 }
 
 @media (max-width: 640px) {
+  .profile-details-grid .skills-section { grid-template-columns: minmax(0, 1fr); }
+  .admin-profile-files, .admin-profile-entry-fields { grid-template-columns: minmax(0, 1fr); }
+  .admin-profile-entry-list-education, .admin-profile-entry-list-experience { grid-template-columns: minmax(0, 1fr); }
+  .admin-profile-entry-fields label.is-wide { grid-column: auto; }
+  .admin-profile-categories { grid-template-columns: minmax(0, 1fr); }
   .admin-media-list { grid-template-columns: minmax(0, 1fr); }
   .admin-media-item { grid-template-columns: minmax(0, 1fr); }
   .admin-media-preview { max-width: 22rem; }
   .admin-media-alt-row { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (min-width: 641px) and (max-width: 800px) {
+  .admin-profile-categories, .admin-profile-entry-list-education, .admin-profile-entry-list-experience { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (min-width: 640px) and (max-width: 1023px) {
