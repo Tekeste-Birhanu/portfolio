@@ -23,22 +23,22 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 
 ### Homepage content
 
-- **Purpose:** Store the predefined editable homepage copy.
-- **Fields:** One singleton row with `intro_text` (plain text, required) and `updated_at`.
-- **Constraints:** The admin can edit only this intro field; the row does not control homepage sections or their order.
+- **Purpose:** Store the predefined editable homepage copy and actions.
+- **Fields:** One singleton row with `role_text` (plain text, default “Software Developer”), `intro_text` (plain text, required), `primary_cta_label` and `primary_cta_href` (default “Get in touch” and `#contact`), optional `secondary_cta_href` with a `secondary_cta_label` (default “View my GitHub”), and `updated_at`.
+- **Constraints:** Primary links accept `#contact` or HTTP(S) URLs; the optional secondary link accepts HTTP(S) URLs and is omitted publicly until set. Labels cannot be blank. The optional profile photo is stored on `profile_content` and managed from the Homepage dashboard section. Neither row controls homepage sections or their order.
 - **Related requirements:** F-01, F-16
 
 ### Profile
 
-- **Purpose:** Store the owner's About-page intro and profile file paths.
+- **Purpose:** Store the owner's About-page intro and profile photo/CV file paths. The photo is presented in the Home hero and managed in the Homepage dashboard section.
 - **Fields:** Singleton row with `intro` (plain text, optional), `photo_storage_path` (optional), `cv_storage_path` (optional), and `updated_at`.
 - **Constraints:** Empty fields are omitted publicly. The CV is a PDF up to 10 MB. The profile photo accepts JPG, PNG, or WebP up to 5 MB; the original is served without app compression or generated variants.
 - **Related requirements:** F-05, F-15
-- **Implementation:** The singleton row is `public.profile_content` with `id = true`. Its public photo and CV use the `profile-photo` and `profile-cv` storage buckets, respectively; bucket rules enforce allowed types and maximum sizes. Failed file cleanup is recorded in `public.profile_media_cleanup` for administrator retry.
+- **Implementation:** The singleton row is `public.profile_content` with `id = true`. Its public photo and CV use the `profile-photo` and `profile-cv` storage buckets, respectively; bucket rules enforce allowed types and maximum sizes. The existing storage column and bucket remain unchanged when photo controls are presented in the Homepage editor. Failed file cleanup is recorded in `public.profile_media_cleanup` for administrator retry from Homepage for photo files and Profile for CV files.
 
 ### Profile media cleanup
 
-- **Purpose:** Retain retryable Storage cleanup work when a profile photo or CV is replaced or removed.
+- **Purpose:** Retain retryable Storage cleanup work when a profile photo or CV is replaced or removed; photo cleanup is retried from Homepage and CV cleanup from Profile.
 - **Fields:** `id`, `bucket_id` (`profile-photo` or `profile-cv`), `storage_path`, and `created_at`.
 - **Constraints:** Only the designated administrator can read or manage cleanup rows. Rows are removed only after the corresponding Storage object is deleted.
 - **Implementation:** `public.profile_media_cleanup` is private under RLS and is introduced with the Profile editor.

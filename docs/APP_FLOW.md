@@ -25,11 +25,11 @@ Admin (not linked publicly)
         ├── /admin/projects/new   Add project
         ├── /admin/projects/<id>  Edit project
         ├── /admin/profile        About content, photo, CV, skills
-        ├── /admin/homepage       Homepage text
+        ├── /admin/homepage       Homepage text and profile photo
         └── /admin/mailbox        Messages and contact methods
 ```
 
-The Home section contains the owner's name and short introduction. The call-to-action link is undecided and omitted for now. The Projects section on the same scrolling page lists every saved project in administrator-defined order, using two columns on wide screens and one on narrow screens. There is no Browse projects action or expand control. Each listed project links to its separate detail URL. A deleted project and its files are removed; its old URL shows the 404 page. Renaming a project redirects its old URL to the current one.
+The Home section contains the owner's name, editable role, short introduction, and administrator-configured contact and GitHub buttons. The Projects section on the same scrolling page lists every saved project in administrator-defined order, using two columns on wide screens and one on narrow screens. There is no Browse projects action or expand control. Each listed project links to its separate detail URL. A deleted project and its files are removed; its old URL shows the 404 page. Renaming a project redirects its old URL to the current one.
 
 ## 3. Main journeys
 
@@ -37,7 +37,7 @@ The Home section contains the owner's name and short introduction. The call-to-a
 
 - **Actor:** Visitor
 - **Entry point:** Home, Projects, or a direct project URL
-- **Steps:** Read the Home introduction; navigate to Projects and scan the ordered project list; select "View details" on a project; review its description, screenshots, technologies, status, links, and populated detail sections; use the lightbox to navigate its images; follow a repository or demo link if present.
+- **Steps:** Read the Home introduction and optional profile photo; navigate to Projects and scan the ordered project list; select "View details" on a project; review its description, screenshots, technologies, status, links, and populated detail sections; use the lightbox to navigate its images; follow a repository or demo link if present.
 - **Success:** The visitor understands the project and can reach its repository or demo.
 - **Failure and recovery:** Unknown or deleted project URLs show a 404 page with a link home. Old project URLs redirect to the current slug. A failed image shows its alt text or a placeholder.
 - **Related requirements:** F-01, F-02, F-03, F-04
@@ -67,7 +67,7 @@ The Home section contains the owner's name and short introduction. The call-to-a
 
 - **Actor:** Designated administrator
 - **Entry point:** Admin navigation to Profile, Homepage, or Mailbox
-- **Steps:** In Profile, explicitly save the About introduction and education entries; edit experience entries and their order, then save them together with one Save experience action; upload, replace, or remove the profile photo and CV; and manage skill categories and skills. Retried profile-file cleanup remains available from Profile. In Homepage, edit predefined text and save. In Mailbox, add, edit, enable/disable, reorder, or remove a contact method. A method includes a label and a value or link; the administrator can use any platform. Supported platforms may have a built-in icon; other platforms use a generic link icon.
+- **Steps:** In Profile, explicitly save the About introduction and education entries; edit experience entries and their order, then save them together with one Save experience action; upload, replace, or remove the CV; and manage skill categories and skills. In Homepage, edit and explicitly save the role, short introduction, and labels and links for the contact and GitHub buttons; upload, replace, or remove the optional profile photo; photo cleanup retries remain available there. In Mailbox, add, edit, enable/disable, reorder, or remove a contact method. A method includes a label and a value or link; the administrator can use any platform. Supported platforms may have a built-in icon; other platforms use a generic link icon.
 - **Skill management:** Add categories; edit category and skill names, then save those edits together with one Save skills action. Reorder categories by dragging their handles. Add or remove skills; drag a skill handle within its category to reorder it, or into another category column to move it. A category can be removed only after all its skills have been moved or removed. About shows skills as pill items grouped under category names and omits empty categories.
 - **Email invariant:** Exactly one Email contact method exists. Its value can be edited, but the method cannot be disabled or removed. This address is shown on Contact and receives message notifications; it is independent of the admin login email. Configure it in Mailbox before public launch.
 - **Success:** Saved changes are live on the public site.
@@ -107,8 +107,8 @@ The Home section contains the owner's name and short introduction. The call-to-a
 | `/admin/reset-password` | Request a reset link, or set a new password after a valid recovery event; invalid/expired links show an error and allow a new request | Anyone | J-03 |
 | `/admin/projects` | Search, order, edit, and delete projects | Designated administrator | J-03, J-06 |
 | `/admin/projects/new`, `/admin/projects/<id>` | Add or edit a project | Designated administrator | J-03 |
-| `/admin/profile` | About content, photo, CV, and skills | Designated administrator | J-04 |
-| `/admin/homepage` | Predefined homepage text | Designated administrator | J-04 |
+| `/admin/profile` | About content, CV, and skills | Designated administrator | J-04 |
+| `/admin/homepage` | Predefined homepage text and profile photo | Designated administrator | J-04 |
 | `/admin/mailbox` | Messages and contact-method management | Designated administrator | J-04, J-05 |
 
 ## 5. Shared states and edge cases

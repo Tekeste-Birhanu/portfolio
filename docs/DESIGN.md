@@ -77,10 +77,10 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### Home
 
 - **Purpose:** Introduce the developer.
-- **Layout:** Owner name in bold, followed by the short introduction. A visible divider separates Home from Projects.
-- **Primary action:** Navigate using the section navigation.
-- **Content and behavior:** Show the owner's name and one short intro. The call-to-action link is undecided and omitted for now.
-- **Responsive changes:** The intro remains readable at phone and desktop widths.
+- **Layout:** Owner name in bold, editable role and short introduction, two call-to-action buttons, and optional profile photo. A visible divider separates Home from Projects. On phones, center the text and buttons and stack the centered photo below them.
+- **Primary action:** Admin-configured contact button; secondary GitHub button.
+- **Content and behavior:** Show the owner's name, role (default “Software Developer”), and short intro. Admin edits both button labels and links; omit the GitHub button until its URL is configured.
+- **Responsive changes:** Keep the intro readable at phone and desktop widths; center the text, buttons, and photo on phones.
 - **Related flow:** J-01
 
 ### Projects
@@ -105,7 +105,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### About
 
 - **Purpose:** Give background and the CV.
-- **Layout:** Intro and education, followed by distinct Skills and Experience panels side by side on wide screens and stacked on phones. Place the CV download in its own separated action row below them when a CV exists. The Skills heading is visually subordinate to About. When a profile photo has been uploaded, show it beside the intro on the right on wide screens and below it on phones. Without a photo, the intro uses the available width.
+- **Layout:** Intro and education, followed by distinct Skills and Experience panels, then the CV download in its own separated action row when a CV exists. The Skills heading is visually subordinate to About. About does not display the profile photo.
 - **Content and behavior:** The administrator edits the intro, education entries, experience entries, skill categories and skills, optional photo, and CV in Profile. Show categorized skill pills and show the intro, education, and experience sections only when they have content. Omit empty categories and sections; show the CV link only when a CV exists.
 - **Related flow:** J-02
 
@@ -144,8 +144,8 @@ Values below are initial decisions. Verify contrast with a checker during implem
 
 ### Admin Profile, Homepage, and Mailbox
 
-- **Purpose:** Edit About content, photo, CV, skill categories, and skills (Profile); edit homepage text (Homepage); read messages and manage contact methods (Mailbox).
-- **Layout:** Profile uses clear sections for About content, education, experience, media, and skill categories. Education and experience entries use two columns on wide screens, with each Add entry form as the final card in its grid. Education entries have individual save and ordering controls; Experience entries share one Save experience action and use drag handles to reorder. Each category is a column with its own ordered skill list. One Save skills action commits category and skill name edits; Remove stays beside each skill. Drag handles reorder categories and skills, and dropping a skill into another category moves it there. Mailbox has a messages list with unread messages marked, and a contact methods section.
+- **Purpose:** Edit About content, CV, skill categories, and skills (Profile); edit homepage role, intro, call-to-action labels/links, and profile photo (Homepage); read messages and manage contact methods (Mailbox).
+- **Layout:** Profile uses clear sections for About content, experience, CV, and skill categories. Education and experience entries use two columns on wide screens, with each Add entry form as the final card in its grid. Education entries have individual save and ordering controls; Experience entries share one Save experience action and use drag handles to reorder. Each category is a column with its own ordered skill list. One Save skills action commits category and skill name edits; Remove stays beside each skill. Drag handles reorder categories and skills, and dropping a skill into another category moves it there. Homepage contains one explicit-save editor for the role, intro, and two call-to-action labels/links, plus a separate photo editor with preview, save, remove, and cleanup retry actions; no controls change page sections. Mailbox has a messages list with unread messages marked, and a contact methods section.
 - **Primary action:** Save (Profile, Homepage); open a message (Mailbox).
 - **Content and behavior:** In Profile, category headings and skill lists can be added; category and skill names are edited and saved together with one Save skills action. Category and skill order is changed by dragging the associated handle. Skills can be dragged within a category to reorder or into another category to move. A category can be deleted only when it has no skills. Messages are ordered newest first; opening a message marks it read. Notification failure is marked in the message list and opened message. Exactly one Email contact method exists; it can be edited but cannot be deleted or disabled. Other contact methods can be managed with add, edit, enable/disable, reorder, and remove actions.
 - **Related flow:** J-04, J-05

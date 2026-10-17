@@ -4,6 +4,7 @@ import { getCachedPublicPortfolio, getPublicPortfolio } from './lib/public-conte
 import { AdminCallbackPage, AdminLoginPage, AdminReadyPage, PasswordRecoveryPage, RequireAdmin } from './admin/auth-pages.jsx';
 import { AdminProjectEditor, AdminProjectsPage, AdminSectionPlaceholder } from './admin/projects-page.jsx';
 import { AdminProfilePage } from './admin/profile-page.jsx';
+import { AdminHomepagePage } from './admin/homepage-page.jsx';
 
 const SITE_OWNER_NAME = 'Your Name';
 
@@ -151,9 +152,16 @@ function HomePage() {
 
   return (
     <>
-      <section className="page-section" id="home" aria-labelledby="home-title">
-        <h1 className="home-name" id="home-title">{SITE_OWNER_NAME}</h1>
-        <p className="page-intro">{portfolio.intro || 'A portfolio introduction has not been added yet.'}</p>
+      <section className={`page-section home-hero${portfolio.profile.photoUrl ? ' has-photo' : ''}`} id="home" aria-labelledby="home-title">
+        <div className="home-hero-copy">
+          <h1 className="home-name" id="home-title">{SITE_OWNER_NAME}</h1>
+          <p className="home-role">{portfolio.role || 'Software Developer'}</p>
+          <p className="page-intro">{portfolio.intro || 'A portfolio introduction has not been added yet.'}</p>
+          <div className="home-hero-actions">
+            {[portfolio.homepageActions?.primary, portfolio.homepageActions?.secondary].filter(Boolean).map((action, index) => <a className={`button ${index === 0 ? 'home-cta-primary' : 'button-secondary'}`} key={`${action.href}-${index}`} href={action.href} target={action.href.startsWith('http') ? '_blank' : undefined} rel={action.href.startsWith('http') ? 'noreferrer' : undefined}>{action.label}</a>)}
+          </div>
+        </div>
+        {portfolio.profile.photoUrl && <img className="home-hero-photo" src={portfolio.profile.photoUrl} alt="Portrait of the portfolio owner" />}
       </section>
       <ProjectsSection projects={portfolio.projects} />
       <section className="page-section content-section" id="about" aria-labelledby="about-title">
@@ -229,14 +237,9 @@ function Skills({ categories }) {
 }
 
 function AboutContent({ profile, education, experience, categories }) {
-  const hasIntro = Boolean(profile.intro || profile.photoUrl);
   return (
     <>
-      {hasIntro && <div className={`profile-intro${profile.photoUrl ? ' has-photo' : ''}`}>
-        {profile.intro && <p className="profile-intro-copy">{profile.intro}</p>}
-        {profile.photoUrl && <img className="profile-photo" src={profile.photoUrl} alt="Portrait of the portfolio owner" loading="lazy" />}
-      </div>}
-      {profile.photoUrl && <hr className="profile-intro-divider" />}
+      {profile.intro && <div className="profile-intro"><p className="profile-intro-copy">{profile.intro}</p></div>}
       {education.length > 0 && <section className="profile-section" aria-labelledby="education-title">
         <h3 id="education-title">Education</h3>
         <div className="profile-entry-list">{education.map((entry) => <article className="profile-entry" key={entry.id}>
@@ -454,7 +457,7 @@ function App() {
           <Route path="/admin/projects/new" element={<RequireAdmin><AdminProjectEditor isNew /></RequireAdmin>} />
           <Route path="/admin/projects/:projectId" element={<RequireAdmin><AdminProjectEditor /></RequireAdmin>} />
           <Route path="/admin/profile" element={<RequireAdmin><AdminProfilePage /></RequireAdmin>} />
-          <Route path="/admin/homepage" element={<RequireAdmin><AdminSectionPlaceholder title="Homepage" /></RequireAdmin>} />
+          <Route path="/admin/homepage" element={<RequireAdmin><AdminHomepagePage /></RequireAdmin>} />
           <Route path="/admin/mailbox" element={<RequireAdmin><AdminSectionPlaceholder title="Mailbox" /></RequireAdmin>} />
           <Route path="/admin/*" element={<RequireAdmin><AdminReadyPage /></RequireAdmin>} />
           <Route path="*" element={<NotFoundPage />} />

@@ -7,7 +7,6 @@ import {
   deleteSkillCategory,
   getProfileEditorData,
   profileCvUrl,
-  profilePhotoUrl,
   removeProfileFile,
   reorderProfileEntries,
   reorderSkillCategories,
@@ -158,9 +157,7 @@ export function AdminProfilePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [photoFile, setPhotoFile] = useState(null);
   const [cvFile, setCvFile] = useState(null);
-  const [photoError, setPhotoError] = useState('');
   const [cvError, setCvError] = useState('');
   const [categoryName, setCategoryName] = useState('');
   const [categoryDrafts, setCategoryDrafts] = useState({});
@@ -169,7 +166,6 @@ export function AdminProfilePage() {
   const [pendingSkills, setPendingSkills] = useState({});
   const [draggedCategoryId, setDraggedCategoryId] = useState(null);
   const [draggedSkill, setDraggedSkill] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState('');
   const initializedDrafts = useRef(false);
 
   const load = useCallback(async () => {
@@ -192,16 +188,6 @@ export function AdminProfilePage() {
   }, []);
 
   useEffect(() => { void load(); }, [load]);
-  useEffect(() => {
-    if (!photoFile) {
-      setPhotoPreview('');
-      return undefined;
-    }
-    const previewUrl = URL.createObjectURL(photoFile);
-    setPhotoPreview(previewUrl);
-    return () => URL.revokeObjectURL(previewUrl);
-  }, [photoFile]);
-
   const run = async (action, successMessage) => {
     setBusy(true);
     setError('');
@@ -218,12 +204,6 @@ export function AdminProfilePage() {
     } finally {
       setBusy(false);
     }
-  };
-
-  const savePhoto = async () => {
-    if (!photoFile) return;
-    const result = await run(() => saveProfileFile('photo_storage_path', photoFile), (saved) => saved.cleanupPending ? 'Profile photo saved. Old-file cleanup is queued for retry.' : 'Profile photo saved.');
-    if (result) { setPhotoFile(null); document.getElementById('profile-photo-file').value = ''; }
   };
 
   const saveCv = async () => {
@@ -352,21 +332,9 @@ export function AdminProfilePage() {
       </section>
 
       <section className="admin-profile-section" aria-labelledby="profile-files-title">
-        <h2 id="profile-files-title">Profile photo and CV</h2>
+        <h2 id="profile-files-title">CV</h2>
         <div className="admin-profile-files">
-          <div className="admin-profile-file-card">
-            <h3>Profile photo</h3>
-            {(photoPreview || data.profile.photo_storage_path) && <img className="admin-profile-photo-preview" src={photoPreview || profilePhotoUrl(data.profile.photo_storage_path)} alt={photoPreview ? 'Selected profile photo preview' : 'Current profile photo'} />}
-            <label htmlFor="profile-photo-file">JPG, PNG, or WebP, up to 5 MB</label>
-            <input id="profile-photo-file" type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(event) => { const file = event.target.files?.[0] ?? null; setPhotoFile(file); setPhotoError(file ? validateProfileFile('photo_storage_path', file) : ''); }} />
-            {photoFile && <p className="admin-list-help">Selected: {photoFile.name}</p>}
-            {photoError && <p className="admin-field-error" role="alert">{photoError}</p>}
-            <div className="admin-profile-actions">
-              <button className="button button-secondary" type="button" disabled={busy || !photoFile || Boolean(photoError)} onClick={() => void savePhoto()}>Save photo</button>
-              {data.profile.photo_storage_path && <button className="button button-danger" type="button" disabled={busy} onClick={() => { if (window.confirm('Remove the profile photo?')) void run(() => removeProfileFile('photo_storage_path'), 'Profile photo removed.'); }}>Remove photo</button>}
-            </div>
-          </div>
-          <div className="admin-profile-file-card">
+          <div className="admin-profile-file-card admin-profile-cv-card">
             <h3>CV</h3>
             {data.profile.cv_storage_path && <p><a href={profileCvUrl(data.profile.cv_storage_path)}>Download current CV</a></p>}
             <label htmlFor="profile-cv-file">PDF, up to 10 MB</label>
@@ -450,9 +418,9 @@ export function AdminProfilePage() {
         <button className="button button-secondary admin-profile-save-skills" type="button" disabled={busy || !hasSkillChanges} onClick={() => void saveSkills()}>Save skills</button>
       </section>
 
-      {data.cleanups.length > 0 && <section className="admin-profile-section" aria-labelledby="profile-cleanup-title">
+      {data.cleanups.some((item) => item.bucket_id === 'profile-cv') && <section className="admin-profile-section" aria-labelledby="profile-cleanup-title">
         <h2 id="profile-cleanup-title">File cleanup needs retry</h2>
-        <ul className="admin-profile-cleanups">{data.cleanups.map((item) => <li key={item.id}><span>{item.bucket_id}: <code>{item.storage_path}</code></span><button className="button button-secondary" type="button" disabled={busy} onClick={() => void run(() => retryProfileMediaCleanup(item), 'File cleanup completed.')}>Retry cleanup</button></li>)}</ul>
+        <ul className="admin-profile-cleanups">{data.cleanups.filter((item) => item.bucket_id === 'profile-cv').map((item) => <li key={item.id}><span>CV: <code>{item.storage_path}</code></span><button className="button button-secondary" type="button" disabled={busy} onClick={() => void run(() => retryProfileMediaCleanup(item), 'File cleanup completed.')}>Retry cleanup</button></li>)}</ul>
       </section>}
     </div>
   </AdminLayout>;

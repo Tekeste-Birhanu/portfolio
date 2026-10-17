@@ -1,4 +1,4 @@
-# Implementation Tasks
+﻿# Implementation Tasks
 
 ## 1. How to use this plan
 
@@ -27,6 +27,7 @@
 ### M1 — Specification and foundation
 
 #### T-01 — Finalize schema and align specifications
+
 - **Status:** Done
 - **Priority:** Must
 - **Depends on:** None
@@ -41,6 +42,7 @@
 - **Notes:** No unresolved product-level schema questions remain. Field-length caps are defined only for the visitor contact form.
 
 #### T-02 — Bootstrap the app and service configuration
+
 - **Status:** Done
 - **Priority:** Must
 - **Depends on:** T-01
@@ -57,6 +59,7 @@
 ### M2 — Public portfolio
 
 #### T-03 — Implement public layout and routes
+
 - **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-02
@@ -71,12 +74,13 @@
 - **Progress:** Single-page public shell with hash navigation, route placeholders, empty/unavailable/loading/error/not-found states, responsive navigation styles, skip link, and visible focus styles are implemented. Legacy `/projects`, `/about`, and `/contact` paths redirect to the relevant section; project detail URLs remain separate. Interactive browser checks at the required widths remain to be completed because no browser surface is available in this session.
 
 #### T-04 — Render Home and Projects lists
+
 - **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-01, T-03
 - **Related:** F-01, F-02, F-13; J-01
 - **Goal:** Let visitors read the introduction, browse all projects, and review skills under About.
-- **Scope:** Read homepage intro, categorized skills, and projects from Supabase. Home contains the intro only; Projects lists all saved projects in shared administrator-defined order using two columns on wide screens and one on narrow screens; About shows categorized skills. There is no Browse projects action or expand control. Each listed project links to a separate detail view. Add clear visual dividers between the Home, Projects, About, and Contact sections.
+- **Scope:** Read homepage intro, categorized skills, and projects from Supabase. Home contains the name, intro, and optional profile photo; Projects lists all saved projects in shared administrator-defined order using two columns on wide screens and one on narrow screens; About shows categorized skills. There is no Browse projects action or expand control. Each listed project links to a separate detail view. Add clear visual dividers between the Home, Projects, About, and Contact sections.
 - **Done when:**
   - [ ] Project entries show name, description, technologies, status, available links, image, and detail link.
   - [ ] Home contains the bold owner name and short intro, with no link until its destination is decided; the "Featured Projects" section lists all projects in stored order without Browse or expand controls; the list uses two columns on wide screens and one on narrow screens.
@@ -87,6 +91,7 @@
 - **Progress:** Added the public content data module, project list, skills display, and public schema/storage migration. The migration is applied and the production build passes. User confirmed seeded projects and skills render. Projects now shows all saved projects in the shared order; this change still needs browser checks. Temporary test records remain in the linked project and must be removed after verification.
 
 #### T-05 — Render project detail, gallery, and URL history
+
 - **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-04
@@ -101,12 +106,13 @@
 - **Progress:** Implemented project detail field mapping and fixed-order optional sections, the single/multiple image gallery and native lightbox, and redirects from historical slugs. Build and browser behavior checks are still pending; T-04's manual walkthrough and temporary-data cleanup also remain outstanding.
 
 #### T-06 — Render About and profile content
+
 - **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-01, T-03
 - **Related:** F-05, F-15; J-02
 - **Goal:** Present the owner's background and optional CV.
-- **Scope:** Render the About intro, education, experience, profile photo, and CV from stored content. Render intro, education, experience, and categorized skill pills only when populated; omit empty categories.
+- **Scope:** Render the About intro, education, experience, and CV from stored content, and render the stored profile photo in the Home hero. Render intro, education, experience, and categorized skill pills only when populated; omit empty categories.
 - **Done when:**
   - [ ] Sections without content are omitted and the CV link appears only when a CV exists.
   - [ ] CV is downloadable as PDF and the page adapts to phone and desktop.
@@ -116,6 +122,7 @@
 ### M3 — Admin and contact workflows
 
 #### T-07 — Implement administrator sign-in and authorization
+
 - **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-01, T-02
@@ -131,6 +138,7 @@
 - **Progress:** Added email/password and Google sign-in screens, password recovery/update, session checks against the designated-admin RPC, protected admin routes, and database/Storage authorization policies. The authorization migration is applied. Hosted Auth providers and redirect URLs are configured, the designated user is provisioned in `admin_config`, and the user reached the authorized admin page. Brevo SMTP delivery succeeded after authorizing the blocked SMTP source IP; password recovery completed, and replaying a used link returned `otp_expired`. Fixed the sign-in page's duplicate success notice and the recovery route's mistaken reliance on any admin session; it now requires Supabase's `PASSWORD_RECOVERY` event and handles invalid/expired-link redirects. The user confirmed the sign-in, recovery, sign-out, Google, expired-link, and denied-access checks. Updated the client to store auth sessions per tab and sign out after 10 minutes without activity; browser verification of the new session behavior is pending.
 
 #### T-08 — Build admin navigation and Projects list
+
 - **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-07
@@ -146,6 +154,7 @@
 - **Progress:** Added protected responsive sidebar navigation, a Supabase-backed two-column Projects dashboard with search, last-updated dates, add/edit entry points, and drag ordering. Removed the featured toggle; the complete admin list order drives the public list. A database migration drops the unused featured flag. Below 1024px, the admin navigation opens as an accessible side drawer. Production build passes; rendered viewport checks remain pending.
 
 #### T-09 — Implement project editor and permanent deletion
+
 - **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-08
@@ -164,6 +173,7 @@
 - **Progress:** Implemented the project editor, required-field and URL validation, reusable technology selection/creation, explicit save, a transactional save RPC for project fields/technologies/slug history, unsaved-navigation protection, and named permanent deletion with retryable Storage cleanup. The production build passes and the hosted save RPC is applied. The user verified save/public listing after refresh, project details, existing and reusable new technologies, both unsaved-change choices, rename redirects, and deletion/not-found behavior. Storage cleanup retry with uploaded media remains to be verified after T-10 media management is available.
 
 #### T-10 — Implement project media management
+
 - **Status:** Done
 - **Priority:** Must
 - **Depends on:** T-09
@@ -179,34 +189,40 @@
 - **Progress:** Added the project editor's media manager for original image/GIF uploads, required alt text, replacement/removal, main-image choice, ordering, and retryable cleanup. The migration validates actual Storage object MIME/size metadata, serializes project count checks, caps stills/GIFs, and records cleanup retries. The user verified T-10, and the database dry run reported no pending migrations.
 
 #### T-11 — Implement Profile and skills editing
+
 - **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-07, T-01
 - **Related:** F-05, F-15; J-04
 - **Goal:** Let the owner maintain the About page and skills without code changes.
-- **Scope:** Build explicit-save editors for the About intro, education, experience (including optional free-form date ranges), profile photo, PDF CV, skill categories, and their skills.
+- **Scope:** Build explicit-save editors for the About intro, education, experience (including optional free-form date ranges), PDF CV, skill categories, and their skills. The profile photo is managed with homepage content under T-12.
 - **Done when:**
   - [ ] Profile content saves and appears on About; empty sections and categories are omitted publicly.
   - [ ] Categories can be added, renamed with one Save skills action, and reordered by dragging; a category can be removed only when empty.
   - [ ] Skills can be added, renamed with the shared Save skills action, reordered within a category, moved between categories by dragging, and removed; About groups skill pills under category names and omits empty categories.
-  - [ ] Profile photo accepts JPG, PNG, or WebP up to 5 MB; CV accepts PDF up to 10 MB; both can be replaced or removed.
+  - [ ] CV accepts PDF up to 10 MB and can be replaced or removed.
 - **Verify:** Check validation, media handling, category and skill operations, drag reordering for categories and skills, moving skills between category columns by dragging, that non-empty categories cannot be deleted, empty-state behavior, and public updates.
-- **Progress:** Replaced the Profile placeholder with editors for the About introduction, education, experience, profile photo, CV, skill categories, and skills. Added browser-side type/size checks, retryable cleanup for replaced/removed profile files, and a database trigger that prevents deleting a category with skills. Five profile validation unit tests pass and the production build passes. The migration dry run could not run in this environment because Supabase CLI has no access token; apply and verify migration `20261017000006_profile_editor_rules.sql`, then complete the interactive admin walkthrough before marking Done.
+- **Progress:** Replaced the Profile placeholder with editors for the About introduction, education, experience, CV, skill categories, and skills. Profile photo management now lives under Homepage (T-12). Added browser-side file type/size checks, retryable cleanup for profile files, and a database trigger that prevents deleting a category with skills. Five profile validation unit tests pass and the production build passes. Migration `20261017000006_profile_editor_rules.sql` is confirmed in both local and remote migration history; the interactive admin walkthrough remains pending.
 
-#### T-12 — Implement Homepage text editing
-- **Status:** Not started
+#### T-12 — Implement Homepage content editing
+
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-07, T-01
 - **Related:** F-01, F-16; J-04
-- **Goal:** Let the owner update predefined homepage copy.
-- **Scope:** Build an explicit-save Homepage editor for the approved text fields only.
+- **Goal:** Let the owner update the homepage role, introduction, call-to-action buttons, and optional profile photo.
+- **Scope:** Build an explicit-save Homepage content editor for the editable role (default “Software Developer”), intro, and two call-to-action labels/links; manage the profile photo with preview, replacement/removal, and retryable cleanup. Keep homepage structure and order fixed.
 - **Done when:**
   - [ ] Changes appear on Home after saving.
   - [ ] The editor cannot add, remove, or reorder homepage sections.
   - [ ] Placeholder wording remains usable until the owner supplies final identity and copy.
-- **Verify:** Check save, validation/error recovery, and public rendering.
+  - [ ] Role and call-to-action labels/links save explicitly; the GitHub button is omitted until its URL is configured.
+  - [ ] The optional profile photo is managed from Homepage and appears beside the hero text on wide screens, below it on phones, and not on About.
+- **Verify:** Check intro save, photo validation/upload/removal/cleanup recovery, responsive public rendering, validation/error recovery, and public rendering.
+- **Progress:** Added the protected Homepage editor for the editable role, intro, and two call-to-action links, and moved profile photo management there with preview, upload, removal, and cleanup retry. The public photo is beside the hero text on wide screens and below it on phones; About no longer shows it. The owner name, page sections, and section order remain outside the editor. Migration and interactive admin save/error and public rendering walkthrough remain pending.
 
 #### T-13 — Implement Mailbox and contact methods
+
 - **Status:** Not started
 - **Priority:** Must
 - **Depends on:** T-07, T-01
@@ -220,6 +236,7 @@
 - **Verify:** Check message states/deletion, contact-method operations, Email invariant, public order, and authorization.
 
 #### T-14 — Implement contact form and Brevo notification
+
 - **Status:** Not started
 - **Priority:** Must
 - **Depends on:** T-13
@@ -235,6 +252,7 @@
 ### M4 — Launch readiness
 
 #### T-15 — Complete accessibility and responsive checks
+
 - **Status:** Not started
 - **Priority:** Must
 - **Depends on:** T-05, T-06, T-08–T-14
@@ -248,6 +266,7 @@
 - **Verify:** Run configured accessibility checks and conduct documented keyboard and viewport walkthroughs.
 
 #### T-16 — Review security and failure recovery
+
 - **Status:** Not started
 - **Priority:** Must
 - **Depends on:** T-07, T-09–T-14
@@ -261,6 +280,7 @@
 - **Verify:** Run configured security checks and targeted authorization and failure-path scenarios; record outcomes.
 
 #### T-17 — Deploy and verify production setup
+
 - **Status:** Not started
 - **Priority:** Must
 - **Depends on:** T-02, T-15, T-16
@@ -275,6 +295,7 @@
 - **Verify:** Follow the deployment and rollback checklist; record commit and smoke-check results.
 
 #### T-18 — Add scheduled Supabase keep-alive
+
 - **Status:** Not started
 - **Priority:** Should
 - **Depends on:** T-17

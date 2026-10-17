@@ -38,6 +38,11 @@ function safeHttpUrl(value) {
   }
 }
 
+function safeHomepageHref(value) {
+  if (value === '#contact') return value;
+  return safeHttpUrl(value);
+}
+
 function mapProject(row) {
   const media = sortByOrder(row.project_media ?? []);
   const mainMedia = media.find((item) => item.is_main) ?? media[0] ?? null;
@@ -79,7 +84,7 @@ export async function getPublicPortfolio() {
   }
 
   const [homepageResult, profileResult, educationResult, experienceResult, categoriesResult, projectsResult] = await Promise.all([
-    supabase.from('homepage_content').select('intro_text').eq('id', true).maybeSingle(),
+    supabase.from('homepage_content').select('intro_text, role_text, primary_cta_label, primary_cta_href, secondary_cta_label, secondary_cta_href').eq('id', true).maybeSingle(),
     supabase.from('profile_content').select('intro, photo_storage_path, cv_storage_path').eq('id', true).maybeSingle(),
     supabase.from('education_entries').select('id, institution, qualification_or_course, date_range, description, sort_order').order('sort_order', { ascending: true }),
     supabase.from('experience_entries').select('id, organization, role, date_range, description, sort_order').order('sort_order', { ascending: true }),
@@ -109,6 +114,15 @@ export async function getPublicPortfolio() {
 
   const portfolio = {
     intro: homepage?.intro_text?.trim() ?? '',
+    role: homepage?.role_text?.trim() || 'Software Developer',
+    homepageActions: {
+      primary: homepage?.primary_cta_href && safeHomepageHref(homepage.primary_cta_href)
+        ? { label: homepage.primary_cta_label?.trim() || 'Get in touch', href: safeHomepageHref(homepage.primary_cta_href) }
+        : null,
+      secondary: homepage?.secondary_cta_href && safeHomepageHref(homepage.secondary_cta_href)
+        ? { label: homepage.secondary_cta_label?.trim() || 'View my GitHub', href: safeHomepageHref(homepage.secondary_cta_href) }
+        : null,
+    },
     profile: {
       intro: profileRow?.intro?.trim() ?? '',
       photoUrl: profileRow?.photo_storage_path
