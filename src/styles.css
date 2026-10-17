@@ -1480,6 +1480,183 @@ p {
   text-align: center;
 }
 
+.public-contact-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.public-contact-methods li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.public-contact-icon {
+  display: inline-grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.admin-mailbox-page {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 64rem;
+}
+.admin-mailbox-section-heading,
+.admin-message-row-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.admin-mailbox-section-heading > span {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+.admin-message-list,
+.admin-contact-method-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.admin-message-row {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg);
+}
+.admin-message-row.is-unread {
+  border-left: 3px solid var(--color-accent);
+}
+.admin-message-open {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.admin-message-row-heading strong,
+.admin-message-row-heading time,
+.admin-message-detail time {
+  overflow-wrap: anywhere;
+}
+.admin-message-row-heading time,
+.admin-message-detail time {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+.admin-message-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--color-muted);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.admin-message-notification {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+.admin-message-notification.is-failed,
+.admin-message-warning {
+  color: var(--color-error);
+}
+.admin-message-actions,
+.admin-contact-method-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+.admin-contact-method {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg);
+}
+.admin-contact-method.is-dragging {
+  opacity: 0.55;
+}
+.admin-contact-method-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  min-width: 0;
+}
+.admin-contact-method-fields label {
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+.admin-contact-method-fields input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+.admin-contact-method-controls {
+  display: grid;
+  justify-items: end;
+  gap: 0.65rem;
+}
+.admin-contact-enabled {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+.admin-contact-method-actions {
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+.admin-message-detail > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.admin-message-detail > header a {
+  overflow-wrap: anywhere;
+}
+.admin-message-notification.is-detail {
+  margin: 0;
+}
+.admin-message-warning {
+  margin: 0;
+}
+.admin-message-body {
+  margin: 0;
+  padding-block: 0.75rem;
+  border-block: 1px solid var(--color-border);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 1023px) {
   .admin-shell {
     grid-template-columns: minmax(0, 1fr);
@@ -1583,6 +1760,31 @@ p {
 }
 
 @media (max-width: 640px) {
+  .admin-contact-method {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .admin-contact-method-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-contact-method-controls {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .admin-contact-method-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .admin-contact-method-actions .button {
+    width: 100%;
+  }
+  .admin-message-row-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
   .profile-details-grid .skills-section {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -1,6 +1,6 @@
 import { isSupabaseConfigured, supabase } from './supabase.js';
 
-const PUBLIC_CONTENT_CACHE_KEY = 'portfolio:public-content:v3';
+const PUBLIC_CONTENT_CACHE_KEY = 'portfolio:public-content:v4';
 
 export function invalidatePublicPortfolioCache() {
   try {
@@ -83,7 +83,7 @@ export async function getPublicPortfolio() {
     throw error;
   }
 
-  const [homepageResult, profileResult, educationResult, experienceResult, categoriesResult, projectsResult] = await Promise.all([
+  const [homepageResult, profileResult, educationResult, experienceResult, categoriesResult, projectsResult, contactMethodsResult] = await Promise.all([
     supabase.from('homepage_content').select('intro_text, role_text, primary_cta_label, primary_cta_href, secondary_cta_label, secondary_cta_href').eq('id', true).maybeSingle(),
     supabase.from('profile_content').select('intro, photo_storage_path, cv_storage_path').eq('id', true).maybeSingle(),
     supabase.from('education_entries').select('id, institution, qualification_or_course, date_range, description, sort_order').order('sort_order', { ascending: true }),
@@ -103,6 +103,7 @@ export async function getPublicPortfolio() {
         project_media(id, storage_path, media_type, alt_text, sort_order, is_main)
       `)
       .order('sort_order', { ascending: true }),
+    supabase.from('contact_methods').select('id, label, method_type, value, sort_order').eq('is_enabled', true).order('sort_order', { ascending: true }),
   ]);
 
   const homepage = unwrap(homepageResult);
@@ -111,6 +112,7 @@ export async function getPublicPortfolio() {
   const experienceRows = unwrap(experienceResult);
   const categories = unwrap(categoriesResult);
   const projectRows = unwrap(projectsResult);
+  const contactMethodRows = unwrap(contactMethodsResult);
 
   const portfolio = {
     intro: homepage?.intro_text?.trim() ?? '',
@@ -142,6 +144,19 @@ export async function getPublicPortfolio() {
       }))
       .filter((category) => category.skills.length > 0),
     projects: sortByOrder(projectRows).map(mapProject),
+    contactMethods: sortByOrder(contactMethodRows ?? []).map((method) => {
+      if (method.method_type === 'email') {
+        const address = method.value?.trim() ?? '';
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)
+          ? { id: method.id, label: method.label, href: `mailto:${address}`, icon: 'email' }
+          : null;
+      }
+      const href = safeHttpUrl(method.value);
+      if (!href) return null;
+      const host = new URL(href).hostname.toLocaleLowerCase();
+      const icon = host.includes('github.com') ? 'github' : host.includes('linkedin.com') ? 'linkedin' : 'link';
+      return { id: method.id, label: method.label, href, icon };
+    }).filter(Boolean),
   };
 
   try {

@@ -219,11 +219,11 @@
   - [ ] Role and call-to-action labels/links save explicitly; the GitHub button is omitted until its URL is configured.
   - [ ] The optional profile photo is managed from Homepage and appears beside the hero text on wide screens, below it on phones, and not on About.
 - **Verify:** Check intro save, photo validation/upload/removal/cleanup recovery, responsive public rendering, validation/error recovery, and public rendering.
-- **Progress:** Added the protected Homepage editor for the editable role, intro, and two call-to-action links, and moved profile photo management there with preview, upload, removal, and cleanup retry. The public photo is beside the hero text on wide screens and below it on phones; About no longer shows it. The owner name, page sections, and section order remain outside the editor. Migration and interactive admin save/error and public rendering walkthrough remain pending.
+- **Progress:** Added the protected Homepage editor for the editable role, intro, and two call-to-action links, and moved profile photo management there with preview, upload, removal, and cleanup retry. The public photo is beside the hero text on wide screens and below it on phones; About no longer shows it. The owner name, page sections, and section order remain outside the editor. Migration `20261017000007_homepage_role_and_actions.sql` is confirmed in local and remote migration history; interactive admin save/error and public rendering walkthrough remain pending.
 
 #### T-13 — Implement Mailbox and contact methods
 
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-07, T-01
 - **Related:** F-17, F-18; J-04, J-05
@@ -234,6 +234,7 @@
   - [ ] Exactly one Email method exists, is editable but cannot be disabled or removed, and is separate from login email.
   - [ ] Other methods can be managed; enabled methods appear publicly in order.
 - **Verify:** Check message states/deletion, contact-method operations, Email invariant, public order, and authorization.
+- **Progress:** Added the Mailbox messages list and detail route, read/unread updates, confirmed deletion, notification status display, contact-method editor with drag ordering, a database-seeded required Email row protected by database constraints, and public rendering for enabled contact methods. The owner applied migration `20261017000008_mailbox_and_contact_methods.sql` and confirmed Mailbox loads, configured Email and a link appear publicly, and saved order is reflected publicly. Toggle visibility, removal, Email protection, and message-state/deletion walkthroughs remain pending.
 
 #### T-14 — Implement contact form and Brevo notification
 

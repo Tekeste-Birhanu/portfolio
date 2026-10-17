@@ -105,8 +105,8 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 ### Contact method
 
 - **Purpose:** Store public contact links and the contact email address used for notifications.
-- **Fields:** `id`, `label`, `method_type` (Email or link), `value` (email address or destination), `is_enabled`, `sort_order`, `created_at`, and `updated_at`.
-- **Constraints:** Exactly one Email method exists and stays enabled; its value is the public contact and notification address, independent of admin login. It may be edited but not disabled or removed. Other methods may use any platform and can be enabled, disabled, reordered, or removed. Render user-provided labels as plain text and validate destinations as safe URLs or email addresses.
+- **Fields:** `id`, `label`, `method_type` (`email` or `link`), `value` (email address or destination), `is_enabled`, `sort_order`, `created_at`, and `updated_at`.
+- **Constraints:** Exactly one Email method exists and stays enabled; its value is the public contact and notification address, independent of admin login. Migration `20261017000008_mailbox_and_contact_methods.sql` seeds the required Email row with an empty value so the owner can configure it in Mailbox before launch. It may be edited but not disabled or removed; a database trigger protects this invariant. Other methods may use any platform and can be enabled, disabled, reordered, or removed. The administrator saves the contact-method list transactionally with the designated-admin-only RPC. Render user-provided labels as plain text and validate destinations as safe URLs or email addresses.
 - **Related requirements:** F-06, F-17
 
 ### Visitor message
@@ -161,7 +161,7 @@ Project name search can use a case-insensitive match at the expected small portf
 
 - **Ownership / tenant boundaries:** One owner/admin. The admin Auth user ID is explicitly allowlisted in a protected configuration source. No public registration or multi-tenant data.
 - **Public reads:** Homepage content, profile content, skill categories and skills, projects, current/historical slugs, project media metadata/files, and enabled contact methods.
-- **Admin reads/writes:** All content management, contact methods, and messages are restricted to the designated administrator. The contact Email row invariant must be enforced beyond the UI.
+- **Admin reads/writes:** All content management, contact methods, and messages are restricted to the designated administrator. Enabled contact methods are also publicly readable. The contact Email row invariant is enforced by the database trigger and unique index.
 - **Visitor message writes:** Browser clients cannot insert directly. The contact Edge Function validates input and writes the message using trusted credentials; it then sends the Brevo notification and records the result.
 - **File access:** Uploaded portfolio files are publicly readable because they appear on public pages. Only the designated admin can upload, replace, or delete them. Storage paths associate each file with exactly one profile or project item.
 - **Retention/deletion:** Projects, project media, contact methods other than the required Email method, and messages are permanently deleted when the administrator deletes them. No archive, soft deletion, or automated database export is in scope. Project deletion is not reported successful until both Storage objects and database records are removed. If Storage removal fails, retain the project record, show an error, and allow a safe retry.
@@ -170,7 +170,7 @@ Project name search can use a case-insensitive match at the expected small portf
 
 ## 7. Migrations and seed data
 
-- **Migration approach:** Version schema, indexes, constraints, policies, and storage setup in ordered Supabase SQL migrations committed to the repository. Migration `20261017000001_all_projects_ordered_publicly.sql` removes the obsolete `is_featured` project field and its index; every project is public in shared admin order. Project saves use the designated-admin-only transactional RPC in migration 20261017000002_admin_project_editor.sql to keep project fields, technology links, and current/historical slugs consistent.
+- **Migration approach:** Version schema, indexes, constraints, policies, and storage setup in ordered Supabase SQL migrations committed to the repository. Migration `20261017000001_all_projects_ordered_publicly.sql` removes the obsolete `is_featured` project field and its index; every project is public in shared admin order. Project saves use the designated-admin-only transactional RPC in migration 20261017000002_admin_project_editor.sql to keep project fields, technology links, and current/historical slugs consistent. Migration `20261017000008_mailbox_and_contact_methods.sql` adds administrator-only visitor message access, public reads of enabled contact methods, and a transactional administrator contact-method save RPC.
 - **Seed data:** Local development may use clearly fictional projects and messages. Production must not receive demo visitor messages or a fake public contact address. Provision the designated Auth user and required Email contact method through documented setup before launch.
 - **Compatibility / rollback:** Review migrations before applying to production. Prefer additive changes; document any migration that could remove or transform owner content. The obsolete `is_featured` values are dropped; this does not delete project content. Backups/exports are not part of this version.
 

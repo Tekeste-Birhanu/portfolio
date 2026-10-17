@@ -81,6 +81,8 @@ on conflict (id) do update set user_id = excluded.user_id;
 
 The browser cannot read or change `admin_config`. The designated user ID is checked by `public.is_designated_admin()` in database and Storage policies.
 
+The Mailbox migration creates the required Email contact method with an empty value. After signing in as the designated administrator, configure the public contact and notification address under Admin → Mailbox. This address is independent of the login email.
+
 ### Build and preview
 
 ```powershell

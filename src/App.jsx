@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { getCachedPublicPortfolio, getPublicPortfolio } from './lib/public-content.js';
 import { AdminCallbackPage, AdminLoginPage, AdminReadyPage, PasswordRecoveryPage, RequireAdmin } from './admin/auth-pages.jsx';
-import { AdminProjectEditor, AdminProjectsPage, AdminSectionPlaceholder } from './admin/projects-page.jsx';
+import { AdminProjectEditor, AdminProjectsPage } from './admin/projects-page.jsx';
 import { AdminProfilePage } from './admin/profile-page.jsx';
 import { AdminHomepagePage } from './admin/homepage-page.jsx';
+import { AdminMailboxPage, AdminMessageDetailPage } from './admin/mailbox-page.jsx';
 
 const SITE_OWNER_NAME = 'Your Name';
 
@@ -170,7 +171,9 @@ function HomePage() {
       </section>
       <section className="page-section content-section" id="contact" aria-labelledby="contact-title">
         <h2 id="contact-title">Contact</h2>
-        <p className="empty-state">Contact details aren’t available yet.</p>
+        {portfolio.contactMethods?.length ? <ul className="public-contact-methods">
+          {portfolio.contactMethods.map((method) => <li key={method.id}><span className="public-contact-icon" aria-hidden="true">{method.icon === 'email' ? '✉' : method.icon === 'github' ? '⌘' : method.icon === 'linkedin' ? 'in' : '↗'}</span><a href={method.href} target={method.href.startsWith('http') ? '_blank' : undefined} rel={method.href.startsWith('http') ? 'noreferrer' : undefined}>{method.label}</a></li>)}
+        </ul> : <p className="empty-state">Contact details aren’t available yet.</p>}
       </section>
     </>
   );
@@ -458,7 +461,8 @@ function App() {
           <Route path="/admin/projects/:projectId" element={<RequireAdmin><AdminProjectEditor /></RequireAdmin>} />
           <Route path="/admin/profile" element={<RequireAdmin><AdminProfilePage /></RequireAdmin>} />
           <Route path="/admin/homepage" element={<RequireAdmin><AdminHomepagePage /></RequireAdmin>} />
-          <Route path="/admin/mailbox" element={<RequireAdmin><AdminSectionPlaceholder title="Mailbox" /></RequireAdmin>} />
+          <Route path="/admin/mailbox" element={<RequireAdmin><AdminMailboxPage /></RequireAdmin>} />
+          <Route path="/admin/mailbox/:messageId" element={<RequireAdmin><AdminMessageDetailPage /></RequireAdmin>} />
           <Route path="/admin/*" element={<RequireAdmin><AdminReadyPage /></RequireAdmin>} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
