@@ -78,7 +78,9 @@ export function AdminLayout({ title, activeSection = 'projects', children }) {
   return <div className="admin-shell">
     <aside className="admin-sidebar">
       <div className={`admin-sidebar-header${menuOpen ? ' is-menu-open' : ''}`}>
-        <Link className="admin-brand" to="/admin/projects">Administrator</Link>
+        <Link className="admin-brand" to="/admin/projects" aria-label="Administrator projects home">
+          <span>Administrator</span>
+        </Link>
         <button
           className="admin-menu-toggle"
           type="button"
@@ -125,6 +127,7 @@ export function AdminProjectsPage() {
   const [search, setSearch] = useState('');
   const [loadError, setLoadError] = useState(false);
   const [actionError, setActionError] = useState('');
+  const [orderNotice, setOrderNotice] = useState('');
   const [busyId, setBusyId] = useState(null);
   const [draggedId, setDraggedId] = useState(null);
   const [attempt, setAttempt] = useState(0);
@@ -157,19 +160,24 @@ export function AdminProjectsPage() {
   }, [projects, search]);
   const isFiltered = Boolean(search.trim());
 
-  const persistOrder = async (nextProjects) => {
+  const persistOrder = async (nextProjects, movedProjectId) => {
     if (!supabase) return;
     setBusyId('ordering');
     setActionError('');
+    setOrderNotice('');
     setProjects(nextProjects);
     const results = await Promise.all(nextProjects.map((project, index) =>
       supabase.from('projects').update({ sort_order: index + 1 }).eq('id', project.id),
     ));
     if (results.some(({ error }) => error)) {
       setActionError('The new order could not be fully saved. Reloaded the saved order; please try again.');
+      setOrderNotice('Project order was not saved.');
       await loadProjects();
     } else {
       setProjects(nextProjects.map((project, index) => ({ ...project, sort_order: index + 1 })));
+      const movedIndex = nextProjects.findIndex((project) => project.id === movedProjectId);
+      const movedProject = nextProjects[movedIndex];
+      setOrderNotice(movedProject ? `${movedProject.name} moved to position ${movedIndex + 1} of ${nextProjects.length}.` : 'Project order saved.');
     }
     setBusyId(null);
   };
@@ -196,7 +204,7 @@ export function AdminProjectsPage() {
     const next = [...projects];
     const [moved] = next.splice(from, 1);
     next.splice(to, 0, moved);
-    void persistOrder(next);
+    void persistOrder(next, projectId);
   };
 
   return <AdminLayout title="Projects">
@@ -212,16 +220,33 @@ export function AdminProjectsPage() {
       <p>Projects could not be loaded. Check your connection and try again.</p>
       <button className="button button-secondary" type="button" onClick={() => setAttempt((value) => value + 1)}>Retry</button>
     </div> : projects.length === 0 ? <p className="empty-state">No projects yet. Add a project to get started.</p> : visibleProjects.length === 0 ? <p className="empty-state">No projects match “{search.trim()}”.</p> : <>
-      <p className="admin-list-help" id="project-order-help">{isFiltered ? 'Clear the search to reorder projects. ' : 'Drag projects to set the order shown on the public homepage.'}</p>
+      <p className="admin-list-help" id="project-order-help">{isFiltered ? 'Clear the search to reorder projects.' : 'Drag projects to set the order shown on the public homepage, or focus a handle and press the up or down arrow key.'}</p>
       <ul className="admin-project-list" aria-describedby="project-order-help">
-        {visibleProjects.map((project) => {
+        {visibleProjects.map((project, index) => {
           return <li
           className={`admin-project-row${draggedId === project.id ? ' is-dragging' : ''}`}
           key={project.id}
           onDragOver={(event) => event.preventDefault()}
           onDrop={(event) => { event.preventDefault(); if (draggedId) moveProject(draggedId, project.id); setDraggedId(null); }}
         >
-          <span className="admin-drag-handle" draggable={busyId === null && !isFiltered} onDragStart={(event) => { setDraggedId(project.id); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', project.id); }} onDragEnd={() => setDraggedId(null)} aria-hidden="true" title="Drag to reorder">⠿</span>
+          <button
+            className="admin-drag-handle"
+            type="button"
+            draggable={busyId === null && !isFiltered}
+            disabled={busyId !== null || isFiltered}
+            aria-label={isFiltered ? 'Project order is disabled while search is active. Clear the search to reorder.' : `Reorder ${project.name}, position ${index + 1} of ${visibleProjects.length}. Use the up or down arrow key to move.`}
+            aria-keyshortcuts="ArrowUp ArrowDown"
+            title={isFiltered ? 'Clear search to reorder' : 'Drag to reorder, or use the arrow keys'}
+            onDragStart={(event) => { setDraggedId(project.id); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', project.id); }}
+            onDragEnd={() => setDraggedId(null)}
+            onKeyDown={(event) => {
+              if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+              event.preventDefault();
+              const targetIndex = index + (event.key === 'ArrowUp' ? -1 : 1);
+              if (targetIndex < 0 || targetIndex >= visibleProjects.length) return;
+              moveProject(project.id, visibleProjects[targetIndex].id);
+            }}
+          >⠿</button>
           <div className="admin-project-main">
             <h2>{project.name}</h2>
             <p>Last updated <time dateTime={project.updated_at}>{formatUpdatedAt(project.updated_at)}</time></p>
@@ -233,7 +258,7 @@ export function AdminProjectsPage() {
           </li>;
         })}
       </ul>
-      {busyId === 'ordering' && <p role="status" aria-live="polite">Saving project order…</p>}
+      {(busyId === 'ordering' || orderNotice) && <p role="status" aria-live="polite">{busyId === 'ordering' ? 'Saving project order…' : orderNotice}</p>}
     </>}
   </AdminLayout>;
 }
@@ -391,6 +416,18 @@ export function AdminProjectEditor({ isNew = false }) {
 
   const hasSavedProject = !isNew || Boolean(createdProjectId);
   const title = hasSavedProject ? 'Edit project' : 'Add project';
+  const renderProjectField = ([name, label, required]) => {
+    const isStatus = name === 'status';
+    const isUrl = name === 'repository_url' || name === 'live_demo_url';
+    const isMultiline = ['short_description', 'long_description', 'key_features', 'technical_details', 'challenges_and_solutions', 'what_i_learned'].includes(name);
+    return <div className={`admin-field${isMultiline ? ' is-wide' : ''}`} key={name}>
+      <label htmlFor={name}>{label}{required && <span aria-hidden="true"> *</span>}</label>
+      {isStatus ? <select id={name} name={name} value={values[name]} onChange={updateField} required aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined}>
+        <option value="">Choose status</option><option value="planning">Planning</option><option value="in_progress">In progress</option><option value="completed">Completed</option>
+      </select> : isMultiline ? <textarea id={name} name={name} value={values[name]} onChange={updateField} rows={name === 'short_description' ? 2 : 4} required={required} aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined} /> : <input id={name} name={name} type={isUrl ? 'url' : 'text'} value={values[name]} onChange={updateField} required={required} aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined} />}
+      {fieldErrors[name] && <span className="admin-field-error" id={`${name}-error`}>{fieldErrors[name]}</span>}
+    </div>;
+  };
   return <AdminLayout title={title}>
     <Link className="button button-secondary admin-editor-back" to="/admin/projects">Back to Projects</Link>
     {loadState === 'loading' ? <p role="status">Loading project…</p> : loadState === 'error' ? <div className="admin-error-panel" role="alert">
@@ -400,31 +437,26 @@ export function AdminProjectEditor({ isNew = false }) {
       {error && <p className="admin-error" role="alert">{error}</p>}
       <form className="admin-project-form" onSubmit={handleSave} noValidate>
         <div className="admin-project-fields">
-          {PROJECT_FIELDS.map(([name, label, required]) => {
-            const isStatus = name === 'status';
-            const isUrl = name === 'repository_url' || name === 'live_demo_url';
-            const isMultiline = ['short_description', 'long_description', 'key_features', 'technical_details', 'challenges_and_solutions', 'what_i_learned'].includes(name);
-            return <div className={`admin-field${isMultiline ? ' is-wide' : ''}`} key={name}>
-              <label htmlFor={name}>{label}{required && <span aria-hidden="true"> *</span>}</label>
-              {isStatus ? <select id={name} name={name} value={values[name]} onChange={updateField} required aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined}>
-                <option value="">Choose status</option><option value="planning">Planning</option><option value="in_progress">In progress</option><option value="completed">Completed</option>
-              </select> : isMultiline ? <textarea id={name} name={name} value={values[name]} onChange={updateField} rows={name === 'short_description' ? 2 : 4} required={required} aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined} /> : <input id={name} name={name} type={isUrl ? 'url' : 'text'} value={values[name]} onChange={updateField} required={required} aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined} />}
-              {fieldErrors[name] && <span className="admin-field-error" id={`${name}-error`}>{fieldErrors[name]}</span>}
-            </div>;
-          })}
+          <div className="admin-project-primary-row">
+            <div className="admin-project-primary-fields">
+              {renderProjectField(PROJECT_FIELDS.find(([name]) => name === 'name'))}
+              {renderProjectField(PROJECT_FIELDS.find(([name]) => name === 'short_description'))}
+            </div>
+            <fieldset className="admin-technology-picker">
+              <legend>Technologies</legend>
+              {technologies.length === 0 && newTechnologyNames.length === 0 ? <p className="admin-list-help">No technologies have been used yet. Add one below.</p> : <div className="admin-technology-options">
+                {technologies.map((technology) => <label className="admin-technology-option" key={technology.id}>
+                  <input type="checkbox" checked={technologyIds.includes(technology.id)} onChange={() => toggleTechnology(technology.id)} />{technology.name}
+                </label>)}
+              </div>}
+              {newTechnologyNames.length > 0 && <ul className="admin-new-technologies" aria-label="New technologies to add">{newTechnologyNames.map((technologyName) => <li key={technologyName}>
+                {technologyName}<button className="admin-remove-technology" type="button" onClick={() => setNewTechnologyNames((current) => current.filter((item) => item !== technologyName))} aria-label={`Remove ${technologyName}`}>Remove</button>
+              </li>)}</ul>}
+              <div className="admin-add-technology"><label htmlFor="new-technology">Add a reusable technology</label><div><input id="new-technology" value={newTechnologyName} onChange={(event) => setNewTechnologyName(event.target.value)} /><button className="button button-secondary" type="button" onClick={addTechnology} disabled={!newTechnologyName.trim()}>Add</button></div></div>
+            </fieldset>
+          </div>
+          {PROJECT_FIELDS.slice(2).map(renderProjectField)}
         </div>
-        <fieldset className="admin-technology-picker">
-          <legend>Technologies</legend>
-          {technologies.length === 0 && newTechnologyNames.length === 0 ? <p className="admin-list-help">No technologies have been used yet. Add one below.</p> : <div className="admin-technology-options">
-            {technologies.map((technology) => <label className="admin-technology-option" key={technology.id}>
-              <input type="checkbox" checked={technologyIds.includes(technology.id)} onChange={() => toggleTechnology(technology.id)} />{technology.name}
-            </label>)}
-          </div>}
-          {newTechnologyNames.length > 0 && <ul className="admin-new-technologies" aria-label="New technologies to add">{newTechnologyNames.map((name) => <li key={name}>
-            {name}<button className="admin-remove-technology" type="button" onClick={() => setNewTechnologyNames((current) => current.filter((item) => item !== name))} aria-label={`Remove ${name}`}>Remove</button>
-          </li>)}</ul>}
-          <div className="admin-add-technology"><label htmlFor="new-technology">Add a reusable technology</label><div><input id="new-technology" value={newTechnologyName} onChange={(event) => setNewTechnologyName(event.target.value)} /><button className="button button-secondary" type="button" onClick={addTechnology} disabled={!newTechnologyName.trim()}>Add</button></div></div>
-        </fieldset>
         <ProjectMediaManager projectId={createdProjectId || (isNew ? null : projectId)} onPendingChange={(pending, altReady) => { setMediaPending(pending); setMediaAltReady(altReady); }} onRegisterPendingUpload={(upload) => { pendingMediaUploadRef.current = upload; }} />
         <div className="admin-editor-actions">
           <button className="button admin-primary-button" type="submit" disabled={saving || deleting || (mediaPending && !mediaAltReady)}>{saving ? 'Saving…' : 'Save project'}</button>

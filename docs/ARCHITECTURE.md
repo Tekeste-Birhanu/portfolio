@@ -38,7 +38,7 @@
 
 ## 4. Modules and responsibilities
 
-- **Public site (`src/site`):** Public pages, single light theme, gallery and lightbox. Reads only through the Supabase client with the anon key; never writes.
+- **Public site (`src/site`):** Public pages, single dark theme, gallery and lightbox. Reads only through the Supabase client with the anon key; never writes.
 - **Admin app (`src/admin`):** Login, Projects, Profile, Homepage, and Mailbox screens, including contact-method management. Requires a signed-in administrator; all writes pass through database security rules.
 - **Data layer (`src/lib`):** Supabase client, public and administrator query functions, slug helpers, upload validation helpers, profile/project media metadata handling, and public-content cache invalidation.
 - **Database rules (`supabase/migrations`):** Schema, constraints, security policies, storage bucket rules. The source of truth for who may read or write what.
@@ -75,7 +75,7 @@
 - **AD-06:** The contact form goes through an Edge Function only. Visitors cannot insert messages directly. The function validates and saves a message before attempting email, uses Brevo's API, records notification status, and keeps its service-role key and Brevo API key out of the browser. No CAPTCHA or application-level rate limiting is applied.
 - **AD-07:** Keep-alive runs daily on GitHub Actions. It makes a few small reads and one small write through a restricted database function, and includes a stay-active step so GitHub does not disable the schedule after 60 days without commits. This lowers the risk of pausing but cannot guarantee it: Supabase can change its activity rules. Check the Actions tab monthly at first.
 - **AD-08:** Slugs and redirects. Slugs are generated from the project name and kept unique. Old slugs are stored in a history table, and the app redirects from an old slug to the current one before showing a 404.
-- **AD-09:** Routing and theme. React Router handles routes, with a Cloudflare Pages fallback so deep links load. The site uses a single light theme; there is no theme toggle or saved theme preference.
+- **AD-09:** Routing and theme. React Router handles routes, with a Cloudflare Pages fallback so deep links load. The site uses a single dark theme; there is no theme toggle or saved theme preference.
 - **AD-10:** Email delivery. Supabase Auth sends administrator verification and password-reset messages through Brevo SMTP. The contact Edge Function uses Brevo's API to notify the configured public contact email. If notification delivery fails after the message is saved, Mailbox shows a warning and retains the message.
 
 ## 7. Data and integration flow

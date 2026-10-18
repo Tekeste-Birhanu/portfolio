@@ -46,6 +46,7 @@ function ProfileEntrySection({ kind, title, items, busy, run }) {
   const [newEntry, setNewEntry] = useState(() => emptyEntry(kind));
   const [orderedIds, setOrderedIds] = useState(() => items.map((item) => item.id));
   const [draggedId, setDraggedId] = useState(null);
+  const [orderNotice, setOrderNotice] = useState('');
   useEffect(() => {
     if (snapshot === lastSnapshot.current) return;
     lastSnapshot.current = snapshot;
@@ -108,6 +109,7 @@ function ProfileEntrySection({ kind, title, items, busy, run }) {
 
   return <section className="admin-profile-section" aria-labelledby={`profile-${kind}-title`}>
     <h2 id={`profile-${kind}-title`}>{title}</h2>
+    {kind === 'experience' && <p className="visually-hidden" role="status" aria-live="polite">{orderNotice}</p>}
     {items.length === 0 && <p className="empty-state">No {title.toLocaleLowerCase()} entries yet.</p>}
     <ol className={`admin-profile-entry-list admin-profile-entry-list-${kind}`}>
       {orderedItems.map((item, index) => {
@@ -125,7 +127,7 @@ function ProfileEntrySection({ kind, title, items, busy, run }) {
             </label>)}
           </div>
           <div className="admin-profile-actions">
-            {kind === 'experience' ? <button className="admin-profile-drag-handle" type="button" draggable={!busy} aria-label={`Drag to reorder ${draft.role || 'experience entry'}; use arrow keys to move`} title="Drag to reorder, or use arrow keys" onDragStart={(event) => { setDraggedId(item.id); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', item.id); }} onDragEnd={() => setDraggedId(null)} onKeyDown={(event) => {
+            {kind === 'experience' ? <button className="admin-profile-drag-handle" type="button" draggable={!busy} aria-label={`Reorder ${draft.role || 'experience entry'}, position ${index + 1} of ${orderedItems.length}. Use the up or down arrow key to move.`} aria-keyshortcuts="ArrowUp ArrowDown" title="Drag to reorder, or use arrow keys" onDragStart={(event) => { setDraggedId(item.id); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', item.id); }} onDragEnd={() => setDraggedId(null)} onKeyDown={(event) => {
               if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
               event.preventDefault();
               const targetIndex = index + (event.key === 'ArrowUp' ? -1 : 1);
@@ -133,6 +135,7 @@ function ProfileEntrySection({ kind, title, items, busy, run }) {
               const next = orderedItems.map((entry) => entry.id);
               [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
               setOrderedIds(next);
+              setOrderNotice(`Draft order changed: ${draft.role || 'Experience entry'} is at position ${targetIndex + 1} of ${orderedItems.length}. Save experience to apply it.`);
             }}>⠿</button> : <>
               <button className="button button-secondary" type="button" disabled={busy || index === 0} onClick={() => move(index, -1)}>Move earlier</button>
               <button className="button button-secondary" type="button" disabled={busy || index === items.length - 1} onClick={() => move(index, 1)}>Move later</button>
@@ -324,6 +327,7 @@ export function AdminProfilePage() {
     {notice && <p className="auth-success" role="status">{notice}</p>}
     {loading && <p role="status">Refreshing profile…</p>}
     <div className="admin-profile-page">
+      <div className="admin-profile-top-grid">
       <section className="admin-profile-section" aria-labelledby="profile-intro-title">
         <h2 id="profile-intro-title">About introduction</h2>
         <label className="admin-profile-wide-field" htmlFor="profile-intro">Introduction</label>
@@ -348,6 +352,7 @@ export function AdminProfilePage() {
           </div>
         </div>
       </section>
+      </div>
 
       <ProfileEntrySection kind="education" title="Education" items={data.education} busy={busy} run={run} />
       <ProfileEntrySection kind="experience" title="Experience" items={data.experience} busy={busy} run={run} />
@@ -367,7 +372,7 @@ export function AdminProfilePage() {
               ];
               return <>
             <div className="admin-profile-category-heading">
-              <button className="admin-profile-drag-handle" type="button" draggable={!busy} aria-label={`Drag to reorder ${category.name}; use arrow keys to move`} title="Drag to reorder, or use arrow keys" onDragStart={(event) => { setDraggedCategoryId(category.id); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', category.id); }} onDragEnd={() => setDraggedCategoryId(null)} onKeyDown={(event) => { if (event.key === 'ArrowUp') { event.preventDefault(); moveCategoryByKey(categoryIndex, -1); } else if (event.key === 'ArrowDown') { event.preventDefault(); moveCategoryByKey(categoryIndex, 1); } }}>⠿</button>
+              <button className="admin-profile-drag-handle" type="button" draggable={!busy} aria-label={`Reorder ${category.name}, position ${categoryIndex + 1} of ${categories.length}. Use the up or down arrow key to move.`} aria-keyshortcuts="ArrowUp ArrowDown" title="Drag to reorder, or use arrow keys" onDragStart={(event) => { setDraggedCategoryId(category.id); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', category.id); }} onDragEnd={() => setDraggedCategoryId(null)} onKeyDown={(event) => { if (event.key === 'ArrowUp') { event.preventDefault(); moveCategoryByKey(categoryIndex, -1); } else if (event.key === 'ArrowDown') { event.preventDefault(); moveCategoryByKey(categoryIndex, 1); } }}>⠿</button>
               <label>Category name<input value={categoryDrafts[category.id] ?? category.name} onChange={(event) => setCategoryDrafts((current) => ({ ...current, [category.id]: event.target.value }))} /></label>
               <div className="admin-profile-actions">
                 <button className="button button-danger" type="button" disabled={busy || displaySkills.length > 0} onClick={() => { if (window.confirm(`Remove the empty category “${category.name}”?`)) void run(() => deleteSkillCategory(category.id), 'Category removed.'); }}>Remove category</button>
@@ -381,7 +386,7 @@ export function AdminProfilePage() {
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={(event) => { event.preventDefault(); event.stopPropagation(); if (draggedSkill?.categoryId === category.id) reorderSkillItems(category.id, draggedSkill.id, skill.id); else if (draggedSkill) moveSkillToCategory(draggedSkill.id, draggedSkill.categoryId, category.id); setDraggedSkill(null); }}
                 >
-                  <button className="admin-profile-drag-handle" type="button" draggable={!busy} aria-label={`Drag to reorder ${skill.name}; use arrow keys to move`} title="Drag to reorder, or use arrow keys" onDragStart={(event) => { setDraggedSkill({ categoryId: category.id, id: skill.id }); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', skill.id); }} onDragEnd={() => setDraggedSkill(null)} onKeyDown={(event) => { if (event.key === 'ArrowUp') { event.preventDefault(); moveSkillByKey(category, displaySkills, skillIndex, -1); } else if (event.key === 'ArrowDown') { event.preventDefault(); moveSkillByKey(category, displaySkills, skillIndex, 1); } }}>⠿</button>
+                  <button className="admin-profile-drag-handle" type="button" draggable={!busy} aria-label={`Reorder ${skill.name}, position ${skillIndex + 1} of ${displaySkills.length}. Use the up or down arrow key to move.`} aria-keyshortcuts="ArrowUp ArrowDown" title="Drag to reorder, or use arrow keys" onDragStart={(event) => { setDraggedSkill({ categoryId: category.id, id: skill.id }); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', skill.id); }} onDragEnd={() => setDraggedSkill(null)} onKeyDown={(event) => { if (event.key === 'ArrowUp') { event.preventDefault(); moveSkillByKey(category, displaySkills, skillIndex, -1); } else if (event.key === 'ArrowDown') { event.preventDefault(); moveSkillByKey(category, displaySkills, skillIndex, 1); } }}>⠿</button>
                   <label><span className="visually-hidden">Skill name</span><input value={skill.isPending ? skill.name : draft.name} onChange={(event) => {
                     if (skill.isPending) setPendingSkills((current) => ({ ...current, [category.id]: (current[category.id] ?? []).map((item) => item.id === skill.id ? { ...item, name: event.target.value } : item) }));
                     else setSkillDrafts((current) => ({ ...current, [skill.id]: { ...draft, name: event.target.value } }));

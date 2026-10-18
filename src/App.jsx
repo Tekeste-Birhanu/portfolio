@@ -11,11 +11,22 @@ import { submitContactMessage } from './lib/contact-submit.js';
 const SITE_OWNER_NAME = 'Your Name';
 
 const navigation = [
-  { label: 'Home', to: '/#home', section: 'home' },
-  { label: 'Projects', to: '/#projects', section: 'projects' },
-  { label: 'About', to: '/#about', section: 'about' },
-  { label: 'Contact', to: '/#contact', section: 'contact' },
+  { label: 'Home', to: '/#home', section: 'home', icon: 'home' },
+  { label: 'Projects', to: '/#projects', section: 'projects', icon: 'projects' },
+  { label: 'About', to: '/#about', section: 'about', icon: 'about' },
+  { label: 'Contact', to: '/#contact', section: 'contact', icon: 'contact' },
 ];
+
+function NavigationIcon({ name }) {
+  const shape = {
+    home: <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />,
+    projects: <><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M8 4v5" /></>,
+    about: <><circle cx="12" cy="8" r="3.5" /><path d="M4.5 21a7.5 7.5 0 0 1 15 0" /></>,
+    contact: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></>,
+  }[name];
+
+  return <svg className="navigation-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{shape}</svg>;
+}
 
 function ContactMethodIcon({ icon }) {
   const shape = {
@@ -37,101 +48,96 @@ function ContactMethodIcon({ icon }) {
 }
 
 function SiteHeader() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuToggleRef = useRef(null);
-  const navigationRef = useRef(null);
+  const [scrollActiveSection, setScrollActiveSection] = useState(null);
+  const activeSectionRef = useRef(null);
   const location = useLocation();
   const activeSection = location.pathname.startsWith('/projects/')
     ? 'projects'
     : location.pathname === '/'
-      ? (location.hash.slice(1) || 'home')
+      ? (scrollActiveSection || location.hash.slice(1) || 'home')
       : null;
 
   useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname, location.hash]);
+    if (location.pathname !== '/') {
+      activeSectionRef.current = null;
+      setScrollActiveSection(null);
+      return undefined;
+    }
 
-  useEffect(() => {
-    if (!menuOpen) return undefined;
-    const previousOverflow = document.body.style.overflow;
-    const previousPaddingRight = document.body.style.paddingRight;
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = 'hidden';
-    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
-    const focusableItems = () => [...(navigationRef.current?.querySelectorAll('a[href], button:not([disabled])') ?? [])];
-    focusableItems()[0]?.focus();
-    const handleKeydown = (event) => {
-      if (event.key === 'Escape') {
-        setMenuOpen(false);
-        return;
+    const mainContent = document.getElementById('main-content');
+    if (!mainContent) return undefined;
+
+    let animationFrame = 0;
+    const updateActiveSection = () => {
+      animationFrame = 0;
+      const sections = navigation
+        .map(({ section }) => document.getElementById(section))
+        .filter(Boolean);
+      if (!sections.length) return;
+
+      const activationPoint = window.scrollY + window.innerHeight * 0.28;
+      let currentSection = sections[0];
+
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top + window.scrollY > activationPoint) break;
+        currentSection = section;
       }
-      if (event.key !== 'Tab') return;
-      const items = focusableItems();
-      if (!items.length) return;
-      if (event.shiftKey && document.activeElement === items[0]) {
-        event.preventDefault();
-        items.at(-1).focus();
-      } else if (!event.shiftKey && document.activeElement === items.at(-1)) {
-        event.preventDefault();
-        items[0].focus();
+
+      const candidateIndex = sections.indexOf(currentSection);
+      const activeIndex = sections.findIndex((section) => section.id === activeSectionRef.current);
+      if (activeIndex >= 0 && candidateIndex !== activeIndex) {
+        const boundarySection = candidateIndex > activeIndex ? currentSection : sections[activeIndex];
+        const boundary = boundarySection.getBoundingClientRect().top + window.scrollY;
+        const hysteresis = 72;
+        const crossedBoundary = candidateIndex > activeIndex
+          ? activationPoint >= boundary + hysteresis
+          : activationPoint <= boundary - hysteresis;
+        if (!crossedBoundary) currentSection = sections[activeIndex];
+      }
+
+      if (activeSectionRef.current !== currentSection.id) {
+        activeSectionRef.current = currentSection.id;
+        setScrollActiveSection(currentSection.id);
       }
     };
-    const breakpoint = window.matchMedia('(min-width: 640px)');
-    const closeOnDesktop = (event) => { if (event.matches) setMenuOpen(false); };
-    window.addEventListener('keydown', handleKeydown);
-    breakpoint.addEventListener('change', closeOnDesktop);
+    const scheduleUpdate = () => {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(updateActiveSection);
+    };
+    const contentObserver = new MutationObserver(scheduleUpdate);
+    contentObserver.observe(mainContent, { childList: true, subtree: true });
+
+    updateActiveSection();
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate);
     return () => {
-      window.removeEventListener('keydown', handleKeydown);
-      breakpoint.removeEventListener('change', closeOnDesktop);
-      document.body.style.overflow = previousOverflow;
-      document.body.style.paddingRight = previousPaddingRight;
-      if (menuToggleRef.current?.isConnected) menuToggleRef.current.focus();
+      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('resize', scheduleUpdate);
+      contentObserver.disconnect();
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
     };
-  }, [menuOpen]);
+  }, [location.pathname]);
 
   return (
-    <header className="site-header">
-      <div className="header-inner">
-        <Link className="site-brand" to="/" aria-label="Developer Portfolio home">
-          Developer Portfolio
+    <nav className="site-navigation" id="primary-navigation" aria-label="Main navigation">
+      {navigation.map(({ label, to, section, icon }) => (
+        <Link
+          key={to}
+          to={to}
+          className={`nav-link${activeSection === section ? ' is-active' : ''}`}
+          aria-label={label}
+          aria-current={activeSection === section ? 'location' : undefined}
+          title={label}
+          onClick={() => {
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+              document.getElementById(section)?.scrollIntoView({ block: 'start' });
+            }));
+          }}
+        >
+          <span className="navigation-icon-wrap"><NavigationIcon name={icon} /></span>
+          <span className="nav-link-label">{label}</span>
         </Link>
-        <button
-          className="menu-toggle"
-          type="button"
-          ref={menuToggleRef}
-          aria-expanded={menuOpen}
-          aria-controls="primary-navigation"
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          <span className="menu-toggle-label">{menuOpen ? 'Close' : 'Menu'}</span>
-          <span className="menu-icon" aria-hidden="true">{menuOpen ? '×' : '☰'}</span>
-        </button>
-        <nav
-          className={`primary-navigation${menuOpen ? ' is-open' : ''}`}
-          id="primary-navigation"
-          ref={navigationRef}
-          aria-label="Main navigation"
-        >
-          {navigation.map(({ label, to, section }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`nav-link${activeSection === section ? ' is-active' : ''}`}
-              aria-current={activeSection === section ? 'location' : undefined}
-              onClick={() => {
-                setMenuOpen(false);
-                requestAnimationFrame(() => requestAnimationFrame(() => {
-                  document.getElementById(section)?.scrollIntoView({ block: 'start' });
-                }));
-              }}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-      </div>
-      {menuOpen && <button className="public-menu-backdrop" type="button" tabIndex={-1} aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
-    </header>
+      ))}
+    </nav>
   );
 }
 
@@ -182,7 +188,7 @@ function HomePage() {
             {[portfolio.homepageActions?.primary, portfolio.homepageActions?.secondary].filter(Boolean).map((action, index) => <a className={`button ${index === 0 ? 'home-cta-primary' : 'button-secondary'}`} key={`${action.href}-${index}`} href={action.href} target={action.href.startsWith('http') ? '_blank' : undefined} rel={action.href.startsWith('http') ? 'noreferrer' : undefined}>{action.label}</a>)}
           </div>
         </div>
-        {portfolio.profile.photoUrl && <img className="home-hero-photo" src={portfolio.profile.photoUrl} alt="Portrait of the portfolio owner" />}
+        {portfolio.profile.photoUrl && <div className="home-hero-badge"><span className="home-hero-rope home-hero-rope-left" aria-hidden="true" /><span className="home-hero-rope home-hero-rope-right" aria-hidden="true" /><img className="home-hero-photo" src={portfolio.profile.photoUrl} alt="Portrait of the portfolio owner" /></div>}
       </section>
       <ProjectsSection projects={portfolio.projects} />
       <section className="page-section content-section" id="about" aria-labelledby="about-title">
@@ -319,8 +325,8 @@ function Skills({ categories }) {
       {categories.map((category) => (
         <div className="skill-category" key={category.id}>
           <h4>{category.name}</h4>
-          <ul className="technology-list">
-            {category.skills.map((skill) => <li className="technology-tag" key={skill.id}>{skill.name}</li>)}
+          <ul className="skill-bullet-list">
+            {category.skills.map((skill) => <li key={skill.id}>{skill.name}</li>)}
           </ul>
         </div>
       ))}
@@ -331,14 +337,17 @@ function Skills({ categories }) {
 function AboutContent({ profile, education, experience, categories }) {
   return (
     <>
-      {profile.intro && <div className="profile-intro"><p className="profile-intro-copy">{profile.intro}</p></div>}
-      {education.length > 0 && <section className="profile-section" aria-labelledby="education-title">
-        <h3 id="education-title">Education</h3>
-        <div className="profile-entry-list">{education.map((entry) => <article className="profile-entry" key={entry.id}>
-          <h4>{entry.qualification_or_course}</h4><p className="profile-entry-meta">{entry.institution}{entry.date_range && <> <span aria-hidden="true">·</span> {entry.date_range}</>}</p>
-          {entry.description && <p className="profile-entry-description">{entry.description}</p>}
-        </article>)}</div>
-      </section>}
+      {(profile.intro || education.length > 0 || profile.cvUrl) && <div className="profile-intro-education-grid">
+        {profile.intro && <div className="profile-intro"><p className="profile-intro-copy">{profile.intro}</p></div>}
+        {(education.length > 0 || profile.cvUrl) && <section className="profile-section" aria-labelledby="education-title">
+          <h3 id="education-title">Education</h3>
+          {education.length > 0 && <div className="profile-entry-list">{education.map((entry) => <article className="profile-entry" key={entry.id}>
+            <h4>{entry.qualification_or_course}</h4><p className="profile-entry-meta">{entry.institution}{entry.date_range && <> <span aria-hidden="true">·</span> {entry.date_range}</>}</p>
+            {entry.description && <p className="profile-entry-description">{entry.description}</p>}
+          </article>)}</div>}
+          {profile.cvUrl && <div className="profile-cv-actions"><a className="button button-secondary cv-download" href={profile.cvUrl}>Download CV (PDF)</a></div>}
+        </section>}
+      </div>}
       {(categories.length > 0 || experience.length > 0) && <div className="profile-details-grid">
         <Skills categories={categories} />
         {experience.length > 0 && <section className="profile-section" aria-labelledby="experience-title">
@@ -349,7 +358,6 @@ function AboutContent({ profile, education, experience, categories }) {
           </article>)}</div>
         </section>}
       </div>}
-      {profile.cvUrl && <div className="profile-cv-actions"><a className="button button-secondary cv-download" href={profile.cvUrl}>Download CV (PDF)</a></div>}
     </>
   );
 }
@@ -383,11 +391,13 @@ function ProjectDetailPage() {
   return (
     <PageLayout title={project.name} backToProjects panel>
       <p className="status-tag detail-status">{project.status === 'planning' ? 'Planning' : project.status === 'in_progress' ? 'In progress' : 'Completed'}</p>
-      <p className="page-intro">{project.shortDescription}</p>
+      <div className={`detail-summary-grid${project.technologies.length > 0 ? ' has-technologies' : ''}`}>
+        <p className="page-intro">{project.shortDescription}</p>
+        {project.technologies.length > 0 && (
+          <div className="detail-block detail-technologies"><h2>Technologies</h2><ul className="technology-list">{project.technologies.map((item) => <li className="technology-tag" key={item}>{item}</li>)}</ul></div>
+        )}
+      </div>
       <ProjectGallery project={project} />
-      {project.technologies.length > 0 && (
-        <div className="detail-block"><h2>Technologies</h2><ul className="technology-list">{project.technologies.map((item) => <li className="technology-tag" key={item}>{item}</li>)}</ul></div>
-      )}
       {(project.repositoryUrl || project.liveDemoUrl) && (
         <div className="project-actions detail-actions">
           {project.repositoryUrl && <a href={project.repositoryUrl} target="_blank" rel="noreferrer">Repository<span className="visually-hidden"> (opens in a new tab)</span></a>}
@@ -441,11 +451,11 @@ function ProjectGallery({ project }) {
   };
 
   return (
-    <div className="project-gallery" aria-label={`${project.name} screenshots`}>
+    <div className="project-gallery" role="group" aria-label={`${project.name} screenshots`}>
       <button className="gallery-main-button" type="button" onClick={openLightbox} aria-label={`Open image viewer: ${images[selected].alt_text}`}>
         <img className="detail-image" src={images[selected].url} alt={images[selected].alt_text} />
       </button>
-      {images.length > 1 && <div className="gallery-thumbnails" aria-label="Choose project image">
+      {images.length > 1 && <div className="gallery-thumbnails" role="group" aria-label="Choose project image">
         {images.map((image, index) => <button className={`gallery-thumbnail${index === selected ? ' is-selected' : ''}`} type="button" key={image.id} onClick={() => setSelected(index)} aria-label={`Show image ${index + 1}: ${image.alt_text}`} aria-pressed={index === selected}>
           <img src={image.url} alt="" />
         </button>)}
@@ -516,6 +526,23 @@ function App() {
   const isAdminPath = location.pathname.startsWith('/admin');
 
   useEffect(() => {
+    const root = document.documentElement;
+    let hideTimeout = 0;
+    const showScrollbar = () => {
+      root.classList.add('scrollbar-visible');
+      window.clearTimeout(hideTimeout);
+      hideTimeout = window.setTimeout(() => root.classList.remove('scrollbar-visible'), 900);
+    };
+
+    window.addEventListener('scroll', showScrollbar, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', showScrollbar);
+      window.clearTimeout(hideTimeout);
+      root.classList.remove('scrollbar-visible');
+    };
+  }, []);
+
+  useEffect(() => {
     if (location.pathname !== '/') return;
     const targetId = location.hash.slice(1);
     if (!targetId) return;
@@ -558,7 +585,7 @@ function App() {
       </main>
       {!isAdminPath && <footer className="site-footer">
         <div className="footer-inner">
-          <span>© {new Date().getFullYear()} {SITE_OWNER_NAME}</span>
+          <span>© {new Date().getFullYear()} {SITE_OWNER_NAME}. All rights reserved.</span>
         </div>
       </footer>}
     </>

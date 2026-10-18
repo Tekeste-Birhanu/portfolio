@@ -10,14 +10,14 @@
 ## 2. Design principles
 
 - **Content first.** Real project screenshots and concise text carry the page. Do not add decoration or content only to fill space.
-- **Restraint.** The terracotta accent is used sparingly. Avoid extra sections, repeated subtitles, and multiple calls to action.
+- **Restraint.** The green accent is used sparingly. Avoid extra sections, repeated subtitles, and multiple calls to action.
 - **Consistency.** The same patterns (buttons, tags, dialogs, empty states) appear across public pages and the admin.
-- **Single theme.** The site uses one light theme. There is no dark-mode toggle or saved theme preference.
+- **Single theme.** The site uses one dark theme. There is no theme toggle or saved theme preference.
 - **Never leave users guessing.** Every action gives feedback, and every empty or failed state says what happened and what to do next.
 
 ## 3. Visual foundations
 
-The public Home, Projects, About, and Contact areas are sections on one scrolling page, reached through header anchor links. Clear horizontal dividers separate these sections. Project detail pages remain separate routes.
+The public Home, Projects, About, and Contact areas are sections on one scrolling page, reached through a floating, bottom-centered icon dock. Project detail pages remain separate routes.
 
 Values below are initial decisions. Verify contrast with a checker during implementation and tune sizes once real content is in.
 
@@ -26,28 +26,31 @@ Values below are initial decisions. Verify contrast with a checker during implem
   - System sans-serif for paragraphs and long text: `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`.
   - Sizes in `rem`, base 1rem. Hierarchy: page title 1.75rem, public section headings 1.65–2rem in the accent color, body 1rem (line height 1.6), metadata and labels 0.875rem.
   - No font files are downloaded.
-- **Color** (CSS variables for the single light theme):
+- **Color** (CSS variables for the single dark theme):
 
-  | Role                             | Light value |
-  | -------------------------------- | ----------- |
-  | Background                       | `#FAFAF8`   |
-  | Surface (cards, inputs, dialogs) | `#FFFFFF`   |
-  | Text                             | `#222222`   |
-  | Muted text                       | `#5C5C5C`   |
-  | Border                           | `#E2E0DB`   |
-  | Accent (terracotta)              | `#A9472A`   |
-  | Error                            | `#B3261E`   |
-  | Success                          | `#1B6E3C`   |
-  - The accent is used for links, the primary button, and the selected thumbnail, not for large areas.
+  | Role                             | Dark value |
+  | -------------------------------- | ---------- |
+  | Background                       | `#11151B`  |
+  | Surface (cards, inputs, dialogs) | `#1A2028`  |
+  | Subtle surface                   | `#222A34`  |
+  | Text                             | `#E8EDF3`  |
+  | Muted text                       | `#ABB5C2`  |
+  | Decorative divider               | `#35404C`  |
+  | Form control boundary            | `#768393`  |
+  | Accent (muted mint green)        | `#4CAA88`  |
+  | Error                            | `#FF7777`  |
+  | Success                          | `#59D98E`  |
+- Form controls use a lighter boundary for clear edges; decorative dividers use a subdued dark border. The accent is used for links, primary buttons, and selected states, not for large areas.
   - Text and interactive elements meet WCAG 2.1 contrast (4.5:1 for text, 3:1 for interface boundaries). Color is never the only signal: errors and status always include words or an icon.
 
-- **Spacing:** Scale in multiples of 4px: 4, 8, 12, 16, 24, 32, 48, 64. Public pages use a centered column about 56rem wide (896px at the 16px base size); keep long text blocks narrower within that column for readability. Admin screens may be wider (about 72rem) for tables.
-- **Shape and elevation:** Corner radius 4px on buttons, inputs, tags, and images. 1px borders. No shadows. The lightbox uses a dimmed backdrop only.
+- **Spacing:** Scale in multiples of 4px: 4, 8, 12, 16, 24, 32, 48, 64. Public pages use a centered column up to 72rem wide; keep long text blocks narrower within that column for readability. Admin screens may be wider (about 92rem) for tables.
+- **Shape and elevation:** Corner radius 4px on standard buttons, inputs, tags, and images; the mobile menu button uses 8px and its floating panel uses 12px. 1px borders. The lightbox uses a dimmed backdrop only.
+- **Scrollbar:** The page scrollbar hides when idle and appears while scrolling. Use a dark neutral track and thumb with the mint accent on hover; keep inner scrollable panels usable.
 - **Icons and imagery:**
   - One monochrome icon set drawn in the current text color. Contact methods always show a text label. The administrator selects a built-in Website/Other, GitHub, LinkedIn, YouTube, Telegram, Instagram, X, Facebook, WhatsApp, Discord, or Phone icon for link methods; Email uses its fixed icon.
   - Imagery is the owner's actual screenshots and profile photo, never stock illustrations.
-  - The owner manually optimizes files before upload. The app stores and serves uploaded originals without compression or generated variants. Images keep their aspect ratio and are not cropped or stretched; gallery thumbnails are display controls using the same uploaded files.
-- **Responsive behavior:** Three ranges: phone (under 640px), tablet (640px to 1023px), desktop (1024px and up). Layouts rearrange rather than shrink. The sticky public header stays compact on phones: brand and a keyboard-operable menu control share one row. The public and admin menus open as vertically stacked side drawers over the page without shifting its content.
+  - The owner manually optimizes files before upload. The app stores and serves uploaded originals without compression or generated variants. Gallery images preserve their aspect ratio; project-card previews and portrait presentation may crop within their display frames. Gallery thumbnails use the same uploaded files.
+- **Responsive behavior:** Three ranges: phone (under 640px), tablet (640px to 1023px), desktop (1024px and up). Layouts rearrange rather than shrink. The public navigation is a floating, bottom-centered dock with four labeled icon links. The admin menu opens as a vertically stacked side drawer without shifting page content.
   - Featured Projects entries use a two-column grid from 768px up and one column below; each image stacks above its text.
   - Admin: sidebar from 1024px up; a compact menu below.
   - No horizontal scrolling at 320px width; wide content scrolls inside its own container.
@@ -58,9 +61,9 @@ Values below are initial decisions. Verify contrast with a checker during implem
 | ------------------------------ | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | Button                         | Actions                                                                           | Primary (accent), secondary (outline), danger (for Delete); disabled and loading states; loading blocks a second click.             |
 | Text field, text area, select  | Input                                                                             | Visible label, optional hint, inline error linked to the field, keeps entered text on error.                                        |
-| Tag                            | Skills, technologies, and project status                                          | Small, bordered, monospace; skills and technologies appear as pills; status shows "In progress" or "Completed" as words.            |
+| Tag                            | Technologies and project status                                                   | Small, bordered, monospace; project status shows "Planning", "In progress", or "Completed" as words. Skills appear in bulleted lists. |
 | Toggle switch                  | Enable or disable a contact method                                                | Labeled, keyboard operable, state announced; the required Email method cannot be disabled.                                            |
-| Site header and navigation     | Public navigation                                                                 | Stays pinned at the top while scrolling; Home, Projects, About, Contact; collapses to a compact menu on phone.                       |
+| Floating navigation dock       | Public navigation                                                                 | Stays centered near the bottom while scrolling; Home, Projects, About, and Contact use labeled icon links.                           |
 | Admin sidebar and compact menu | Admin navigation                                                                  | Projects, Profile, Homepage, Mailbox, sign out; sidebar on desktop, side drawer below 1024px.                                        |
 | Project entry                  | Featured Projects list                                                            | Name with status beside it, description, technologies on their own line, links, and a "View details" action; image stacks above text within each card. |
 | Gallery                        | Project detail screenshots                                                        | One main image; thumbnails below only when there are several; selected thumbnail marked with the accent border.                     |
@@ -77,7 +80,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### Home
 
 - **Purpose:** Introduce the developer.
-- **Layout:** Owner name in bold, editable role and short introduction, two call-to-action buttons, and optional profile photo. A visible divider separates Home from Projects. On phones, center the text and buttons and stack the centered photo below them.
+- **Layout:** Owner name in bold, editable role and short introduction, two call-to-action buttons, and optional profile photo styled as a hanging badge. On phones, center the text and buttons and stack the centered badge above them.
 - **Primary action:** Admin-configured contact button; secondary GitHub button.
 - **Content and behavior:** Show the owner's name, role (default “Software Developer”), and short intro. Admin edits both button labels and links; omit the GitHub button until its URL is configured.
 - **Responsive changes:** Keep the intro readable at phone and desktop widths; center the text, buttons, and photo on phones.
@@ -105,8 +108,8 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### About
 
 - **Purpose:** Give background and the CV.
-- **Layout:** Intro and education, followed by distinct Skills and Experience panels, then the CV download in its own separated action row when a CV exists. The Skills heading is visually subordinate to About. About does not display the profile photo.
-- **Content and behavior:** The administrator edits the intro, education entries, experience entries, skill categories and skills, optional photo, and CV in Profile. Show categorized skill pills and show the intro, education, and experience sections only when they have content. Omit empty categories and sections; show the CV link only when a CV exists.
+- **Layout:** Intro and education appear side by side when space allows. The CV download appears in the Education section when a CV exists. Skills and Experience follow as distinct, vertically stacked sections; skill categories can sit side by side. The Skills heading is visually subordinate to About. About does not display the profile photo.
+- **Content and behavior:** The administrator edits the intro, education entries, experience entries, skill categories, skills, and CV in Profile; the optional profile photo is managed from Homepage. Show skills as bulleted lists under their category headings. Show the intro, education, and experience sections only when they have content. Omit empty categories and sections; show the CV link only when a CV exists.
 - **Related flow:** J-02
 
 ### Contact
@@ -161,7 +164,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 - **Notification failure:** The visitor still sees success once their message is saved. Mailbox shows a warning on the affected message in both the list and detail view.
 - **Confirmation for destructive or irreversible actions:** Deleting a project, message, or contact method, and leaving a form with unsaved changes, always opens a dialog. There is no undo.
 - **Feedback and recovery:** Failed saves and uploads keep the user's input and allow a retry.
-- **Motion:** Kept minimal (short fades only). Reduced-motion preferences remove animation, including lightbox transitions.
+- **Motion:** Kept minimal; the Home hero grid drifts subtly and fades toward the corners, and other motion uses short fades. Reduced-motion preferences remove animation, including the grid drift and lightbox transitions.
 
 ## 7. Accessibility
 
@@ -180,7 +183,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ## 8. Content guidelines
 
 - **Tone:** First person, plain, concise, and factual. No marketing language.
-- **Labels and messages:** Use the same names everywhere: Projects, Profile, Homepage, Mailbox, "In progress", "Completed". Sentence case. Buttons start with a verb (Save, Delete, Send message).
+- **Labels and messages:** Use the same names everywhere: Projects, Profile, Homepage, Mailbox, "Planning", "In progress", "Completed". Sentence case. Buttons start with a verb (Save, Delete, Send message).
 - **Dates, numbers, and localization:** English only. Dates read like "15 Oct 2026".
 - **Errors:** Say what happened and what to do next. Never blame the user, and never reveal which part of a sign-in was wrong.
 

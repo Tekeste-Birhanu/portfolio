@@ -10,7 +10,7 @@ A personal portfolio website for showcasing projects, skills, and background to 
 
 - One scrolling public page with Home, Projects, About, and Contact sections, plus separate project detail pages.
 - Responsive project galleries and lightbox; the Projects section lists every saved project and each has a separate detail page.
-- One light theme and skill pills grouped under admin-managed categories on About.
+- One dark theme and skills shown as bullet lists grouped under admin-managed categories on About.
 - Private admin dashboard for projects, profile, homepage intro, contact methods, and messages.
 - Contact form that saves visitor email and message to Mailbox and sends an email notification.
 
@@ -116,7 +116,7 @@ Production deployment is not configured yet. The planned target is Cloudflare Pa
 
 - Owner identity and final homepage copy will be added later.
 - Improved social link previews are deferred until after the site exists.
-- Telegram notifications, dark mode, CAPTCHA, application-level contact rate limiting, app-side image compression, automated database exports, video demos, analytics, and page builders are out of scope for this version.
+- Telegram notifications, theme switching, CAPTCHA, application-level contact rate limiting, app-side image compression, automated database exports, video demos, analytics, and page builders are out of scope for this version.
 - Supabase free-tier limits and Brevo sender/deliverability setup must be checked before launch.
 
 ## Contributing and AI-assisted development

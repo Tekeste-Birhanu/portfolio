@@ -70,7 +70,7 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 
 - **Purpose:** Store one skill within a category.
 - **Fields:** `id`, `category_id`, `name`, `sort_order`, `created_at`, and `updated_at`.
-- **Constraints:** Each skill belongs to exactly one category. Skills can be added, renamed, reordered within their category, moved to another category, and removed. Public skills render as pill-style items grouped under their category name.
+- **Constraints:** Each skill belongs to exactly one category. Skills can be added, renamed, reordered within their category, moved to another category, and removed. Public skills render as bullet lists grouped under their category name.
 - **Related requirements:** F-15
 
 ### Project
@@ -151,7 +151,7 @@ Homepage content, Profile, administrator configuration, and the Email contact me
 | Project media by project/order | Index on `(project_id, sort_order)` | Load each gallery in display order. |
 | Project technologies by project/order | Index on `(project_id, sort_order)` and unique `(project_id, technology_id)` | Render ordered technology tags without duplicates. |
 | Skill categories in display order | Index on `sort_order` | Render category headings in administrator-defined order. |
-| Skills in category order | Index on `(category_id, sort_order)` | Render each category's ordered skill pills. |
+| Skills in category order | Index on `(category_id, sort_order)` | Render each category's ordered skill bullet list. |
 | Contact methods by enabled/order | Index on `(is_enabled, sort_order)` | Render enabled methods in configured order. |
 | Messages newest first | Index on `created_at DESC` | Mailbox default ordering. |
 
