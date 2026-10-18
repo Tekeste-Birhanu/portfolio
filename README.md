@@ -100,7 +100,7 @@ npm.cmd run build
 npm.cmd run preview
 ```
 
-The Cloudflare Pages build command is `npm run build` and the output directory is `dist`. `public/_redirects` provides the SPA fallback for nested routes.
+The Cloudflare Pages build command is `npm run build` and the output directory is `dist`. `public/_redirects` provides the SPA fallback for nested routes. Set `VITE_SITE_URL` to the production site origin so Auth redirects use the deployed domain; it can remain empty locally to use the current origin.
 
 Keep all credentials and service secrets out of source control. Add only safe placeholder values to environment examples when they are created.
 

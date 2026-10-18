@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase.js';
 const AdminAuthContext = createContext(null);
 const INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000;
 const LAST_ACTIVITY_KEY = 'portfolio-admin-last-activity';
+const AUTH_REDIRECT_ORIGIN = (import.meta.env.VITE_SITE_URL || window.location.origin).replace(/\/+$/, '');
 
 export function AdminAuthProvider({ children }) {
   const [status, setStatus] = useState('checking');
@@ -113,14 +114,14 @@ export function AdminAuthProvider({ children }) {
     if (!supabase) return { error: new Error('Supabase is not configured.') };
     return supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/admin/callback` },
+      options: { redirectTo: `${AUTH_REDIRECT_ORIGIN}/admin/callback` },
     });
   }, []);
 
   const sendPasswordReset = useCallback(async (email) => {
     if (!supabase) return { error: new Error('Supabase is not configured.') };
     return supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/admin/reset-password`,
+      redirectTo: `${AUTH_REDIRECT_ORIGIN}/admin/reset-password`,
     });
   }, []);
 
