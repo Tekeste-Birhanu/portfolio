@@ -1,10 +1,10 @@
 import { isSupabaseConfigured, supabase } from './supabase.js';
 
-const PUBLIC_CONTENT_CACHE_KEY = 'portfolio:public-content:v5';
+const PUBLIC_CONTENT_CACHE_KEY = 'portfolio:public-content:v6';
 
 export function invalidatePublicPortfolioCache() {
   try {
-    sessionStorage.removeItem(PUBLIC_CONTENT_CACHE_KEY);
+    localStorage.removeItem(PUBLIC_CONTENT_CACHE_KEY);
   } catch {
     // The cache is optional; the public page will fetch fresh content on reload.
   }
@@ -12,7 +12,7 @@ export function invalidatePublicPortfolioCache() {
 
 export function getCachedPublicPortfolio() {
   try {
-    const cached = sessionStorage.getItem(PUBLIC_CONTENT_CACHE_KEY);
+    const cached = localStorage.getItem(PUBLIC_CONTENT_CACHE_KEY);
     return cached ? JSON.parse(cached) : null;
   } catch {
     return null;
@@ -165,7 +165,7 @@ export async function getPublicPortfolio() {
   };
 
   try {
-    sessionStorage.setItem(PUBLIC_CONTENT_CACHE_KEY, JSON.stringify(portfolio));
+    localStorage.setItem(PUBLIC_CONTENT_CACHE_KEY, JSON.stringify(portfolio));
   } catch {
     // Storage may be unavailable or full; the freshly loaded data still works.
   }

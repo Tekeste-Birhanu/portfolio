@@ -285,7 +285,7 @@
 
 #### T-17 — Deploy and verify production setup
 
-- **Status:** Not started
+- **Status:** In progress
 - **Priority:** Must
 - **Depends on:** T-02, T-15, T-16
 - **Related:** Constraints; F-19

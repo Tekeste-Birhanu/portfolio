@@ -117,7 +117,7 @@ The Home section contains the owner's name, editable role, short introduction, a
 - **Empty:** Projects and Mailbox show clear empty states. Empty skill categories are omitted from About; empty About subsections are omitted. If no projects are saved, Projects shows "No projects yet".
 - **Success:** Saves show confirmation. The contact form shows success only after its message has been saved, regardless of notification delivery.
 - **Errors:** Explain what failed and what to do next. Form input is retained after validation or save errors. A failed email notification is shown as a warning on the saved message in Mailbox.
-- **Supabase unavailable:** Public pages show a clear temporary-unavailability message and a retry option when content cannot be fetched. Admin screens show a service-unavailable message. No cached copy of site content is promised.
+- **Supabase unavailable:** Public pages show the last successfully loaded public content from browser storage when available while attempting a fresh read. If no cached copy exists, they show a clear temporary-unavailability message and a retry option. Admin screens show a service-unavailable message.
 - **Unauthorized:** Admin routes without a session show sign-in. A signed-in non-administrator is denied access and signed out. Hiding `/admin` from navigation is not an authorization control.
 - **Destructive actions:** Project and message deletion require confirmation. There is no undo in V1.
 - **Offline/interrupted:** Contact submission errors preserve the visitor's email and message. Admin forms warn before leaving with unsaved changes.
