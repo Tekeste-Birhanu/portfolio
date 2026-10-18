@@ -1,3 +1,5 @@
+import { readBoundedJson, validateContactInput } from './validation.ts';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, apikey, x-client-info, content-type',
@@ -9,14 +11,6 @@ function jsonResponse(body: Record<string, unknown>, status = 200) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' },
   });
-}
-
-function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(value);
-}
-
-function characterCount(value: string) {
-  return Array.from(value).length;
 }
 
 async function updateNotificationStatus(
@@ -89,29 +83,18 @@ Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return jsonResponse({ error: 'Use POST to submit a message.' }, 405);
 
-  let input: unknown;
-  try {
-    input = await request.json();
-  } catch {
-    return jsonResponse({ error: 'Send a valid email address and message.' }, 400);
+  const parsedBody = await readBoundedJson(request);
+  if (!parsedBody.ok) {
+    return parsedBody.reason === 'too_large'
+      ? jsonResponse({ error: 'The request is too large.' }, 413)
+      : jsonResponse({ error: 'Send a valid email address and message.' }, 400);
   }
 
-  if (!input || typeof input !== 'object' || Array.isArray(input)) {
-    return jsonResponse({ error: 'Send a valid email address and message.' }, 400);
-  }
-
-  const raw = input as Record<string, unknown>;
-  const visitorEmail = typeof raw.visitorEmail === 'string' ? raw.visitorEmail.trim() : '';
-  const messageBody = typeof raw.message === 'string' ? raw.message.trim() : '';
-  if (
-    !visitorEmail
-    || characterCount(visitorEmail) > 254
-    || !isValidEmail(visitorEmail)
-    || !messageBody
-    || characterCount(messageBody) > 5000
-  ) {
+  const validated = validateContactInput(parsedBody.value);
+  if (!validated.ok) {
     return jsonResponse({ error: 'Enter a valid email address and a message of up to 5,000 characters.' }, 400);
   }
+  const { visitorEmail, messageBody } = validated.value;
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -153,7 +136,7 @@ Deno.serve(async (request) => {
 
   let notificationStatus: 'sent' | 'failed' = 'sent';
   try {
-    if (!brevoApiKey || !senderEmail || !isValidEmail(senderEmail)) {
+    if (!brevoApiKey || !senderEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(senderEmail)) {
       throw new Error('Brevo notification configuration is incomplete.');
     }
     await sendNotification(supabaseUrl, serviceKey, brevoApiKey, senderEmail, senderName, visitorEmail, messageBody);

@@ -164,7 +164,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 - **Notification failure:** The visitor still sees success once their message is saved. Mailbox shows a warning on the affected message in both the list and detail view.
 - **Confirmation for destructive or irreversible actions:** Deleting a project, message, or contact method, and leaving a form with unsaved changes, always opens a dialog. There is no undo.
 - **Feedback and recovery:** Failed saves and uploads keep the user's input and allow a retry.
-- **Motion:** Kept minimal; the Home hero grid drifts subtly and fades toward the corners, and other motion uses short fades. Reduced-motion preferences remove animation, including the grid drift and lightbox transitions.
+- **Motion:** Kept minimal. The Home hero grid and hanging profile photo are static; other motion uses short transitions. Reduced-motion preferences remove animation and transitions.
 
 ## 7. Accessibility
 

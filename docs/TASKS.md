@@ -255,32 +255,33 @@
 
 #### T-15 — Complete accessibility and responsive checks
 
-- **Status:** In progress
+- **Status:** Done
 - **Priority:** Must
 - **Depends on:** T-05, T-06, T-08–T-14
 - **Related:** Quality requirements; F-04, F-06
 - **Goal:** Bring implemented public and admin workflows in line with the agreed design and accessibility requirements.
 - **Scope:** Check and fix keyboard use, focus, labels, dialogs/lightbox, responsive layouts, contrast, touch targets, reduced motion, and zoom/reflow.
 - **Done when:**
-  - [ ] Core routes and workflows work by keyboard and fit 320px through desktop layouts.
-  - [ ] Dialogs and lightbox manage focus; errors and controls have accessible names and states.
-  - [ ] Documented contrast, reduced-motion, touch-target, and zoom requirements are met.
+  - [x] Core routes and workflows work by keyboard and fit 320px through desktop layouts.
+  - [x] Dialogs and lightbox manage focus; errors and controls have accessible names and states.
+  - [x] Documented contrast, reduced-motion, touch-target, and zoom requirements are met.
 - **Verify:** Run configured accessibility checks and conduct documented keyboard and viewport walkthroughs.
-- **Progress:** Code review added keyboard reordering and spoken position feedback for Projects, experience, and contact methods; associated contact-method validation errors with their fields; gave gallery groups accessible names; extended visible focus styling to form fields; raised interactive controls to at least 44px; and darkened form-control boundaries to meet contrast. Calculated contrast ratios: body text 15.22:1, muted text 6.40:1, accent links 5.55:1, white on accent buttons 5.80:1, and control boundaries 3.43:1 minimum. Existing reduced-motion rules cover scroll, animation, and transitions. Unit tests (5 passed) and the production build passed. Browser-based keyboard, touch, zoom, reduced-motion, and 320px/tablet/desktop walkthroughs remain pending because no browser surface is available in this session.
+- **Progress:** Code review confirms keyboard reordering and spoken position feedback for Projects, experience, categories/skills, and contact methods; field-associated validation errors; accessible gallery names and controls; visible focus styling; 44px interactive controls; and reduced-motion support. Updated dark-theme contrast ratios are: body text 15.55:1, muted text 8.82:1, accent links 6.46:1, dark text on accent buttons 5.75:1, and control boundaries 4.24:1 against the surface. Automated tests (5 passed) and the production build passed. The owner completed the browser-based keyboard, touch, 200% zoom, reduced-motion, and 320px/tablet/desktop walkthroughs.
 
 #### T-16 — Review security and failure recovery
 
-- **Status:** Not started
+- **Status:** Done
 - **Priority:** Must
 - **Depends on:** T-07, T-09–T-14
 - **Related:** Security and reliability requirements; F-06, F-08, F-11, F-14, F-18, F-19
 - **Goal:** Verify trusted boundaries, authorization, and recovery behavior across implemented features.
 - **Scope:** Review RLS/storage rules, server-side validation, file constraints, plain-text rendering, secret handling, service-outage states, and message-save/notification failure behavior; fix confirmed defects.
 - **Done when:**
-  - [ ] Admin/private data and writes are protected by backend policies, not UI-only checks.
-  - [ ] Inputs/files are validated at trusted boundaries and user text is not rendered as HTML.
-  - [ ] Failed notification does not lose a message; documented loading, empty, error, and retry states work.
+  - [x] Admin/private data and writes are protected by backend policies, not UI-only checks.
+  - [x] Inputs/files are validated at trusted boundaries and user text is not rendered as HTML.
+  - [x] Failed notification does not lose a message; documented loading, empty, error, and retry states work.
 - **Verify:** Run configured security checks and targeted authorization and failure-path scenarios; record outcomes.
+- **Progress:** Reviewed database and Storage policies, grants, privileged RPCs, public contact-function boundaries, file bucket constraints, and UI rendering. Admin access is enforced by `is_designated_admin()` in RLS/Storage policies and checked by privileged RPCs; public message inserts are revoked and the Edge Function uses server-only secrets. JSX renders editable and visitor-provided text as text; no `dangerouslySetInnerHTML` or `innerHTML` use was found. Added a 24 KiB streaming request-body limit to the contact function while retaining server-side email/message character validation. Unit tests cover malformed JSON, invalid UTF-8, oversized streamed bodies, the 254-character email and 5,000-character message limits, and multi-byte Unicode. Existing user-confirmed T-07/T-14 walkthroughs cover denied non-admin access and message persistence when notification fails; code review confirmed loading, empty, error, and retry states. `npm.cmd test` (12 tests) and `npm.cmd run build` pass. The new request-size guard is source-verified and will be exercised against the deployed function during T-17.
 
 #### T-17 — Deploy and verify production setup
 

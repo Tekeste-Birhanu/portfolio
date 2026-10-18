@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { getCachedPublicPortfolio, getPublicPortfolio } from './lib/public-content.js';
 import { AdminCallbackPage, AdminLoginPage, AdminReadyPage, PasswordRecoveryPage, RequireAdmin } from './admin/auth-pages.jsx';
@@ -524,6 +524,7 @@ function ServiceUnavailablePage({ message = 'The portfolio service is unavailabl
 function App() {
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith('/admin');
+  const isReload = useRef(window.performance.getEntriesByType('navigation')[0]?.type === 'reload');
 
   useEffect(() => {
     const root = document.documentElement;
@@ -540,6 +541,20 @@ function App() {
       window.clearTimeout(hideTimeout);
       root.classList.remove('scrollbar-visible');
     };
+  }, []);
+
+  useLayoutEffect(() => {
+    if (isReload.current && location.pathname === '/') {
+      isReload.current = false;
+      let secondFrame = 0;
+      const firstFrame = window.requestAnimationFrame(() => {
+        secondFrame = window.requestAnimationFrame(() => window.scrollTo(0, 0));
+      });
+      return () => {
+        window.cancelAnimationFrame(firstFrame);
+        if (secondFrame) window.cancelAnimationFrame(secondFrame);
+      };
+    }
   }, []);
 
   useEffect(() => {

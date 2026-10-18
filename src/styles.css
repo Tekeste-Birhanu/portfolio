@@ -253,7 +253,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 1.25rem;
+  margin-top: 1.75rem;
 }
 .home-hero-actions .button {
   text-decoration: none;
@@ -277,6 +277,7 @@ h1 {
 .home-hero-copy {
   grid-area: copy;
   min-width: 0;
+  max-width: 52ch;
 }
 .home-hero-badge {
   grid-area: photo;
