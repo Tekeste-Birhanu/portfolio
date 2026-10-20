@@ -13,10 +13,10 @@ function formatUpdatedAt(value) {
 }
 
 const adminSections = [
+  { label: 'Home', to: '/admin/homepage', id: 'homepage' },
   { label: 'Projects', to: '/admin/projects', id: 'projects' },
-  { label: 'Profile', to: '/admin/profile', id: 'profile' },
-  { label: 'Homepage', to: '/admin/homepage', id: 'homepage' },
-  { label: 'Mailbox', to: '/admin/mailbox', id: 'mailbox' },
+  { label: 'About', to: '/admin/profile', id: 'profile' },
+  { label: 'Contact', to: '/admin/mailbox', id: 'mailbox' },
 ];
 
 export function AdminLayout({ title, activeSection = 'projects', children }) {

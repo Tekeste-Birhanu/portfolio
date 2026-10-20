@@ -21,12 +21,6 @@ import {
 } from '../lib/profile-admin.js';
 
 const ENTRY_FIELDS = {
-  education: [
-    { name: 'institution', label: 'Institution', required: true },
-    { name: 'qualification_or_course', label: 'Qualification or course', required: true },
-    { name: 'date_range', label: 'Date range' },
-    { name: 'description', label: 'Description', multiline: true },
-  ],
   experience: [
     { name: 'organization', label: 'Organization', required: true },
     { name: 'role', label: 'Role', required: true },
@@ -354,7 +348,6 @@ export function AdminProfilePage() {
       </section>
       </div>
 
-      <ProfileEntrySection kind="education" title="Education" items={data.education} busy={busy} run={run} />
       <ProfileEntrySection kind="experience" title="Experience" items={data.experience} busy={busy} run={run} />
 
       <section className="admin-profile-section" aria-labelledby="profile-skills-title">

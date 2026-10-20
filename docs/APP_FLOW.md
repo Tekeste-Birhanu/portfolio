@@ -11,7 +11,7 @@ Public (any visitor)
 [/] Single scrolling public page
   ├── #home                 Owner name and short introduction
   ├── #projects             All projects in admin order; each opens a separate detail page
-  ├── #about                Background, categorized skills, and optional CV download
+  ├── #about                About Me introduction, experience, skills, and optional CV download
   └── #contact              Configured contact links and message form
       /projects/<slug>      Separate project detail and screenshot lightbox
 
@@ -24,12 +24,12 @@ Admin (not linked publicly)
         ├── /admin/projects       Projects list, search, ordering
         ├── /admin/projects/new   Add project
         ├── /admin/projects/<id>  Edit project
-        ├── /admin/profile        About content, photo, CV, skills
+        ├── /admin/profile        About Me content, experience, CV, skills
         ├── /admin/homepage       Homepage text and profile photo
         └── /admin/mailbox        Messages and contact methods
 ```
 
-The Home section contains the owner's name, editable role, short introduction, and administrator-configured contact and GitHub buttons. The Projects section on the same scrolling page lists every saved project in administrator-defined order, using two columns on wide screens and one on narrow screens. There is no Browse projects action or expand control. Each listed project links to its separate detail URL. A deleted project and its files are removed; its old URL shows the 404 page. Renaming a project redirects its old URL to the current one.
+The Home section contains the owner's name, editable role, short introduction, and fixed “Get in touch” and “View my GitHub” buttons. The contact button links to `/#contact`; the GitHub button links to `https://github.com/Tekeste-Birhanu`. Neither button label nor destination is editable in the admin. The Projects section on the same scrolling page lists every saved project in administrator-defined order, using two columns on wide screens and one on narrow screens. There is no Browse projects action or expand control. Each listed project links to its separate detail URL. A deleted project and its files are removed; its old URL shows the 404 page. Renaming a project redirects its old URL to the current one.
 
 ## 3. Main journeys
 
@@ -46,7 +46,7 @@ The Home section contains the owner's name, editable role, short introduction, a
 
 - **Actor:** Visitor
 - **Entry point:** About or Contact
-- **Steps:** Read the About content and download the CV if available; on Contact, choose an enabled contact link or enter an email address and message in the form; submit; see confirmation after the message is saved.
+- **Steps:** Read the About Me content and work experience, and download the CV if available; on Contact, choose an enabled contact link or enter an email address and message in the form; submit; see confirmation after the message is saved.
 - **Contact links:** The configured Email link opens the visitor's email app. Other enabled methods (for example, Telegram, GitHub, or a social platform) open their configured destinations in a new tab.
 - **Message submission:** The server validates the visitor's email and message, saves the message in Mailbox, then attempts an email notification to the configured contact email. The visitor's email is set as Reply-To in that notification.
 - **Success:** The message is saved and the visitor sees success. The form is cleared after successful saving.
@@ -67,7 +67,7 @@ The Home section contains the owner's name, editable role, short introduction, a
 
 - **Actor:** Designated administrator
 - **Entry point:** Admin navigation to Profile, Homepage, or Mailbox
-- **Steps:** In Profile, explicitly save the About introduction and education entries; edit experience entries and their order, then save them together with one Save experience action; upload, replace, or remove the CV; and manage skill categories and skills. In Homepage, edit and explicitly save the role, short introduction, and labels and links for the contact and GitHub buttons; upload, replace, or remove the optional profile photo; photo cleanup retries remain available there. In Mailbox, add, edit, enable/disable, reorder, or remove a contact method. A method includes a label and value; link methods choose a built-in icon, including Phone, which opens a `tel:` link. The public page shows the label and actual clickable destination.
+- **Steps:** In Profile, explicitly save the About Me introduction; edit experience entries and their order, then save them together with one Save experience action; upload, replace, or remove the CV; and manage skill categories and skills. Education is not managed or displayed. In Homepage, edit and explicitly save the role and short introduction; upload, replace, or remove the optional profile photo; photo cleanup retries remain available there. Hero button labels and destinations are fixed in the app. In Mailbox, add, edit, enable/disable, reorder, or remove a contact method. A method includes a label and value; link methods choose a built-in icon, including Phone, which opens a `tel:` link. The public page shows the label and actual clickable destination.
 - **Skill management:** Add categories; edit category and skill names, then save those edits together with one Save skills action. Reorder categories by dragging their handles. Add or remove skills; drag a skill handle within its category to reorder it, or into another category column to move it. A category can be removed only after all its skills have been moved or removed. About shows skills as bullet lists grouped under category names and omits empty categories.
 - **Email invariant:** Exactly one Email contact method exists. Its value can be edited, but the method cannot be disabled or removed. This address is shown on Contact and receives message notifications; it is independent of the admin login email. Configure it in Mailbox before public launch.
 - **Success:** Saved changes are live on the public site.
@@ -100,14 +100,14 @@ The Home section contains the owner's name, editable role, short introduction, a
 | `/` and `/#home` | Single scrolling public portfolio, starting at the intro | Anyone | J-01, J-02 |
 | `/#projects` | All projects in admin order; two columns on wide screens, one on narrow screens | Anyone | J-01 |
 | `/projects/<slug>` | Project detail and screenshot lightbox | Anyone | J-01 |
-| `/#about` | About section, categorized skills, and optional CV download | Anyone | J-02 |
+| `/#about` | About Me introduction, experience, categorized skills, and optional CV download | Anyone | J-02 |
 | `/#contact` | Enabled contact methods and email/message form | Anyone | J-02 |
 | 404 | Unknown or deleted addresses | Anyone | J-01, J-06 |
 | `/admin` | Sign-in, then redirect to Projects when signed in | Sign-in is public; dashboard is administrator-only | J-03 |
 | `/admin/reset-password` | Request a reset link, or set a new password after a valid recovery event; invalid/expired links show an error and allow a new request | Anyone | J-03 |
 | `/admin/projects` | Search, order, edit, and delete projects | Designated administrator | J-03, J-06 |
 | `/admin/projects/new`, `/admin/projects/<id>` | Add or edit a project | Designated administrator | J-03 |
-| `/admin/profile` | About content, CV, and skills | Designated administrator | J-04 |
+| `/admin/profile` | About Me content, experience, CV, and skills | Designated administrator | J-04 |
 | `/admin/homepage` | Predefined homepage text and profile photo | Designated administrator | J-04 |
 | `/admin/mailbox` | Messages and contact-method management | Designated administrator | J-04, J-05 |
 

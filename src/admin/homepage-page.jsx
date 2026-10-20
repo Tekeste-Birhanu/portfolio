@@ -6,8 +6,8 @@ import { profilePhotoUrl, removeProfileFile, retryProfileMediaCleanup, saveProfi
 const INTRO_PLACEHOLDER = 'A portfolio introduction has not been added yet.';
 
 export function AdminHomepagePage() {
-  const [content, setContent] = useState({ introText: '', roleText: 'Software Developer', primaryCtaLabel: 'Get in touch', primaryCtaHref: '#contact', secondaryCtaLabel: 'View my GitHub', secondaryCtaHref: '' });
-  const [savedContent, setSavedContent] = useState({ introText: '', roleText: 'Software Developer', primaryCtaLabel: 'Get in touch', primaryCtaHref: '#contact', secondaryCtaLabel: 'View my GitHub', secondaryCtaHref: '' });
+  const [content, setContent] = useState({ introText: '', roleText: 'Software Developer' });
+  const [savedContent, setSavedContent] = useState({ introText: '', roleText: 'Software Developer' });
   const [photoStoragePath, setPhotoStoragePath] = useState(null);
   const [cleanups, setCleanups] = useState([]);
   const [photoFile, setPhotoFile] = useState(null);
@@ -30,10 +30,6 @@ export function AdminHomepagePage() {
       const loadedContent = {
         introText: data.introText,
         roleText: data.roleText,
-        primaryCtaLabel: data.primaryCtaLabel,
-        primaryCtaHref: data.primaryCtaHref,
-        secondaryCtaLabel: data.secondaryCtaLabel,
-        secondaryCtaHref: data.secondaryCtaHref,
       };
       setContent(loadedContent);
       setSavedContent(loadedContent);
@@ -60,7 +56,10 @@ export function AdminHomepagePage() {
 
   const handleSave = async (event) => {
     event.preventDefault();
-    const normalized = { ...content, introText: content.introText.trim(), roleText: content.roleText.trim(), primaryCtaLabel: content.primaryCtaLabel.trim(), primaryCtaHref: content.primaryCtaHref.trim(), secondaryCtaLabel: content.secondaryCtaLabel.trim(), secondaryCtaHref: content.secondaryCtaHref.trim() };
+    const normalized = {
+      introText: content.introText.trim(),
+      roleText: content.roleText.trim(),
+    };
     if (!normalized.introText) {
       setError('Enter a homepage introduction before saving.');
       setNotice('');
@@ -136,7 +135,7 @@ export function AdminHomepagePage() {
     {error && <p className="admin-error" role="alert">{error}</p>}
     {notice && <p className="auth-success" role="status">{notice}</p>}
     {loading ? <p role="status">Loading homepage content…</p> : <div className="admin-profile-page admin-homepage-grid">
-      <form className="admin-homepage-form" onSubmit={handleSave}>
+      <form id="homepage-content-form" className="admin-homepage-form" onSubmit={handleSave}>
         <section className="admin-profile-section" aria-labelledby="homepage-intro-title">
           <h2 id="homepage-intro-title">Hero text</h2>
           <label className="admin-profile-wide-field" htmlFor="homepage-role">Role beneath your name</label>
@@ -169,28 +168,13 @@ export function AdminHomepagePage() {
             {photoStoragePath && <button className="button button-danger" type="button" disabled={savingPhoto} onClick={() => void handleRemovePhoto()}>Remove photo</button>}
           </div>
         </section>
-        <section className="admin-profile-section" aria-labelledby="homepage-actions-title">
-          <h2 id="homepage-actions-title">Hero buttons</h2>
-          <div className="admin-homepage-actions">
-            <div className="admin-homepage-action-card">
-              <h3>Contact button</h3>
-              <label className="admin-profile-wide-field" htmlFor="homepage-primary-label">Button label</label>
-              <input id="homepage-primary-label" value={content.primaryCtaLabel} onChange={(event) => { setContent((current) => ({ ...current, primaryCtaLabel: event.target.value })); setError(''); setNotice(''); }} required />
-              <label className="admin-profile-wide-field" htmlFor="homepage-primary-href">Button link</label>
-              <input id="homepage-primary-href" type="text" value={content.primaryCtaHref} onChange={(event) => { setContent((current) => ({ ...current, primaryCtaHref: event.target.value })); setError(''); setNotice(''); }} required placeholder="#contact or https://…" />
-            </div>
-            <div className="admin-homepage-action-card">
-              <h3>GitHub button</h3>
-              <label className="admin-profile-wide-field" htmlFor="homepage-secondary-label">Button label</label>
-              <input id="homepage-secondary-label" value={content.secondaryCtaLabel} onChange={(event) => { setContent((current) => ({ ...current, secondaryCtaLabel: event.target.value })); setError(''); setNotice(''); }} required />
-              <label className="admin-profile-wide-field" htmlFor="homepage-secondary-href">GitHub profile link</label>
-              <input id="homepage-secondary-href" type="url" value={content.secondaryCtaHref} onChange={(event) => { setContent((current) => ({ ...current, secondaryCtaHref: event.target.value })); setError(''); setNotice(''); }} placeholder="https://github.com/username" />
-            </div>
-          </div>
-          <button className="button admin-primary-button admin-homepage-save" type="submit" disabled={saving || JSON.stringify(content) === JSON.stringify(savedContent)}>
-            {saving ? 'Saving…' : 'Save homepage'}
-          </button>
-        </section>
+        <button
+          className="button admin-primary-button admin-homepage-save"
+          type="submit"
+          disabled={saving || JSON.stringify(content) === JSON.stringify(savedContent)}
+        >
+          {saving ? 'Saving…' : 'Save homepage'}
+        </button>
       </form>
       {cleanups.length > 0 && <section className="admin-profile-section" aria-labelledby="homepage-photo-cleanup-title">
         <h2 id="homepage-photo-cleanup-title">Photo cleanup needs retry</h2>

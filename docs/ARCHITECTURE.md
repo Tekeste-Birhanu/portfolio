@@ -38,8 +38,9 @@
 
 ## 4. Modules and responsibilities
 
-- **Public site (`src/site`):** Public pages, single dark theme, gallery and lightbox. Reads only through the Supabase client with the anon key; never writes.
-- **Admin app (`src/admin`):** Login, Projects, Profile, Homepage, and Mailbox screens, including contact-method management. Requires a signed-in administrator; all writes pass through database security rules.
+- **Public site (`src/App.jsx`, `src/public-page-states.jsx`):** Public routes and page components, shared page states, gallery, and lightbox. Reads only through the Supabase client with the anon key; never writes.
+- **Admin app (`src/admin.jsx`, `src/admin/`):** Admin route composition, authentication provider, and page shell are separate from the public app. Login, Projects, Profile, Homepage, and Mailbox screens live in focused components under `src/admin/`, including contact-method management. Requires a signed-in administrator; all writes pass through database security rules.
+- **Styles (`src/styles.css`, `src/admin.css`):** Shared theme tokens, base, and public styles live in `styles.css`; admin-only selectors live in `admin.css`.
 - **Data layer (`src/lib`):** Supabase client, public and administrator query functions, slug helpers, upload validation helpers, profile/project media metadata handling, and public-content cache invalidation.
 - **Database rules (`supabase/migrations`):** Schema, constraints, security policies, storage bucket rules. The source of truth for who may read or write what.
 - **Contact function (`supabase/functions/submit-contact`):** Validate and save visitor messages, send a Brevo notification, and record notification success or failure. The function reads Supabase's server credentials and the `BREVO_API_KEY` / `BREVO_SENDER_EMAIL` secrets. The SMTP key used by Supabase Auth is separate from the Brevo API key. No CAPTCHA or application-level rate limiting.
@@ -50,11 +51,14 @@
 ```text
 /
   src/
-    site/              public pages and components
+    App.jsx            public routes and pages
+    admin.jsx          admin route composition
+    public-page-states.jsx shared page layout, loading, error, and not-found views
+    styles.css         shared tokens, base, and public styles
+    admin.css          admin-only styles
     admin/             admin screens and components
     lib/               Supabase client, data functions, helpers
-    styles/            theme variables and base styles (plain CSS)
-    main.jsx           app entry and routes
+    main.jsx           app entry point
   public/              static files, including the Pages fallback rule
   supabase/
     migrations/        schema, security rules, storage rules

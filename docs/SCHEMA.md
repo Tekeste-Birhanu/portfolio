@@ -23,14 +23,14 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 
 ### Homepage content
 
-- **Purpose:** Store the predefined editable homepage copy and actions.
-- **Fields:** One singleton row with `role_text` (plain text, default “Software Developer”), `intro_text` (plain text, required), `primary_cta_label` and `primary_cta_href` (default “Get in touch” and `#contact`), optional `secondary_cta_href` with a `secondary_cta_label` (default “View my GitHub”), and `updated_at`.
-- **Constraints:** Primary links accept `#contact` or HTTP(S) URLs; the optional secondary link accepts HTTP(S) URLs and is omitted publicly until set. Labels cannot be blank. The optional profile photo is stored on `profile_content` and managed from the Homepage dashboard section. Neither row controls homepage sections or their order.
+- **Purpose:** Store editable homepage role and introduction content. The hero button labels and destinations are fixed in the application: “Get in touch” links to `/#contact`, and “View my GitHub” links to `https://github.com/Tekeste-Birhanu`.
+- **Fields:** One singleton row with `role_text` (plain text, default “Software Developer”), `intro_text` (plain text, required), and `updated_at`. The previously used `primary_cta_label`, `primary_cta_href`, `secondary_cta_label`, and `secondary_cta_href` columns remain from an applied historical migration; current application code does not read or write them. Removing them would require a separate schema migration and would discard any old button settings.
+- **Constraints:** Role and intro are editable. The optional profile photo is stored on `profile_content` and managed from the Homepage dashboard section. Neither row controls homepage sections or their order.
 - **Related requirements:** F-01, F-16
 
 ### Profile
 
-- **Purpose:** Store the owner's About-page intro and profile photo/CV file paths. The photo is presented in the Home hero and managed in the Homepage dashboard section.
+- **Purpose:** Store the owner's About Me intro and profile photo/CV file paths. The photo is presented in the Home hero and managed in the Homepage dashboard section.
 - **Fields:** Singleton row with `intro` (plain text, optional), `photo_storage_path` (optional), `cv_storage_path` (optional), and `updated_at`.
 - **Constraints:** Empty fields are omitted publicly. The CV is a PDF up to 10 MB. The profile photo accepts JPG, PNG, or WebP up to 5 MB; the original is served without app compression or generated variants.
 - **Related requirements:** F-05, F-15
@@ -43,13 +43,7 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 - **Constraints:** Only the designated administrator can read or manage cleanup rows. Rows are removed only after the corresponding Storage object is deleted.
 - **Implementation:** `public.profile_media_cleanup` is private under RLS and is introduced with the Profile editor.
 
-### Education entry
-
-- **Purpose:** Store one education item on the About page.
-- **Fields:** `id`, `institution` (required), `qualification_or_course` (required), `date_range` (optional plain text), `description` (optional plain text), `sort_order`, and timestamps.
-- **Constraints:** Entries are independently added, edited, removed, and reordered. Date range and description may be omitted; date range can use forms such as `2021–2024` or `2022–Present`.
-- **Related requirements:** F-15
-- **Implementation:** Stored in `public.education_entries`, linked to the singleton profile and ordered by `sort_order`.
+The legacy `public.education_entries` table remains in the deployed schema to preserve existing records. Application roles have no access to it, and education is no longer queried or managed by the application.
 
 ### Work experience entry
 
@@ -124,7 +118,6 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 | Project | One-to-many | Project slug | One current slug per project; delete slugs with project. |
 | Project | One-to-many | Project media | Delete media metadata and stored files with project. |
 | Project | Many-to-many | Technology | Via project-technology rows; delete relationships with project. |
-| Profile | One-to-many | Education entry | Delete entries with the profile only if profile is ever made non-singleton. |
 | Profile | One-to-many | Work experience entry | Delete entries with the profile only if profile is ever made non-singleton. |
 | Skill category | One-to-many | Skill | Each skill belongs to one category; a category may be deleted only when it contains no skills. |
 

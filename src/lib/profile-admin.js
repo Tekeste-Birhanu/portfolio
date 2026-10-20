@@ -1,7 +1,6 @@
 import { supabase } from './supabase.js';
 import { invalidatePublicPortfolioCache } from './public-content.js';
 
-const ENTRY_COLUMNS = 'id, institution, qualification_or_course, date_range, description, sort_order';
 const EXPERIENCE_COLUMNS = 'id, organization, role, date_range, description, sort_order';
 const FILES = {
   photo_storage_path: { bucket: 'profile-photo', accepts: ['image/jpeg', 'image/png', 'image/webp'], maxBytes: 5 * 1024 * 1024, extensions: { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' } },
@@ -32,16 +31,14 @@ export function profileCvUrl(path) {
 
 export async function getProfileEditorData() {
   const db = client();
-  const [profileResult, educationResult, experienceResult, categoryResult, cleanupResult] = await Promise.all([
+  const [profileResult, experienceResult, categoryResult, cleanupResult] = await Promise.all([
     db.from('profile_content').select('id, intro, photo_storage_path, cv_storage_path, updated_at').eq('id', true).single(),
-    db.from('education_entries').select(ENTRY_COLUMNS).order('sort_order', { ascending: true }),
     db.from('experience_entries').select(EXPERIENCE_COLUMNS).order('sort_order', { ascending: true }),
     db.from('skill_categories').select('id, name, sort_order, skills(id, category_id, name, sort_order)').order('sort_order', { ascending: true }),
     db.from('profile_media_cleanup').select('id, bucket_id, storage_path, created_at').order('created_at', { ascending: true }),
   ]);
   return {
     profile: unwrap(profileResult),
-    education: ordered(unwrap(educationResult)),
     experience: ordered(unwrap(experienceResult)),
     categories: ordered(unwrap(categoryResult)).map((category) => ({ ...category, skills: ordered(category.skills) })),
     cleanups: unwrap(cleanupResult),
@@ -54,7 +51,6 @@ export async function saveProfileIntro(intro) {
 }
 
 function entryConfig(kind) {
-  if (kind === 'education') return { table: 'education_entries', columns: ENTRY_COLUMNS, fields: ['institution', 'qualification_or_course', 'date_range', 'description'] };
   if (kind === 'experience') return { table: 'experience_entries', columns: EXPERIENCE_COLUMNS, fields: ['organization', 'role', 'date_range', 'description'] };
   throw new Error('Unknown profile entry type.');
 }

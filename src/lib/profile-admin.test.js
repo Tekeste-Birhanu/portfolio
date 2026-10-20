@@ -23,9 +23,9 @@ describe('profile media validation', () => {
 });
 
 describe('profile content validation', () => {
-  it('rejects education and experience entries missing required fields', async () => {
+  it('rejects experience entries missing required fields', async () => {
     await expect(saveProfileEntry('education', { institution: '', qualification_or_course: 'Course' }))
-      .rejects.toThrow('Complete the required fields before saving.');
+      .rejects.toThrow('Unknown profile entry type.');
     await expect(saveProfileEntry('experience', { organization: 'Org', role: ' ' }))
       .rejects.toThrow('Complete the required fields before saving.');
   });

@@ -17,7 +17,7 @@
 
 ## 3. Visual foundations
 
-The public Home, Projects, About, and Contact areas are sections on one scrolling page, reached through a floating, bottom-centered icon dock. Project detail pages remain separate routes.
+The public Home, Projects, About, and Contact areas are sections on one scrolling page. Desktop uses a centered top navigation bar with the site logo at left and text links at right; phone and tablet layouts use labeled icon links in a floating, bottom-centered dock. Project detail pages remain separate routes.
 
 Values below are initial decisions. Verify contrast with a checker during implementation and tune sizes once real content is in.
 
@@ -50,7 +50,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
   - One monochrome icon set drawn in the current text color. Contact methods always show a text label. The administrator selects a built-in Website/Other, GitHub, LinkedIn, YouTube, Telegram, Instagram, X, Facebook, WhatsApp, Discord, or Phone icon for link methods; Email uses its fixed icon.
   - Imagery is the owner's actual screenshots and profile photo, never stock illustrations.
   - The owner manually optimizes files before upload. The app stores and serves uploaded originals without compression or generated variants. Gallery images preserve their aspect ratio; project-card previews and portrait presentation may crop within their display frames. Gallery thumbnails use the same uploaded files.
-- **Responsive behavior:** Three ranges: phone (under 640px), tablet (640px to 1023px), desktop (1024px and up). Layouts rearrange rather than shrink. The public navigation is a floating, bottom-centered dock with four labeled icon links. The admin menu opens as a vertically stacked side drawer without shifting page content.
+- **Responsive behavior:** Three ranges: phone (under 640px), tablet (640px to 1023px), desktop (1024px and up). Layouts rearrange rather than shrink. Public navigation is a centered top bar with the site logo and text links on desktop and a floating, bottom-centered icon dock with four labeled links on smaller screens. The admin menu opens as a vertically stacked side drawer without shifting page content.
   - Featured Projects entries use a two-column grid from 768px up and one column below; each image stacks above its text.
   - Admin: sidebar from 1024px up; a compact menu below.
   - No horizontal scrolling at 320px width; wide content scrolls inside its own container.
@@ -63,8 +63,8 @@ Values below are initial decisions. Verify contrast with a checker during implem
 | Text field, text area, select  | Input                                                                             | Visible label, optional hint, inline error linked to the field, keeps entered text on error.                                        |
 | Tag                            | Technologies and project status                                                   | Small, bordered, monospace; project status shows "Planning", "In progress", or "Completed" as words. Skills appear in bulleted lists. |
 | Toggle switch                  | Enable or disable a contact method                                                | Labeled, keyboard operable, state announced; the required Email method cannot be disabled.                                            |
-| Floating navigation dock       | Public navigation                                                                 | Stays centered near the bottom while scrolling; Home, Projects, About, and Contact use labeled icon links.                           |
-| Admin sidebar and compact menu | Admin navigation                                                                  | Projects, Profile, Homepage, Mailbox, sign out; sidebar on desktop, side drawer below 1024px.                                        |
+| Public navigation              | Public navigation                                                                 | Desktop: site logo at left and text links at right in a centered top bar. Phone and tablet: stays centered near the bottom with labeled icon links. |
+| Admin sidebar and compact menu | Admin navigation                                                                  | Home, Projects, About, Contact, sign out; Home opens Homepage editing, About opens Profile editing, Contact opens Mailbox; sidebar on desktop, side drawer below 1024px. |
 | Project entry                  | Featured Projects list                                                            | Name with status beside it, description, technologies on their own line, links, and a "View details" action; image stacks above text within each card. |
 | Gallery                        | Project detail screenshots                                                        | One main image; thumbnails below only when there are several; selected thumbnail marked with the accent border.                     |
 | Lightbox                       | Larger screenshot view                                                            | Close button, previous and next, arrow keys and Escape, swipe on touch; focus moves into it and returns to the main image on close. |
@@ -80,9 +80,9 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### Home
 
 - **Purpose:** Introduce the developer.
-- **Layout:** Owner name in bold, editable role and short introduction, two call-to-action buttons, and optional profile photo styled as a hanging badge. On phones, center the text and buttons and stack the centered badge above them.
-- **Primary action:** Admin-configured contact button; secondary GitHub button.
-- **Content and behavior:** Show the owner's name, role (default “Software Developer”), and short intro. Admin edits both button labels and links; omit the GitHub button until its URL is configured.
+- **Layout:** Owner name in bold, editable role and short introduction, fixed “Get in touch” and “View my GitHub” buttons, and optional profile photo styled as a hanging badge. On phones, center the text and buttons and stack the centered badge above them.
+- **Primary action:** The contact button always links to `/#contact`; the GitHub button always links to `https://github.com/Tekeste-Birhanu`.
+- **Content and behavior:** Show the owner's name, role (default “Software Developer”), and short intro. Button labels and destinations are fixed in the application and are not editable in the admin.
 - **Responsive changes:** Keep the intro readable at phone and desktop widths; center the text, buttons, and photo on phones.
 - **Related flow:** J-01
 
@@ -108,8 +108,8 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### About
 
 - **Purpose:** Give background and the CV.
-- **Layout:** Intro and education appear side by side when space allows. The CV download appears in the Education section when a CV exists. Skills and Experience follow as distinct, vertically stacked sections; skill categories can sit side by side. The Skills heading is visually subordinate to About. About does not display the profile photo.
-- **Content and behavior:** The administrator edits the intro, education entries, experience entries, skill categories, skills, and CV in Profile; the optional profile photo is managed from Homepage. Show skills as bulleted lists under their category headings. Show the intro, education, and experience sections only when they have content. Omit empty categories and sections; show the CV link only when a CV exists.
+- **Layout:** About Me introduction and optional CV link appear side by side when space allows. Skills and Experience follow as distinct, vertically stacked sections; skill categories can sit side by side. The Skills heading is visually subordinate to About Me. About Me does not display the profile photo.
+- **Content and behavior:** The administrator edits the About Me intro, experience entries, skill categories, skills, and CV in Profile; the optional profile photo is managed from Homepage. Education is not managed or displayed. Show skills as bulleted lists under their category headings. Omit empty categories and sections; show the CV link only when a CV exists.
 - **Related flow:** J-02
 
 ### Contact
@@ -147,8 +147,8 @@ Values below are initial decisions. Verify contrast with a checker during implem
 
 ### Admin Profile, Homepage, and Mailbox
 
-- **Purpose:** Edit About content, CV, skill categories, and skills (Profile); edit homepage role, intro, call-to-action labels/links, and profile photo (Homepage); read messages and manage contact methods (Mailbox).
-- **Layout:** Profile uses clear sections for About content, experience, CV, and skill categories. Education and experience entries use two columns on wide screens, with each Add entry form as the final card in its grid. Education entries have individual save and ordering controls; Experience entries share one Save experience action and use drag handles to reorder. Each category is a column with its own ordered skill list. One Save skills action commits category and skill name edits; Remove stays beside each skill. Drag handles reorder categories and skills, and dropping a skill into another category moves it there. Homepage contains one explicit-save editor for the role, intro, and two call-to-action labels/links, plus a separate photo editor with preview, save, remove, and cleanup retry actions; no controls change page sections. Mailbox has a messages list with unread messages marked, and a contact methods section.
+- **Purpose:** Edit About Me content, CV, skill categories, and skills (Profile); edit homepage role and intro and manage the profile photo (Homepage); read messages and manage contact methods (Mailbox).
+- **Layout:** Profile uses clear sections for About Me content, experience, CV, and skill categories. Experience entries use two columns on wide screens, with the Add entry form as the final card in its grid; entries share one Save experience action and use drag handles to reorder. Each category is a column with its own ordered skill list. One Save skills action commits category and skill name edits; Remove stays beside each skill. Drag handles reorder categories and skills, and dropping a skill into another category moves it there. Education is not available in the dashboard. Homepage contains an explicit-save editor for the role and intro, plus a separate photo editor with preview, save, remove, and cleanup retry actions; hero button links are fixed and no controls change page sections. Mailbox has a messages list with unread messages marked, and a contact methods section.
 - **Primary action:** Save (Profile, Homepage); open a message (Mailbox).
 - **Content and behavior:** In Profile, category headings and skill lists can be added; category and skill names are edited and saved together with one Save skills action. Category and skill order is changed by dragging the associated handle. Skills can be dragged within a category to reorder or into another category to move. A category can be deleted only when it has no skills. Messages are ordered newest first; opening a message marks it read. Notification failure is marked in the message list and opened message. Exactly one Email contact method exists; it can be edited but cannot be deleted or disabled. Other contact methods can be managed with add, edit, enable/disable, reorder, and remove actions.
 - **Related flow:** J-04, J-05
