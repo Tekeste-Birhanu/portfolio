@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AdminLayout } from './projects-page.jsx';
+import { AdminProfileSkeleton } from '../skeletons.jsx';
 import {
   addSkillCategory,
   deleteProfileEntry,
@@ -209,7 +210,7 @@ export function AdminProfilePage() {
     if (result) { setCvFile(null); document.getElementById('profile-cv-file').value = ''; }
   };
 
-  if (loading && !data) return <AdminLayout title="Profile" activeSection="profile"><p role="status">Loading profile…</p></AdminLayout>;
+  if (loading && !data) return <AdminLayout title="Profile" activeSection="profile"><AdminProfileSkeleton /></AdminLayout>;
   if (!data) return <AdminLayout title="Profile" activeSection="profile"><div className="admin-error-panel" role="alert"><p>{error}</p><button className="button button-secondary" type="button" onClick={() => void load()}>Retry</button></div></AdminLayout>;
 
   const categories = data.categories;
@@ -319,7 +320,6 @@ export function AdminProfilePage() {
   return <AdminLayout title="Profile" activeSection="profile">
     {error && <p className="admin-error" role="alert">{error}</p>}
     {notice && <p className="auth-success" role="status">{notice}</p>}
-    {loading && <p role="status">Refreshing profile…</p>}
     <div className="admin-profile-page">
       <div className="admin-profile-top-grid">
       <section className="admin-profile-section" aria-labelledby="profile-intro-title">

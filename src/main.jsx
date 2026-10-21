@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './styles.css';
-import App from './App.jsx';
-import AdminApp from './admin.jsx';
+const App = lazy(() => import('./App.jsx'));
+const AdminApp = lazy(() => import('./admin.jsx'));
+
+function RouteLoading() {
+  return (
+    <div className="app-route-loading" role="status">
+      Loading page…
+    </div>
+  );
+}
 
 const [navigationEntry] = window.performance.getEntriesByType('navigation');
 if (navigationEntry?.type === 'reload' && window.location.pathname === '/' && window.location.hash) {
@@ -12,8 +20,22 @@ if (navigationEntry?.type === 'reload' && window.location.pathname === '/' && wi
 }
 
 const router = createBrowserRouter([
-  { path: '/admin/*', element: <AdminApp /> },
-  { path: '*', element: <App /> },
+  {
+    path: '/admin/*',
+    element: (
+      <Suspense fallback={<RouteLoading />}>
+        <AdminApp />
+      </Suspense>
+    ),
+  },
+  {
+    path: '*',
+    element: (
+      <Suspense fallback={<RouteLoading />}>
+        <App />
+      </Suspense>
+    ),
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(

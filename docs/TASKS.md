@@ -80,15 +80,15 @@
 - **Depends on:** T-01, T-03
 - **Related:** F-01, F-02, F-13; J-01
 - **Goal:** Let visitors read the introduction, browse all projects, and review skills under About Me.
-- **Scope:** Read homepage intro, categorized skills, and projects from Supabase. Home contains the name, intro, and optional profile photo; Projects lists all saved projects in shared administrator-defined order using two columns on wide screens and one on narrow screens; About shows categorized skills. There is no Browse projects action or expand control. Each listed project links to a separate detail view. Add clear visual dividers between the Home, Projects, About, and Contact sections.
+- **Scope:** Home contains the name, fixed hero role and intro, and bundled profile image; Projects lists all saved projects in shared administrator-defined order using two columns on wide screens and one on narrow screens; About shows categorized skills. Projects, About, and Contact load independently near the viewport. There is no Browse projects action or expand control. Each listed project links to a separate detail view. Add clear visual dividers between the Home, Projects, About, and Contact sections.
 - **Done when:**
   - [x] Project entries show name, description, technologies, status, available links, image, and detail link.
-  - [x] Home contains the bold owner name and short intro, with no link until its destination is decided; the "Featured Projects" section lists all projects in stored order without Browse or expand controls; the list uses two columns on wide screens and one on narrow screens.
+  - [x] Home contains the fixed owner name, role, intro, bundled profile image, and fixed contact/GitHub actions; the Projects section lists all projects in stored order without a featured toggle, Browse action, or expand control; the list uses two columns on wide screens and one on narrow screens.
   - [x] Projects navigation reaches the project list, and every project has a "View details" link to its separate route.
   - [x] Skills appear under About, empty categories are omitted, and the project empty state appears when no projects exist.
   - [x] Public section boundaries are visually clear.
 - **Verify:** Check multiple ordered projects, all saved projects appearing on Projects, separate detail links, optional links, responsive columns, skills under About with multiple categories and their order, empty categories, no-project state, and visible section dividers.
-- **Progress:** Added the public content data module, project list, skills display, and public schema/storage migration. The migration is applied and the production build passes. User confirmed seeded projects and skills render. Projects now shows all saved projects in the shared order; this change still needs browser checks. Temporary test records remain in the linked project and must be removed after verification. The owner later confirmed the remaining checks were complete.
+- **Progress:** Added the public content data module, project list, skills display, and public schema/storage migration. The migration is applied and the production build passes. The owner confirmed the public project list and skills, including that all saved projects use the shared administrator-defined order.
 
 #### T-05 — Render project detail, gallery, and URL history
 
@@ -103,7 +103,7 @@
   - [x] Gallery supports one or many images, keyboard controls, touch navigation, and focus return after close.
   - [x] Old slugs redirect to the current project; deleted slugs show not found.
 - **Verify:** Check empty sections, single/multiple images, keyboard/touch controls, rename history, and deleted slugs.
-- **Progress:** Implemented project detail field mapping and fixed-order optional sections, the single/multiple image gallery and native lightbox, and redirects from historical slugs. Build and browser behavior checks are still pending; T-04's manual walkthrough and temporary-data cleanup also remain outstanding. The owner later confirmed the remaining checks were complete.
+- **Progress:** Implemented project detail field mapping and fixed-order optional sections, the single/multiple image gallery and native lightbox, and redirects from historical slugs. The owner confirmed project details, media, and URL behavior during the editor walkthrough; automated tests and the production build pass.
 
 #### T-06 — Render About and profile content
 
@@ -112,12 +112,12 @@
 - **Depends on:** T-01, T-03
 - **Related:** F-05, F-15; J-02
 - **Goal:** Present the owner's background and optional CV.
-- **Scope:** Render the About Me intro, experience, and CV from stored content, and render the stored profile photo in the Home hero. Render intro, experience, and categorized skill bullet lists only when populated; omit empty categories. Education is not part of the public portfolio.
+- **Scope:** Render the About Me intro, experience, and CV from stored content, and render the bundled profile image in the Home hero. Render intro, experience, and categorized skill bullet lists only when populated; omit empty categories. Education is not part of the public portfolio.
 - **Done when:**
   - [x] Sections without content are omitted and the CV link appears only when a CV exists.
-  - [x] CV is downloadable as PDF and the page adapts to phone and desktop.
-- **Verify:** Check partial and complete profiles, with and without CV/photo.
-- **Progress:** Added public profile and experience data reads, conditional About Me rendering, and the additive schema/storage migration. Education was later removed from the application; its legacy table is retained with access revoked. The migration was applied to the linked Supabase project and the production build passes. Browser checks with partial/complete profile data and photo/CV variants remain pending. The owner later confirmed the remaining checks were complete.
+  - [x] CV opens as a browser PDF preview and the page adapts to phone and desktop.
+- **Verify:** Check partial and complete profiles, with and without a CV; the Home image is a bundled asset and is not profile content fetched from Supabase.
+- **Progress:** Added public profile and experience data reads, conditional About Me rendering, and the additive schema/storage migration. Education was later removed from the application; its legacy table is retained with access revoked. The migration was applied to the linked Supabase project. The owner confirmed the profile behavior; automated tests and the production build pass.
 
 ### M3 — Admin and contact workflows
 
@@ -151,7 +151,7 @@
   - [x] Project order can be changed by dragging.
   - [x] Admin navigation adapts to desktop and mobile.
 - **Verify:** Check filtering, ordering, empty state, responsive layout, and authorization.
-- **Progress:** Added protected responsive sidebar navigation, a Supabase-backed two-column Projects dashboard with search, last-updated dates, add/edit entry points, and drag ordering. Removed the featured toggle; the complete admin list order drives the public list. A database migration drops the unused featured flag. Below 1024px, the admin navigation opens as an accessible side drawer. Production build passes; rendered viewport checks remain pending. The owner later confirmed the remaining checks were complete.
+- **Progress:** Added protected responsive sidebar navigation, a Supabase-backed two-column Projects dashboard with search, last-updated dates, add/edit entry points, and drag ordering. Removed the featured toggle; the complete admin list order drives the public list. A database migration drops the unused featured flag. Below 1024px, the admin navigation opens as an accessible side drawer. The owner confirmed the dashboard behavior and responsive navigation; the production build passes.
 
 #### T-09 — Implement project editor and permanent deletion
 
@@ -195,31 +195,29 @@
 - **Depends on:** T-07, T-01
 - **Related:** F-05, F-15; J-04
 - **Goal:** Let the owner maintain About Me content and skills without code changes.
-- **Scope:** Build explicit-save editors for the About Me intro, experience (including optional free-form date ranges), PDF CV, skill categories, and their skills. Education is not managed in the dashboard. The profile photo is managed with homepage content under T-12.
+- **Scope:** Build explicit-save editors for the About Me intro, experience (including optional free-form date ranges), PDF CV, skill categories, and their skills. Education is not managed in the dashboard. The profile image is bundled with the app, not managed from the dashboard.
 - **Done when:**
   - [x] Profile content saves and appears on About; empty sections and categories are omitted publicly.
   - [x] Categories can be added, renamed with one Save skills action, and reordered by dragging; a category can be removed only when empty.
   - [x] Skills can be added, renamed with the shared Save skills action, reordered within a category, moved between categories by dragging, and removed; About groups skills in bullet lists under category names and omits empty categories.
   - [x] CV accepts PDF up to 10 MB and can be replaced or removed.
 - **Verify:** Check validation, media handling, category and skill operations, drag reordering for categories and skills, moving skills between category columns by dragging, that non-empty categories cannot be deleted, empty-state behavior, and public updates.
-- **Progress:** Replaced the Profile placeholder with editors for the About Me introduction, experience, CV, skill categories, and skills. Education has been removed from the administrator and public interfaces; its legacy database table is retained without an application read/write path to avoid deleting existing records. Profile photo management now lives under Homepage (T-12). Added browser-side file type/size checks, retryable cleanup for profile files, and a database trigger that prevents deleting a category with skills. Five profile validation unit tests pass and the production build passes. Migration `20261017000006_profile_editor_rules.sql` is confirmed in both local and remote migration history; the interactive admin walkthrough remains pending. The owner later confirmed the remaining checks were complete.
+- **Progress:** Replaced the Profile placeholder with editors for the About Me introduction, experience, CV, skill categories, and skills. Education has been removed from the administrator and public interfaces; its legacy database table is retained without an application read/write path to avoid deleting existing records. The Home image is bundled with the app rather than managed from the dashboard. Added browser-side file type/size checks, retryable CV cleanup, and a database trigger that prevents deleting a category with skills. Migration `20261017000006_profile_editor_rules.sql` is confirmed in both local and remote migration history; the owner confirmed the interactive checks were complete.
 
-#### T-12 — Implement Homepage content editing
+#### T-12 — Keep Home content fixed and bundled
 
 - **Status:** Done
 - **Priority:** Must
 - **Depends on:** T-07, T-01
 - **Related:** F-01, F-16; J-04
-- **Goal:** Let the owner update the homepage role and introduction, and manage the optional profile photo.
-- **Scope:** Build an explicit-save Homepage content editor for the editable role (default “Software Developer”) and intro; manage the profile photo with preview, replacement/removal, and retryable cleanup. Keep homepage structure and order fixed. The fixed “Get in touch” action links to `/#contact`, and “View my GitHub” links to `https://github.com/Tekeste-Birhanu`; neither is editable in the dashboard.
+- **Goal:** Keep the Home role, introduction, image, and actions fixed in the app.
+- **Scope:** Bundle the Home image in `public/`; keep hero text, actions, page structure, and section order fixed in the app. The admin dashboard has Projects, About, and Contact sections only.
 - **Done when:**
-  - [x] Changes appear on Home after saving.
-  - [x] The editor cannot add, remove, or reorder homepage sections.
-  - [x] Placeholder wording remains usable until the owner supplies final identity and copy.
-  - [x] Role and intro save explicitly; the fixed hero actions use their defined contact and GitHub destinations.
-  - [x] The optional profile photo is managed from Homepage and appears beside the hero text on wide screens, below it on phones, and not on About.
-- **Verify:** Check intro save, photo validation/upload/removal/cleanup recovery, responsive public rendering, validation/error recovery, and public rendering.
-- **Progress:** Added the protected Homepage editor for role and intro, and moved profile photo management there with preview, upload, removal, and cleanup retry. The public photo is beside the hero text on wide screens and below it on phones; About no longer shows it. The owner name, fixed hero actions, page sections, and section order remain outside the editor. Migration `20261017000007_homepage_role_and_actions.sql` is confirmed in local and remote migration history; its CTA columns remain in the applied schema but are no longer read or written by the app. A future migration can remove them if the owner wants to discard those stored settings. The owner confirmed the interactive checks were complete.
+  - [x] The bundled profile image and fixed hero text render without a Supabase content request.
+  - [x] Homepage sections and their order are fixed in the application.
+  - [x] The role and approved introduction are fixed in the app; the fixed hero actions use their defined contact and GitHub destinations.
+- **Progress:** Home role, approved intro, image, actions, page sections, and section order are fixed in the app. The profile image is served from `public/profile-placeholder.jpg`; there is no Supabase read or admin photo editor. The legacy `profile_content.photo_storage_path` column, photo bucket, and historical cleanup rows remain in the hosted schema to avoid deleting stored data; the app no longer reads or writes the photo path. The legacy `homepage_content` table remains unused. The owner confirmed the interactive checks were complete.
+- **Verify:** Check the fixed Home content and bundled image render without a Supabase request, fixed section order, and responsive layout.
 
 #### T-13 — Implement Mailbox and contact methods
 
@@ -234,7 +232,7 @@
   - [x] Exactly one Email method exists, is editable but cannot be disabled or removed, and is separate from login email.
   - [x] Other methods can be managed; enabled methods appear publicly in order.
 - **Verify:** Check automatic read state on open, confirmed deletion, contact-method operations, Email invariant, public order, and authorization.
-- **Progress:** Added the Mailbox messages list and detail route, automatic read state on open, confirmed deletion, notification status display, contact-method editor with drag ordering, a database-seeded required Email row protected by database constraints, and public rendering for enabled contact methods. The owner applied migration `20261017000008_mailbox_and_contact_methods.sql` and confirmed Mailbox loads, configured Email and a link appear publicly, and saved order is reflected publicly. Administrator-selected contact icons and phone links are implemented locally; migration `20261017000009_contact_method_icons.sql` must be applied before using them. Toggle visibility, removal, Email protection, and message-open/deletion walkthroughs remain pending. The owner later confirmed the remaining checks were complete.
+- **Progress:** Added the messages list and detail route, automatic read state on open, confirmed deletion, notification status display, contact-method editor with drag ordering, a database-seeded required Email row protected by database constraints, and public rendering for enabled contact methods. The owner applied migrations `20261017000008_mailbox_and_contact_methods.sql` and `20261017000009_contact_method_icons.sql`, confirmed the Contact dashboard and public links work, and completed the message and method walkthroughs.
 
 #### T-14 — Implement contact form and Brevo notification
 
@@ -322,5 +320,5 @@
 
 ## 6. Blockers and deferred work
 
-- **Current specification blockers:** None for starting implementation. Owner identity and final homepage copy, Brevo sender/deliverability setup, and free-tier service checks remain documented as deferred or pre-launch work.
-- **Deferred:** Database exports and automated backups; owner identity and final homepage copy; improved link previews; Telegram notifications; custom icons for arbitrary contact platforms; theme switching; CAPTCHA/rate limiting; app-side image compression; video demos; analytics; dashboard overview; custom page builders and sections.
+- **Current specification blockers:** None. Production smoke checks, Brevo sender/deliverability, and free-tier service checks are tracked as launch-readiness work in T-17.
+- **Deferred:** Database exports and automated backups; improved link previews; Telegram notifications; custom icons for arbitrary contact platforms; theme switching; CAPTCHA/rate limiting; app-side image compression; video demos; analytics; dashboard overview; custom page builders and sections.

@@ -139,6 +139,68 @@
   gap: 1.25rem;
   max-width: 64rem;
 }
+.admin-profile-skeletons,
+.admin-message-skeleton,
+.admin-editor-skeleton {
+  display: grid;
+  gap: 1rem;
+  max-width: 64rem;
+}
+.admin-profile-skeletons .admin-profile-section,
+.admin-message-skeleton .admin-profile-section {
+  width: 100%;
+}
+.admin-project-skeletons {
+  max-width: 64rem;
+}
+.admin-project-skeletons .admin-project-row {
+  min-height: 8.5rem;
+}
+.admin-project-skeletons .skeleton-drag-handle {
+  grid-row: span 2;
+}
+.admin-project-skeletons .admin-row-actions > .ui-skeleton {
+  flex: 0 0 auto;
+}
+.admin-mailbox-skeletons {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 64rem;
+}
+.skeleton-admin-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 8rem;
+  gap: 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+.admin-editor-skeleton {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 64rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+}
+.skeleton-editor-primary {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+}
+.admin-media-skeletons {
+  display: grid;
+  gap: 1rem;
+  padding-block: 1rem;
+}
+.skeleton-admin-media-row {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
 .admin-profile-top-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -163,14 +225,6 @@
   margin: 0;
   font-family: var(--font-mono);
   font-size: 1rem;
-}
-.admin-homepage-form {
-  display: grid;
-  gap: 1.25rem;
-}
-.admin-homepage-save {
-  grid-column: 1 / -1;
-  width: 100%;
 }
 .admin-profile-section textarea,
 .admin-profile-section input,
@@ -248,16 +302,6 @@
   padding: 0.9rem;
   border: 1px solid var(--color-border);
   border-radius: 4px;
-}
-.admin-profile-photo-preview {
-  display: block;
-  width: min(100%, 14rem);
-  max-height: 14rem;
-  aspect-ratio: 1;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background: var(--color-bg);
-  object-fit: cover;
 }
 .admin-profile-entry-list,
 .admin-profile-categories,
@@ -1250,14 +1294,10 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .admin-homepage-form {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
-  }
-}
-
 @media (max-width: 639px) {
+  .admin-editor-skeleton {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .admin-content {
     padding-block: 1.75rem;
   }

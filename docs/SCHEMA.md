@@ -23,23 +23,23 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 
 ### Homepage content
 
-- **Purpose:** Store editable homepage role and introduction content. The hero button labels and destinations are fixed in the application: “Get in touch” links to `/#contact`, and “View my GitHub” links to `https://github.com/Tekeste-Birhanu`.
-- **Fields:** One singleton row with `role_text` (plain text, default “Software Developer”), `intro_text` (plain text, required), and `updated_at`. The previously used `primary_cta_label`, `primary_cta_href`, `secondary_cta_label`, and `secondary_cta_href` columns remain from an applied historical migration; current application code does not read or write them. Removing them would require a separate schema migration and would discard any old button settings.
-- **Constraints:** Role and intro are editable. The optional profile photo is stored on `profile_content` and managed from the Homepage dashboard section. Neither row controls homepage sections or their order.
+- **Purpose:** Legacy singleton row retained from the prior editable hero copy implementation. The current hero role and introduction are fixed in the app and this table has no application read/write path.
+- **Fields:** Existing role, intro, updated-at, and historical CTA columns remain in the hosted schema. No active UI or public request uses them; removing the row/table would require a reviewed schema migration and discard stored copy/settings.
+- **Constraints:** The legacy row does not control homepage sections or their order. Home copy and its image are bundled with the app.
 - **Related requirements:** F-01, F-16
 
 ### Profile
 
-- **Purpose:** Store the owner's About Me intro and profile photo/CV file paths. The photo is presented in the Home hero and managed in the Homepage dashboard section.
+- **Purpose:** Store the owner's About Me intro, legacy profile photo path, and current CV file path.
 - **Fields:** Singleton row with `intro` (plain text, optional), `photo_storage_path` (optional), `cv_storage_path` (optional), and `updated_at`.
-- **Constraints:** Empty fields are omitted publicly. The CV is a PDF up to 10 MB. The profile photo accepts JPG, PNG, or WebP up to 5 MB; the original is served without app compression or generated variants.
+- **Constraints:** Empty fields are omitted publicly. The CV is a PDF up to 10 MB. The `photo_storage_path` field is retained for legacy data but is no longer read or written by the application; Home uses the bundled `public/profile-placeholder.jpg` asset.
 - **Related requirements:** F-05, F-15
-- **Implementation:** The singleton row is `public.profile_content` with `id = true`. Its public photo and CV use the `profile-photo` and `profile-cv` storage buckets, respectively; bucket rules enforce allowed types and maximum sizes. The existing storage column and bucket remain unchanged when photo controls are presented in the Homepage editor. Failed file cleanup is recorded in `public.profile_media_cleanup` for administrator retry from Homepage for photo files and Profile for CV files.
+- **Implementation:** The singleton row is `public.profile_content` with `id = true`. The CV uses the `profile-cv` Storage bucket. The legacy `profile-photo` bucket, `photo_storage_path` column, and stored objects remain in the hosted schema; no application route accesses them. Failed CV cleanup is recorded in `public.profile_media_cleanup` for administrator retry from About.
 
 ### Profile media cleanup
 
-- **Purpose:** Retain retryable Storage cleanup work when a profile photo or CV is replaced or removed; photo cleanup is retried from Homepage and CV cleanup from Profile.
-- **Fields:** `id`, `bucket_id` (`profile-photo` or `profile-cv`), `storage_path`, and `created_at`.
+- **Purpose:** Retain retryable Storage cleanup work when a CV is replaced or removed. Historical photo cleanup rows may remain from the former photo editor.
+- **Fields:** `id`, `bucket_id` (`profile-photo` or `profile-cv`), `storage_path`, and `created_at`. New application cleanup rows use `profile-cv`.
 - **Constraints:** Only the designated administrator can read or manage cleanup rows. Rows are removed only after the corresponding Storage object is deleted.
 - **Implementation:** `public.profile_media_cleanup` is private under RLS and is introduced with the Profile editor.
 
@@ -121,7 +121,7 @@ The legacy `public.education_entries` table remains in the deployed schema to pr
 | Profile | One-to-many | Work experience entry | Delete entries with the profile only if profile is ever made non-singleton. |
 | Skill category | One-to-many | Skill | Each skill belongs to one category; a category may be deleted only when it contains no skills. |
 
-Homepage content, Profile, administrator configuration, and the Email contact method are singleton records. Visitor messages and all editable content are owned by the one designated administrator.
+Legacy Homepage content, Profile, administrator configuration, and the Email contact method are singleton records. Visitor messages and all editable content are owned by the one designated administrator.
 
 ## 4. Integrity and business invariants
 
@@ -153,7 +153,7 @@ Project name search can use a case-insensitive match at the expected small portf
 ## 6. Access and data lifecycle
 
 - **Ownership / tenant boundaries:** One owner/admin. The admin Auth user ID is explicitly allowlisted in a protected configuration source. No public registration or multi-tenant data.
-- **Public reads:** Homepage content, profile content, skill categories and skills, projects, current/historical slugs, project media metadata/files, and enabled contact methods.
+- **Public reads:** About Me content and CV metadata, skill categories and skills, projects, current/historical slugs, project media metadata/files, and enabled contact methods. The Home role, introduction, actions, and profile image are bundled with the app; Home content and the legacy profile photo path are not read from Supabase. Legacy homepage copy has no app read path.
 - **Admin reads/writes:** All content management, contact methods, and messages are restricted to the designated administrator. Enabled contact methods are also publicly readable. The contact Email row invariant is enforced by the database trigger and unique index.
 - **Visitor message writes:** Browser clients cannot insert directly. The contact Edge Function validates input and writes the message using trusted credentials; it then sends the Brevo notification and records the result.
 - **File access:** Uploaded portfolio files are publicly readable because they appear on public pages. Only the designated admin can upload, replace, or delete them. Storage paths associate each file with exactly one profile or project item.

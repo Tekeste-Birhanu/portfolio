@@ -1,9 +1,8 @@
 import { supabase } from './supabase.js';
-import { invalidatePublicPortfolioCache } from './public-content.js';
+import { invalidatePublicPortfolioCache } from './public-content-cache.js';
 
 const EXPERIENCE_COLUMNS = 'id, organization, role, date_range, description, sort_order';
 const FILES = {
-  photo_storage_path: { bucket: 'profile-photo', accepts: ['image/jpeg', 'image/png', 'image/webp'], maxBytes: 5 * 1024 * 1024, extensions: { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' } },
   cv_storage_path: { bucket: 'profile-cv', accepts: ['application/pdf'], maxBytes: 10 * 1024 * 1024, extensions: { 'application/pdf': 'pdf' } },
 };
 
@@ -21,10 +20,6 @@ function ordered(items = []) {
   return [...items].sort((left, right) => left.sort_order - right.sort_order);
 }
 
-export function profilePhotoUrl(path) {
-  return path ? client().storage.from('profile-photo').getPublicUrl(path).data.publicUrl : '';
-}
-
 export function profileCvUrl(path) {
   return path ? client().storage.from('profile-cv').getPublicUrl(path, { download: true }).data.publicUrl : '';
 }
@@ -32,10 +27,10 @@ export function profileCvUrl(path) {
 export async function getProfileEditorData() {
   const db = client();
   const [profileResult, experienceResult, categoryResult, cleanupResult] = await Promise.all([
-    db.from('profile_content').select('id, intro, photo_storage_path, cv_storage_path, updated_at').eq('id', true).single(),
+    db.from('profile_content').select('intro, cv_storage_path').eq('id', true).single(),
     db.from('experience_entries').select(EXPERIENCE_COLUMNS).order('sort_order', { ascending: true }),
-    db.from('skill_categories').select('id, name, sort_order, skills(id, category_id, name, sort_order)').order('sort_order', { ascending: true }),
-    db.from('profile_media_cleanup').select('id, bucket_id, storage_path, created_at').order('created_at', { ascending: true }),
+    db.from('skill_categories').select('id, name, sort_order, skills(id, name, sort_order)').order('sort_order', { ascending: true }),
+    db.from('profile_media_cleanup').select('id, bucket_id, storage_path').eq('bucket_id', 'profile-cv').order('created_at', { ascending: true }),
   ]);
   return {
     profile: unwrap(profileResult),
@@ -145,9 +140,9 @@ export async function deleteSkill(id) {
 
 export function validateProfileFile(slot, file) {
   const rule = FILES[slot];
-  if (!file || !rule || !rule.accepts.includes(file.type)) return slot === 'photo_storage_path' ? 'Choose a JPG, PNG, or WebP image.' : 'Choose a PDF file.';
+  if (!file || !rule || !rule.accepts.includes(file.type)) return 'Choose a PDF file.';
   if (!file.size) return 'The selected file is empty.';
-  if (file.size > rule.maxBytes) return `${slot === 'photo_storage_path' ? 'Images' : 'PDF files'} must be ${rule.maxBytes / (1024 * 1024)} MB or smaller.`;
+  if (file.size > rule.maxBytes) return `PDF files must be ${rule.maxBytes / (1024 * 1024)} MB or smaller.`;
   return '';
 }
 

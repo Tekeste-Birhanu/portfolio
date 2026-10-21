@@ -1,25 +1,42 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
-  Link,
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-  useParams,
-} from "react-router-dom";
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import {
-  getCachedPublicPortfolio,
-  getPublicPortfolio,
-} from "./lib/public-content.js";
-import { submitContactMessage } from "./lib/contact-submit.js";
+  getCachedPublicAbout,
+  getCachedPublicContact,
+  getCachedPublicProjects,
+} from "./lib/public-content-cache.js";
+import { NotFoundPage, LoadingPage } from "./public-page-states.jsx";
 import {
-  NotFoundPage,
-  PageLayout,
-  LoadingPage,
-  ServiceUnavailablePage,
-} from "./public-page-states.jsx";
+  PublicAboutSkeleton,
+  PublicContactSkeleton,
+  PublicProjectsSkeleton,
+} from "./skeletons.jsx";
+
+const ProjectDetailPage = lazy(() => import("./project-detail-page.jsx"));
+const loadPublicProjects = () =>
+  import("./lib/public-content.js").then(({ getPublicProjects }) =>
+    getPublicProjects(),
+  );
+const loadPublicAbout = () =>
+  import("./lib/public-content.js").then(({ getPublicAbout }) =>
+    getPublicAbout(),
+  );
+const loadPublicContact = () =>
+  import("./lib/public-content.js").then(({ getPublicContact }) =>
+    getPublicContact(),
+  );
 
 const SITE_OWNER_NAME = "Tekeste Birhanu";
+const HERO_ROLE = "Software Developer";
+const HERO_INTRO =
+  "Learning by building, growing with every project, and exploring new ways to create smarter digital experiences – from building intuitive interfaces to exploring AI-powered solutions.";
 
 const navigation = [
   { label: "Home", to: "/#home", section: "home", icon: "home" },
@@ -360,45 +377,88 @@ function SiteHeader() {
   );
 }
 
-function HomePage() {
-  const [portfolio, setPortfolio] = useState(getCachedPublicPortfolio);
-  const [loadError, setLoadError] = useState(null);
+function useDeferredPublicContent(load, getCached, eager = false) {
+  const sectionRef = useRef(null);
+  const [data, setData] = useState(getCached);
+  const [shouldLoad, setShouldLoad] = useState(eager);
+  const [error, setError] = useState(null);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
+    if (eager) return undefined;
+    const section = sectionRef.current;
+    if (!section || !("IntersectionObserver" in window)) {
+      setShouldLoad(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "500px 0px" },
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [eager]);
+
+  useEffect(() => {
+    if (!shouldLoad) return undefined;
     let current = true;
-    setLoadError(null);
-    getPublicPortfolio()
+    setError(null);
+    load()
       .then((result) => {
-        if (current) setPortfolio(result);
+        if (current) setData(result);
       })
-      .catch((error) => {
-        if (current) setLoadError(error);
+      .catch((loadError) => {
+        if (current) setError(loadError);
       });
     return () => {
       current = false;
     };
-  }, [attempt]);
+  }, [load, shouldLoad, attempt]);
 
-  if (loadError && !portfolio) {
-    const message =
-      loadError.code === "SUPABASE_NOT_CONFIGURED"
-        ? loadError.message
-        : "The portfolio service could not be reached. Check your connection and try again.";
-    return (
-      <ServiceUnavailablePage
-        message={message}
-        onRetry={() => setAttempt((value) => value + 1)}
-      />
-    );
-  }
+  return {
+    sectionRef,
+    data,
+    error,
+    loading: shouldLoad && !data && !error,
+    retry: () => setAttempt((value) => value + 1),
+  };
+}
 
-  if (!portfolio) return <LoadingPage title="Loading portfolio" />;
+function SectionLoadError({ label, onRetry }) {
+  return (
+    <p className="public-section-error" role="alert">
+      {label} could not be loaded.{" "}
+      <button className="text-link" type="button" onClick={onRetry}>
+        Retry
+      </button>
+    </p>
+  );
+}
+
+function HomePage() {
+  const projectsData = useDeferredPublicContent(
+    loadPublicProjects,
+    getCachedPublicProjects,
+  );
+  const aboutData = useDeferredPublicContent(
+    loadPublicAbout,
+    getCachedPublicAbout,
+  );
+  const contactData = useDeferredPublicContent(
+    loadPublicContact,
+    getCachedPublicContact,
+  );
+  const heroPhoto = "/profile-placeholder.jpg";
 
   return (
     <>
       <section
-        className={`page-section home-hero${portfolio.profile.photoUrl ? " has-photo" : ""}`}
+        className="page-section home-hero has-photo"
         id="home"
         aria-labelledby="home-title"
       >
@@ -406,11 +466,8 @@ function HomePage() {
           <h1 className="home-name" id="home-title">
             {SITE_OWNER_NAME}
           </h1>
-          <p className="home-role">{portfolio.role || "Software Developer"}</p>
-          <p className="page-intro">
-            {portfolio.intro ||
-              "A portfolio introduction has not been added yet."}
-          </p>
+          <p className="home-role">{HERO_ROLE}</p>
+          <p className="page-intro">{HERO_INTRO}</p>
           <div className="home-hero-actions">
             <a className="button home-cta-primary" href="/#contact">
               Get in touch
@@ -425,42 +482,68 @@ function HomePage() {
             </a>
           </div>
         </div>
-        {portfolio.profile.photoUrl && (
-          <div className="home-hero-badge">
-            <img
-              className="home-hero-photo"
-              src={portfolio.profile.photoUrl}
-              alt="Portrait of the portfolio owner"
-            />
-          </div>
-        )}
+        <div className="home-hero-badge">
+          <img
+            className="home-hero-photo"
+            src={heroPhoto}
+            alt="Portrait of the portfolio owner"
+            fetchPriority="high"
+            decoding="async"
+          />
+        </div>
       </section>
-      <ProjectsSection projects={portfolio.projects} />
+      <ProjectsSection
+        sectionRef={projectsData.sectionRef}
+        projects={projectsData.data}
+        loading={projectsData.loading}
+        error={projectsData.error}
+        onRetry={projectsData.retry}
+      />
       <section
         className="page-section content-section"
         id="about"
         aria-labelledby="about-title"
+        ref={aboutData.sectionRef}
       >
         <h2 id="about-title">About Me</h2>
-        <AboutContent
-          profile={portfolio.profile}
-          experience={portfolio.experience}
-          categories={portfolio.skillCategories}
-        />
+        {aboutData.loading && <PublicAboutSkeleton />}
+        {aboutData.error && !aboutData.data && (
+          <SectionLoadError label="About Me" onRetry={aboutData.retry} />
+        )}
+        {aboutData.data && (
+          <AboutContent
+            profile={aboutData.data.profile}
+            experience={aboutData.data.experience}
+            categories={aboutData.data.skillCategories}
+          />
+        )}
       </section>
       <section
         className="page-section content-section"
         id="contact"
         aria-labelledby="contact-title"
+        ref={contactData.sectionRef}
       >
         <h2 id="contact-title">Contact Me</h2>
-        <ContactSection methods={portfolio.contactMethods ?? []} />
+        <ContactSection
+          methods={contactData.data ?? []}
+          methodsLoading={contactData.loading}
+          methodsError={contactData.error}
+          methodsAvailable={contactData.data !== null}
+          onRetryMethods={contactData.retry}
+        />
       </section>
     </>
   );
 }
 
-function ContactSection({ methods }) {
+function ContactSection({
+  methods,
+  methodsLoading,
+  methodsError,
+  methodsAvailable,
+  onRetryMethods,
+}) {
   const [visitorEmail, setVisitorEmail] = useState("");
   const [message, setMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
@@ -500,6 +583,7 @@ function ContactSection({ methods }) {
 
     setSending(true);
     try {
+      const { submitContactMessage } = await import("./lib/contact-submit.js");
       await submitContactMessage(normalizedEmail, normalizedMessage);
       setVisitorEmail("");
       setMessage("");
@@ -515,7 +599,11 @@ function ContactSection({ methods }) {
   return (
     <div className="public-contact-grid">
       <section className="public-contact-panel" aria-label="Contact methods">
-        {methods.length ? (
+        {methodsLoading ? (
+          <PublicContactSkeleton />
+        ) : methodsError && !methodsAvailable ? (
+          <SectionLoadError label="Contact details" onRetry={onRetryMethods} />
+        ) : methods.length ? (
           <ul className="public-contact-methods">
             {methods.map((method) => (
               <li key={method.id}>
@@ -632,23 +720,28 @@ function ContactSection({ methods }) {
   );
 }
 
-function ProjectsSection({ projects }) {
+function ProjectsSection({ sectionRef, projects, loading, error, onRetry }) {
   return (
     <section
       className="page-section content-section"
       id="projects"
       aria-labelledby="projects-title"
+      ref={sectionRef}
     >
       <h2 id="projects-title">Featured Projects</h2>
-      {projects.length === 0 ? (
+      {loading && <PublicProjectsSkeleton />}
+      {error && !projects && (
+        <SectionLoadError label="Projects" onRetry={onRetry} />
+      )}
+      {projects && projects.length === 0 ? (
         <p className="empty-state">No projects yet.</p>
-      ) : (
+      ) : projects?.length > 0 ? (
         <div className="project-list project-grid">
           {projects.map((project) => (
             <ProjectEntry key={project.id} project={project} />
           ))}
         </div>
-      )}
+      ) : null}
     </section>
   );
 }
@@ -740,17 +833,18 @@ function AboutContent({ profile, experience, categories }) {
             </div>
           )}
           {profile.cvUrl && (
-            <section className="profile-section" aria-labelledby="cv-title">
-              <h3 id="cv-title">CV</h3>
+            <div className="profile-section">
               <div className="profile-cv-actions">
                 <a
                   className="button button-secondary cv-download"
                   href={profile.cvUrl}
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  Download CV (PDF)
+                  Preview CV
                 </a>
               </div>
-            </section>
+            </div>
           )}
         </div>
       )}
@@ -789,264 +883,6 @@ function AboutContent({ profile, experience, categories }) {
         </div>
       )}
     </>
-  );
-}
-
-function ProjectDetailPage() {
-  const { slug } = useParams();
-  const [project, setProject] = useState(null);
-  const [notFound, setNotFound] = useState(false);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let current = true;
-    setProject(null);
-    setNotFound(false);
-    setError(false);
-    getPublicPortfolio()
-      .then((portfolio) => {
-        if (!current) return;
-        const match = portfolio.projects.find(
-          (item) => item.slug === slug || item.historicalSlugs.includes(slug),
-        );
-        setProject(match ?? null);
-        setNotFound(!match);
-      })
-      .catch(() => {
-        if (current) setError(true);
-      });
-    return () => {
-      current = false;
-    };
-  }, [slug]);
-
-  if (error)
-    return (
-      <ServiceUnavailablePage message="The project could not be loaded. Please try again shortly." />
-    );
-  if (notFound) return <NotFoundPage project />;
-  if (!project) return <LoadingPage title="Loading project" />;
-  if (project.slug !== slug)
-    return <Navigate to={`/projects/${project.slug}`} replace />;
-  return (
-    <PageLayout title={project.name} backToProjects panel>
-      <p className="status-tag detail-status">
-        {project.status === "planning"
-          ? "Planning"
-          : project.status === "in_progress"
-            ? "In progress"
-            : "Completed"}
-      </p>
-      <div
-        className={`detail-summary-grid${project.technologies.length > 0 ? " has-technologies" : ""}`}
-      >
-        <p className="page-intro">{project.shortDescription}</p>
-        {project.technologies.length > 0 && (
-          <div className="detail-block detail-technologies">
-            <h2>Technologies</h2>
-            <ul className="technology-list">
-              {project.technologies.map((item) => (
-                <li className="technology-tag" key={item}>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-      <ProjectGallery project={project} />
-      {(project.repositoryUrl || project.liveDemoUrl) && (
-        <div className="project-actions detail-actions">
-          {project.repositoryUrl && (
-            <a href={project.repositoryUrl} target="_blank" rel="noreferrer">
-              Repository
-              <span className="visually-hidden"> (opens in a new tab)</span>
-            </a>
-          )}
-          {project.liveDemoUrl && (
-            <a href={project.liveDemoUrl} target="_blank" rel="noreferrer">
-              Live demo
-              <span className="visually-hidden"> (opens in a new tab)</span>
-            </a>
-          )}
-        </div>
-      )}
-      {project.longDescription && (
-        <div className="detail-block">
-          <h2>About this project</h2>
-          <p className="detail-copy">{project.longDescription}</p>
-        </div>
-      )}
-      {[
-        ["Key features", project.keyFeatures],
-        ["Technical details", project.technicalDetails],
-        ["Challenges and solutions", project.challengesAndSolutions],
-        ["What I learned", project.whatILearned],
-      ]
-        .filter(([, content]) => content?.trim())
-        .map(([heading, content]) => (
-          <div className="detail-block" key={heading}>
-            <h2>{heading}</h2>
-            <p className="detail-copy">{content}</p>
-          </div>
-        ))}
-      <Link
-        className="text-link project-back-link project-back-bottom"
-        to="/#projects"
-      >
-        Back to Projects
-      </Link>
-    </PageLayout>
-  );
-}
-
-function ProjectGallery({ project }) {
-  const images = project.media;
-  const [selected, setSelected] = useState(0);
-  const [lightboxIndex, setLightboxIndex] = useState(null);
-  const dialogRef = useRef(null);
-  const closeRef = useRef(null);
-  const triggerRef = useRef(null);
-  const touchStartRef = useRef(null);
-  const activeIndex = lightboxIndex ?? selected;
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (lightboxIndex !== null && dialog && !dialog.open) {
-      dialog.showModal();
-      closeRef.current?.focus();
-    }
-  }, [lightboxIndex]);
-
-  if (!images.length) return null;
-  const openLightbox = () => {
-    triggerRef.current = document.activeElement;
-    setLightboxIndex(selected);
-  };
-  const closeLightbox = () => {
-    if (dialogRef.current?.open) dialogRef.current.close();
-    setLightboxIndex(null);
-    requestAnimationFrame(() => triggerRef.current?.focus());
-  };
-  const move = (direction) => {
-    setLightboxIndex(
-      (index) => (index + direction + images.length) % images.length,
-    );
-  };
-
-  return (
-    <div
-      className="project-gallery"
-      role="group"
-      aria-label={`${project.name} screenshots`}
-    >
-      <button
-        className="gallery-main-button"
-        type="button"
-        onClick={openLightbox}
-        aria-label={`Open image viewer: ${images[selected].alt_text}`}
-      >
-        <img
-          className="detail-image"
-          src={images[selected].url}
-          alt={images[selected].alt_text}
-        />
-      </button>
-      {images.length > 1 && (
-        <div
-          className="gallery-thumbnails"
-          role="group"
-          aria-label="Choose project image"
-        >
-          {images.map((image, index) => (
-            <button
-              className={`gallery-thumbnail${index === selected ? " is-selected" : ""}`}
-              type="button"
-              key={image.id}
-              onClick={() => setSelected(index)}
-              aria-label={`Show image ${index + 1}: ${image.alt_text}`}
-              aria-pressed={index === selected}
-            >
-              <img src={image.url} alt="" />
-            </button>
-          ))}
-        </div>
-      )}
-      <dialog
-        className="lightbox"
-        ref={dialogRef}
-        aria-label={`${project.name} image viewer`}
-        onCancel={() => setLightboxIndex(null)}
-        onClose={() => {
-          setLightboxIndex(null);
-          requestAnimationFrame(() => triggerRef.current?.focus());
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowLeft" && images.length > 1) {
-            event.preventDefault();
-            move(-1);
-          }
-          if (event.key === "ArrowRight" && images.length > 1) {
-            event.preventDefault();
-            move(1);
-          }
-        }}
-        onTouchStart={(event) => {
-          touchStartRef.current = {
-            x: event.changedTouches[0].clientX,
-            y: event.changedTouches[0].clientY,
-          };
-        }}
-        onTouchEnd={(event) => {
-          const start = touchStartRef.current;
-          if (!start || images.length < 2) return;
-          const dx = event.changedTouches[0].clientX - start.x;
-          const dy = event.changedTouches[0].clientY - start.y;
-          if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy))
-            move(dx < 0 ? 1 : -1);
-          touchStartRef.current = null;
-        }}
-      >
-        <div className="lightbox-toolbar">
-          <span aria-live="polite">
-            Image {activeIndex + 1} of {images.length}
-          </span>
-          <button
-            className="button button-secondary"
-            ref={closeRef}
-            type="button"
-            onClick={closeLightbox}
-          >
-            Close image viewer
-          </button>
-        </div>
-        {images.length > 1 && (
-          <button
-            className="lightbox-nav lightbox-previous"
-            type="button"
-            onClick={() => move(-1)}
-            aria-label="Previous image"
-          >
-            ‹
-          </button>
-        )}
-        <img
-          className="lightbox-image"
-          src={images[activeIndex].url}
-          alt={images[activeIndex].alt_text}
-        />
-        {images.length > 1 && (
-          <button
-            className="lightbox-nav lightbox-next"
-            type="button"
-            onClick={() => move(1)}
-            aria-label="Next image"
-          >
-            ›
-          </button>
-        )}
-      </dialog>
-    </div>
   );
 }
 
@@ -1119,7 +955,14 @@ function App() {
             path="/projects"
             element={<Navigate to="/#projects" replace />}
           />
-          <Route path="/projects/:slug" element={<ProjectDetailPage />} />
+          <Route
+            path="/projects/:slug"
+            element={
+              <Suspense fallback={<LoadingPage title="Loading project" />}>
+                <ProjectDetailPage />
+              </Suspense>
+            }
+          />
           <Route path="/about" element={<Navigate to="/#about" replace />} />
           <Route
             path="/contact"

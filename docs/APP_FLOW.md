@@ -11,7 +11,7 @@ Public (any visitor)
 [/] Single scrolling public page
   ├── #home                 Owner name and short introduction
   ├── #projects             All projects in admin order; each opens a separate detail page
-  ├── #about                About Me introduction, experience, skills, and optional CV download
+  ├── #about                About Me introduction, experience, skills, and optional CV preview
   └── #contact              Configured contact links and message form
       /projects/<slug>      Separate project detail and screenshot lightbox
 
@@ -25,11 +25,10 @@ Admin (not linked publicly)
         ├── /admin/projects/new   Add project
         ├── /admin/projects/<id>  Edit project
         ├── /admin/profile        About Me content, experience, CV, skills
-        ├── /admin/homepage       Homepage text and profile photo
         └── /admin/mailbox        Messages and contact methods
 ```
 
-The Home section contains the owner's name, editable role, short introduction, and fixed “Get in touch” and “View my GitHub” buttons. The contact button links to `/#contact`; the GitHub button links to `https://github.com/Tekeste-Birhanu`. Neither button label nor destination is editable in the admin. The Projects section on the same scrolling page lists every saved project in administrator-defined order, using two columns on wide screens and one on narrow screens. There is no Browse projects action or expand control. Each listed project links to its separate detail URL. A deleted project and its files are removed; its old URL shows the 404 page. Renaming a project redirects its old URL to the current one.
+The Home section contains the owner's name, fixed role and short introduction, bundled `public/profile-placeholder.jpg`, and fixed “Get in touch” and “View my GitHub” buttons. Home content is bundled with the app and does not load from Supabase or have admin editing controls. The contact button links to `/#contact`; the GitHub button links to `https://github.com/Tekeste-Birhanu`. Neither button label nor destination is editable in the admin. The Projects section on the same scrolling page lists every saved project in administrator-defined order, using two columns on wide screens and one on narrow screens. There is no Browse projects action or expand control. Each listed project links to its separate detail URL. A deleted project and its files are removed; its old URL shows the 404 page. Renaming a project redirects its old URL to the current one.
 
 ## 3. Main journeys
 
@@ -37,7 +36,7 @@ The Home section contains the owner's name, editable role, short introduction, a
 
 - **Actor:** Visitor
 - **Entry point:** Home, Projects, or a direct project URL
-- **Steps:** Read the Home introduction and optional profile photo; navigate to Projects and scan the ordered project list; select "View details" on a project; review its description, screenshots, technologies, status, links, and populated detail sections; use the lightbox to navigate its images; follow a repository or demo link if present.
+- **Steps:** Read the Home introduction and bundled profile photo; as the visitor scrolls, Projects, About, and Contact load independently near the viewport. Scan the ordered project list; select "View details" on a project; the detail route resolves that URL's slug and loads only that project and its related technologies and media in one request; review its description, screenshots, technologies, status, links, and populated detail sections; use the lightbox to navigate its images; follow a repository or demo link if present.
 - **Success:** The visitor understands the project and can reach its repository or demo.
 - **Failure and recovery:** Unknown or deleted project URLs show a 404 page with a link home. Old project URLs redirect to the current slug. A failed image shows its alt text or a placeholder.
 - **Related requirements:** F-01, F-02, F-03, F-04
@@ -46,7 +45,7 @@ The Home section contains the owner's name, editable role, short introduction, a
 
 - **Actor:** Visitor
 - **Entry point:** About or Contact
-- **Steps:** Read the About Me content and work experience, and download the CV if available; on Contact, choose an enabled contact link or enter an email address and message in the form; submit; see confirmation after the message is saved.
+- **Steps:** Read the About Me content and work experience, and preview the CV in the browser if available; on Contact, choose an enabled contact link or enter an email address and message in the form; submit; see confirmation after the message is saved.
 - **Contact links:** The configured Email link opens the visitor's email app. Other enabled methods (for example, Telegram, GitHub, or a social platform) open their configured destinations in a new tab.
 - **Message submission:** The server validates the visitor's email and message, saves the message in Mailbox, then attempts an email notification to the configured contact email. The visitor's email is set as Reply-To in that notification.
 - **Success:** The message is saved and the visitor sees success. The form is cleared after successful saving.
@@ -63,13 +62,13 @@ The Home section contains the owner's name, editable role, short introduction, a
 - **Failure and recovery:** Required-field errors, upload errors, or save errors preserve entered values. Failed Storage cleanup is recorded for a manual retry; project deletion includes queued paths and retains the project if cleanup fails. Leaving with unsaved changes asks whether to stay or discard changes. A forgotten password starts the email recovery flow. Invalid or expired recovery links show an error and offer a new reset request; a password form is available only after Supabase confirms a recovery event. An authenticated user who is not the designated administrator is denied and signed out. The app stores the administrator session in the current tab and signs out after 10 minutes without activity; an expired session returns to sign-in. Email sign-in requires a verified account; no public registration is available.
 - **Related requirements:** F-08, F-09, F-10, F-11, F-12, F-13
 
-### J-04 — Administrator maintains profile, homepage, and contact methods
+### J-04 — Administrator maintains About and Contact content
 
 - **Actor:** Designated administrator
-- **Entry point:** Admin navigation to Profile, Homepage, or Mailbox
-- **Steps:** In Profile, explicitly save the About Me introduction; edit experience entries and their order, then save them together with one Save experience action; upload, replace, or remove the CV; and manage skill categories and skills. Education is not managed or displayed. In Homepage, edit and explicitly save the role and short introduction; upload, replace, or remove the optional profile photo; photo cleanup retries remain available there. Hero button labels and destinations are fixed in the app. In Mailbox, add, edit, enable/disable, reorder, or remove a contact method. A method includes a label and value; link methods choose a built-in icon, including Phone, which opens a `tel:` link. The public page shows the label and actual clickable destination.
+- **Entry point:** Admin navigation to About or Contact
+- **Steps:** In About, explicitly save the About Me introduction; edit experience entries and their order, then save them together with one Save experience action; upload, replace, or remove the CV; and manage skill categories and skills. Education is not managed or displayed. The Home role, intro, image, and buttons are fixed in the app. In Contact, add, edit, enable/disable, reorder, or remove a contact method and review messages. A method includes a label and value; link methods choose a built-in icon, including Phone, which opens a `tel:` link. The public page shows the label and actual clickable destination.
 - **Skill management:** Add categories; edit category and skill names, then save those edits together with one Save skills action. Reorder categories by dragging their handles. Add or remove skills; drag a skill handle within its category to reorder it, or into another category column to move it. A category can be removed only after all its skills have been moved or removed. About shows skills as bullet lists grouped under category names and omits empty categories.
-- **Email invariant:** Exactly one Email contact method exists. Its value can be edited, but the method cannot be disabled or removed. This address is shown on Contact and receives message notifications; it is independent of the admin login email. Configure it in Mailbox before public launch.
+- **Email invariant:** Exactly one Email contact method exists. Its value can be edited, but the method cannot be disabled or removed. This address is shown on Contact and receives message notifications; it is independent of the admin login email. Configure it under Admin → Contact before public launch.
 - **Success:** Saved changes are live on the public site.
 - **Failure and recovery:** Invalid values, unsupported file types, and oversized files show field-level errors and preserve prior saved content. Leaving with unsaved changes asks whether to stay or discard changes.
 - **Related requirements:** F-15, F-16, F-17
@@ -77,7 +76,7 @@ The Home section contains the owner's name, editable role, short introduction, a
 ### J-05 — Administrator handles messages
 
 - **Actor:** Designated administrator
-- **Entry point:** Admin navigation → Mailbox
+- **Entry point:** Admin navigation → Contact (messages and contact methods)
 - **Steps:** See messages ordered newest first, with unread messages marked; open a message (which marks it read); use the sender's email as Reply-To in the notification to reply from the administrator's email app; delete a message after confirmation. Public contact methods show their configured label and clickable address or URL; a Phone method opens the device dialer.
 - **Notification warning:** If a saved message's notification email fails, Mailbox shows a warning on that message. The saved message remains available.
 - **Success:** The administrator can review and manage the inbox. An empty inbox shows “No messages.”
@@ -100,7 +99,7 @@ The Home section contains the owner's name, editable role, short introduction, a
 | `/` and `/#home` | Single scrolling public portfolio, starting at the intro | Anyone | J-01, J-02 |
 | `/#projects` | All projects in admin order; two columns on wide screens, one on narrow screens | Anyone | J-01 |
 | `/projects/<slug>` | Project detail and screenshot lightbox | Anyone | J-01 |
-| `/#about` | About Me introduction, experience, categorized skills, and optional CV download | Anyone | J-02 |
+| `/#about` | About Me introduction, experience, categorized skills, and optional CV preview | Anyone | J-02 |
 | `/#contact` | Enabled contact methods and email/message form | Anyone | J-02 |
 | 404 | Unknown or deleted addresses | Anyone | J-01, J-06 |
 | `/admin` | Sign-in, then redirect to Projects when signed in | Sign-in is public; dashboard is administrator-only | J-03 |
@@ -108,7 +107,6 @@ The Home section contains the owner's name, editable role, short introduction, a
 | `/admin/projects` | Search, order, edit, and delete projects | Designated administrator | J-03, J-06 |
 | `/admin/projects/new`, `/admin/projects/<id>` | Add or edit a project | Designated administrator | J-03 |
 | `/admin/profile` | About Me content, experience, CV, and skills | Designated administrator | J-04 |
-| `/admin/homepage` | Predefined homepage text and profile photo | Designated administrator | J-04 |
 | `/admin/mailbox` | Messages and contact-method management | Designated administrator | J-04, J-05 |
 
 ## 5. Shared states and edge cases

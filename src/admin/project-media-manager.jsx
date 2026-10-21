@@ -10,7 +10,8 @@ import {
   uploadProjectMedia,
   validateProjectMediaFile,
 } from '../lib/project-media-admin.js';
-import { invalidatePublicPortfolioCache } from '../lib/public-content.js';
+import { invalidatePublicPortfolioCache } from '../lib/public-content-cache.js';
+import { AdminMediaSkeleton } from '../skeletons.jsx';
 
 function fileSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
@@ -174,7 +175,7 @@ export function ProjectMediaManager({ projectId, onPendingChange, onRegisterPend
     <p className="admin-list-help">Upload JPG, PNG, or WebP files up to 5 MB, or GIF files up to 10 MB. Each image needs alt text. Uploads and alt text changes save with Save project; image actions save immediately.</p>
     {error && <div className="admin-error-panel" role="alert"><p>{error}</p>{projectId && !error.includes('waiting for a database migration') && !busy && !loading && <button className="button button-secondary" type="button" onClick={() => void reload()}>Reload media</button>}</div>}
       {message && <p className="auth-success" role="status">{message}</p>}
-    {loading ? <p role="status">Loading project media…</p> : media.length === 0 ? <p className="empty-state">No images or GIFs have been added.</p> : <ol className="admin-media-list" aria-label="Project media order">
+    {loading ? <AdminMediaSkeleton /> : media.length === 0 ? <p className="empty-state">No images or GIFs have been added.</p> : <ol className="admin-media-list" aria-label="Project media order">
       {media.map((item, index) => <li className="admin-media-item" key={item.id}>
         <img className="admin-media-preview" src={item.url} alt="" />
         <div className="admin-media-details">

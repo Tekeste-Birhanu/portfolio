@@ -4,6 +4,8 @@ import { useAdminAuth } from './auth-context.jsx';
 import { supabase } from '../lib/supabase.js';
 import { EMPTY_PROJECT, PROJECT_FIELDS, getProjectEditorData, permanentlyDeleteProject, saveProject, validateProject } from '../lib/project-admin.js';
 import { ProjectMediaManager } from './project-media-manager.jsx';
+import { AdminEditorSkeleton, AdminProjectsSkeleton } from '../skeletons.jsx';
+import { invalidatePublicPortfolioCache } from '../lib/public-content-cache.js';
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
 
@@ -13,7 +15,6 @@ function formatUpdatedAt(value) {
 }
 
 const adminSections = [
-  { label: 'Home', to: '/admin/homepage', id: 'homepage' },
   { label: 'Projects', to: '/admin/projects', id: 'projects' },
   { label: 'About', to: '/admin/profile', id: 'profile' },
   { label: 'Contact', to: '/admin/mailbox', id: 'mailbox' },
@@ -141,7 +142,7 @@ export function AdminProjectsPage() {
     setLoadError(false);
     const { data, error } = await supabase
       .from('projects')
-      .select('id, name, updated_at, sort_order')
+      .select('id, name, updated_at')
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true });
     if (error) {
@@ -175,6 +176,7 @@ export function AdminProjectsPage() {
       await loadProjects();
     } else {
       setProjects(nextProjects.map((project, index) => ({ ...project, sort_order: index + 1 })));
+      invalidatePublicPortfolioCache();
       const movedIndex = nextProjects.findIndex((project) => project.id === movedProjectId);
       const movedProject = nextProjects[movedIndex];
       setOrderNotice(movedProject ? `${movedProject.name} moved to position ${movedIndex + 1} of ${nextProjects.length}.` : 'Project order saved.');
@@ -216,7 +218,7 @@ export function AdminProjectsPage() {
       <Link className="button admin-primary-button admin-add-project" to="/admin/projects/new">Add project</Link>
     </div>
     {actionError && <p className="admin-error" role="alert">{actionError}</p>}
-    {projects === null ? <p className="empty-state" role="status">Loading projects…</p> : loadError ? <div className="admin-error-panel" role="alert">
+    {projects === null ? <AdminProjectsSkeleton /> : loadError ? <div className="admin-error-panel" role="alert">
       <p>Projects could not be loaded. Check your connection and try again.</p>
       <button className="button button-secondary" type="button" onClick={() => setAttempt((value) => value + 1)}>Retry</button>
     </div> : projects.length === 0 ? <p className="empty-state">No projects yet. Add a project to get started.</p> : visibleProjects.length === 0 ? <p className="empty-state">No projects match “{search.trim()}”.</p> : <>
@@ -430,7 +432,7 @@ export function AdminProjectEditor({ isNew = false }) {
   };
   return <AdminLayout title={title}>
     <Link className="button button-secondary admin-editor-back" to="/admin/projects">Back to Projects</Link>
-    {loadState === 'loading' ? <p role="status">Loading project…</p> : loadState === 'error' ? <div className="admin-error-panel" role="alert">
+    {loadState === 'loading' ? <AdminEditorSkeleton /> : loadState === 'error' ? <div className="admin-error-panel" role="alert">
       <p>{error}</p>
       <button className="button button-secondary" type="button" onClick={() => { setError(''); setLoadAttempt((count) => count + 1); }}>Retry</button>
     </div> : <>

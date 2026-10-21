@@ -64,14 +64,14 @@ Values below are initial decisions. Verify contrast with a checker during implem
 | Tag                            | Technologies and project status                                                   | Small, bordered, monospace; project status shows "Planning", "In progress", or "Completed" as words. Skills appear in bulleted lists. |
 | Toggle switch                  | Enable or disable a contact method                                                | Labeled, keyboard operable, state announced; the required Email method cannot be disabled.                                            |
 | Public navigation              | Public navigation                                                                 | Desktop: site logo at left and text links at right in a centered top bar. Phone and tablet: stays centered near the bottom with labeled icon links. |
-| Admin sidebar and compact menu | Admin navigation                                                                  | Home, Projects, About, Contact, sign out; Home opens Homepage editing, About opens Profile editing, Contact opens Mailbox; sidebar on desktop, side drawer below 1024px. |
+| Admin sidebar and compact menu | Admin navigation                                                                  | Projects, About, Contact, sign out; About opens About/profile editing and Contact opens messages/contact methods; sidebar on desktop, side drawer below 1024px. |
 | Project entry                  | Featured Projects list                                                            | Name with status beside it, description, technologies on their own line, links, and a "View details" action; image stacks above text within each card. |
 | Gallery                        | Project detail screenshots                                                        | One main image; thumbnails below only when there are several; selected thumbnail marked with the accent border.                     |
 | Lightbox                       | Larger screenshot view                                                            | Close button, previous and next, arrow keys and Escape, swipe on touch; focus moves into it and returns to the main image on close. |
 | Confirmation dialog            | Delete project, delete message, delete contact method, leave with unsaved changes | Names the item, clear primary and cancel actions, Escape cancels, focus is trapped while open.                                      |
 | Inline notice                  | "Saved" and error messages                                                        | Appears near the action, announced to screen readers, does not block the page.                                                      |
-| Admin project card             | Projects dashboard                                                               | Name, last updated, Edit, Delete; drag handle and move controls set public order. Two columns on wide screens, one on narrow screens. |
-| Image upload area              | Project screenshots, profile photo, CV                                            | Preview, alt text field for project images, set main image, reorder, replace, remove; shows file type and size errors. Project images are manually optimized and served as uploaded; CV PDF limit is 10 MB. |
+| Admin project card             | Projects dashboard                                                               | Name, last updated, Edit, Delete; drag handle sets public order. Two columns on wide screens, one on narrow screens. |
+| Image upload area              | Project screenshots and CV                                                       | Preview, alt text field for project images, set main image, reorder, replace, remove; shows file type and size errors. Project images are manually optimized and served as uploaded; CV PDF limit is 10 MB. The Home profile image is bundled with the app and is not uploaded or managed in admin. |
 | Notification warning           | Mailbox messages                                                                  | Failed email notification is marked in both the message row and the opened message; the saved message remains available.             |
 | Empty state                    | No content                                                                        | One plain line, with the next action where one exists.                                                                              |
 
@@ -80,7 +80,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### Home
 
 - **Purpose:** Introduce the developer.
-- **Layout:** Owner name in bold, editable role and short introduction, fixed “Get in touch” and “View my GitHub” buttons, and optional profile photo styled as a hanging badge. On phones, center the text and buttons and stack the centered badge above them.
+- **Layout:** Owner name in bold, fixed role and short introduction, fixed “Get in touch” and “View my GitHub” buttons, and the bundled `public/profile-placeholder.jpg` in a 3:4 portrait frame aligned to the right on wide screens. On phones, center the text and buttons and stack the centered portrait above them.
 - **Primary action:** The contact button always links to `/#contact`; the GitHub button always links to `https://github.com/Tekeste-Birhanu`.
 - **Content and behavior:** Show the owner's name, role (default “Software Developer”), and short intro. Button labels and destinations are fixed in the application and are not editable in the admin.
 - **Responsive changes:** Keep the intro readable at phone and desktop widths; center the text, buttons, and photo on phones.
@@ -108,8 +108,8 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### About
 
 - **Purpose:** Give background and the CV.
-- **Layout:** About Me introduction and optional CV link appear side by side when space allows. Skills and Experience follow as distinct, vertically stacked sections; skill categories can sit side by side. The Skills heading is visually subordinate to About Me. About Me does not display the profile photo.
-- **Content and behavior:** The administrator edits the About Me intro, experience entries, skill categories, skills, and CV in Profile; the optional profile photo is managed from Homepage. Education is not managed or displayed. Show skills as bulleted lists under their category headings. Omit empty categories and sections; show the CV link only when a CV exists.
+- **Layout:** About Me introduction and optional CV preview button appear side by side when space allows. Skills and Experience follow as distinct, vertically stacked sections; skill categories can sit side by side. The Skills heading is visually subordinate to About Me. About Me does not display the profile photo.
+- **Content and behavior:** The administrator edits the About Me intro, experience entries, skill categories, skills, and CV in About. The profile image is a bundled static asset, not Supabase content or an admin setting. Education is not managed or displayed. Show skills as bulleted lists under their category headings. Omit empty categories and sections; show the CV preview link only when a CV exists.
 - **Related flow:** J-02
 
 ### Contact
@@ -145,12 +145,12 @@ Values below are initial decisions. Verify contrast with a checker during implem
 - **Content and behavior:** Existing technologies are offered for selection. The admin can create a new technology from the picker; it is added to the shared list and selected for the current project. The editor stays open after saving, with a "Saved" notice. Leaving with unsaved changes opens the confirmation dialog.
 - **Related flow:** J-03
 
-### Admin Profile, Homepage, and Mailbox
+### Admin About and Contact
 
-- **Purpose:** Edit About Me content, CV, skill categories, and skills (Profile); edit homepage role and intro and manage the profile photo (Homepage); read messages and manage contact methods (Mailbox).
-- **Layout:** Profile uses clear sections for About Me content, experience, CV, and skill categories. Experience entries use two columns on wide screens, with the Add entry form as the final card in its grid; entries share one Save experience action and use drag handles to reorder. Each category is a column with its own ordered skill list. One Save skills action commits category and skill name edits; Remove stays beside each skill. Drag handles reorder categories and skills, and dropping a skill into another category moves it there. Education is not available in the dashboard. Homepage contains an explicit-save editor for the role and intro, plus a separate photo editor with preview, save, remove, and cleanup retry actions; hero button links are fixed and no controls change page sections. Mailbox has a messages list with unread messages marked, and a contact methods section.
-- **Primary action:** Save (Profile, Homepage); open a message (Mailbox).
-- **Content and behavior:** In Profile, category headings and skill lists can be added; category and skill names are edited and saved together with one Save skills action. Category and skill order is changed by dragging the associated handle. Skills can be dragged within a category to reorder or into another category to move. A category can be deleted only when it has no skills. Messages are ordered newest first; opening a message marks it read. Notification failure is marked in the message list and opened message. Exactly one Email contact method exists; it can be edited but cannot be deleted or disabled. Other contact methods can be managed with add, edit, enable/disable, reorder, and remove actions.
+- **Purpose:** Edit About Me content, CV, skill categories, and skills (About); read messages and manage contact methods (Contact). The Home hero role, intro, image, and actions are fixed in the app.
+- **Layout:** About uses clear sections for About Me content, experience, CV, and skill categories. Experience entries use two columns on wide screens, with the Add entry form as the final card in its grid; entries share one Save experience action and use drag handles to reorder. Each category is a column with its own ordered skill list. One Save skills action commits category and skill name edits; Remove stays beside each skill. Drag handles reorder categories and skills, and dropping a skill into another category moves it there. Education is not available in the dashboard. Contact has a messages list with unread messages marked, and a contact methods section.
+- **Primary action:** Save About content; open a message or save contact methods.
+- **Content and behavior:** In About, category headings and skill lists can be added; category and skill names are edited and saved together with one Save skills action. Category and skill order is changed by dragging the associated handle. Skills can be dragged within a category to reorder or into another category to move. A category can be deleted only when it has no skills. Messages are ordered newest first; opening a message marks it read. Notification failure is marked in the message list and opened message. Exactly one Email contact method exists; it can be edited but cannot be deleted or disabled. Other contact methods can be managed with add, edit, enable/disable, reorder, and remove actions.
 - **Related flow:** J-04, J-05
 
 ## 6. Interaction and UI states
@@ -164,7 +164,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 - **Notification failure:** The visitor still sees success once their message is saved. Mailbox shows a warning on the affected message in both the list and detail view.
 - **Confirmation for destructive or irreversible actions:** Deleting a project, message, or contact method, and leaving a form with unsaved changes, always opens a dialog. There is no undo.
 - **Feedback and recovery:** Failed saves and uploads keep the user's input and allow a retry.
-- **Motion:** Kept minimal. The Home hero grid and hanging profile photo are static; other motion uses short transitions. Reduced-motion preferences remove animation and transitions.
+- **Motion:** Kept minimal. The Home hero grid and bundled profile image are static; other motion uses short transitions. Reduced-motion preferences remove animation and transitions.
 
 ## 7. Accessibility
 
@@ -183,10 +183,10 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ## 8. Content guidelines
 
 - **Tone:** First person, plain, concise, and factual. No marketing language.
-- **Labels and messages:** Use the same names everywhere: Projects, Profile, Homepage, Mailbox, "Planning", "In progress", "Completed". Sentence case. Buttons start with a verb (Save, Delete, Send message).
+- **Labels and messages:** Use the same names everywhere: Projects, About, Contact, "Planning", "In progress", "Completed". Sentence case. Buttons start with a verb (Save, Delete, Send message).
 - **Dates, numbers, and localization:** English only. Dates read like "15 Oct 2026".
 - **Errors:** Say what happened and what to do next. Never blame the user, and never reveal which part of a sign-in was wrong.
 
 ## 9. Open design questions
 
-- **Final homepage intro wording.** Placeholder copy can be used until launch; it does not block the build.
+- Hero role and intro wording are fixed in the app; changing them requires a code update.

@@ -4,17 +4,17 @@ A personal portfolio website for showcasing projects, skills, and background to 
 
 ## Status
 
-**Implementation in progress.** T-02 established the application and service configuration. Public and admin features follow the sequence in `docs/TASKS.md`.
+**Implementation in progress.** The public site is deployed on Cloudflare Pages. Production smoke checks and launch readiness are tracked in `docs/TASKS.md` (T-17).
 
-## Planned features
+## Features
 
 - One scrolling public page with Home, Projects, About, and Contact sections, plus separate project detail pages.
 - Responsive project galleries and lightbox; the Projects section lists every saved project and each has a separate detail page.
 - One dark theme and skills shown as bullet lists grouped under admin-managed categories on About.
-- Private admin dashboard for projects, profile, homepage intro, contact methods, and messages.
+- Private admin dashboard for projects, About content, contact methods, and messages.
 - Contact form that saves visitor email and message to Mailbox and sends an email notification.
 
-## Planned stack
+## Stack
 
 - **Frontend:** Plain JavaScript with React and Vite.
 - **Database and storage:** Supabase Postgres and Storage.
@@ -91,7 +91,7 @@ on conflict (id) do update set user_id = excluded.user_id;
 
 The browser cannot read or change `admin_config`. The designated user ID is checked by `public.is_designated_admin()` in database and Storage policies.
 
-The Mailbox migration creates the required Email contact method with an empty value. After signing in as the designated administrator, configure the public contact and notification address under Admin → Mailbox. This address is independent of the login email.
+The Mailbox migration creates the required Email contact method with an empty value. After signing in as the designated administrator, configure the public contact and notification address under Admin → Contact. This address is independent of the login email.
 
 ### Build and preview
 
@@ -110,11 +110,10 @@ Vitest is installed as the project test runner. Feature tasks will add tests alo
 
 ## Deployment
 
-Production deployment is not configured yet. The planned target is Cloudflare Pages with Supabase and Brevo configured separately. Deployment steps will be documented before launch.
+The public site is deployed to Cloudflare Pages with Supabase and Brevo configured separately. Production smoke checks and any remaining launch steps are tracked in T-17.
 
 ## Known limitations and deferred work
 
-- Owner identity and final homepage copy will be added later.
 - Improved social link previews are deferred until after the site exists.
 - Telegram notifications, theme switching, CAPTCHA, application-level contact rate limiting, app-side image compression, automated database exports, video demos, analytics, and page builders are out of scope for this version.
 - Supabase free-tier limits and Brevo sender/deliverability setup must be checked before launch.

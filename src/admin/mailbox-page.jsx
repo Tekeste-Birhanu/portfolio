@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AdminLayout } from './projects-page.jsx';
 import { deleteVisitorMessage, getMailboxData, getVisitorMessage, saveContactMethods, validateContactMethods } from '../lib/mailbox-admin.js';
 import { CONTACT_METHOD_ICONS } from '../lib/contact-methods.js';
+import { AdminMailboxSkeleton, AdminMessageSkeleton } from '../skeletons.jsx';
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -145,7 +146,7 @@ export function AdminMailboxPage() {
   return <AdminLayout title="Mailbox" activeSection="mailbox">
     {error && <p className="admin-error" role="alert">{error}</p>}
     {notice && <p className="auth-success" role="status">{notice}</p>}
-    {loading ? <p role="status">Loading Mailbox…</p> : loadFailed ? <button className="button button-secondary" type="button" onClick={() => setAttempt((value) => value + 1)}>Retry</button> : <div className="admin-mailbox-page">
+    {loading ? <AdminMailboxSkeleton /> : loadFailed ? <button className="button button-secondary" type="button" onClick={() => setAttempt((value) => value + 1)}>Retry</button> : <div className="admin-mailbox-page">
       <section className="admin-profile-section" aria-labelledby="mailbox-messages-title">
         <div className="admin-mailbox-section-heading">
           <h2 id="mailbox-messages-title">Messages</h2>
@@ -264,7 +265,7 @@ export function AdminMessageDetailPage() {
   return <AdminLayout title="Message" activeSection="mailbox">
     <Link className="admin-editor-back" to="/admin/mailbox">← Mailbox</Link>
     {error && <p className="admin-error" role="alert">{error}</p>}
-    {loading ? <p role="status">Loading message…</p> : missing ? <p className="empty-state">This message is no longer available.</p> : error ? <button className="button button-secondary" type="button" onClick={() => void load()}>Retry</button> : message && <article className="admin-profile-section admin-message-detail">
+    {loading ? <AdminMessageSkeleton /> : missing ? <p className="empty-state">This message is no longer available.</p> : error ? <button className="button button-secondary" type="button" onClick={() => void load()}>Retry</button> : message && <article className="admin-profile-section admin-message-detail">
       <header><div className="admin-message-detail-meta"><a href={`mailto:${message.visitor_email}`}>{message.visitor_email}</a><time dateTime={message.created_at}>{formatDate(message.created_at)}</time></div><button className="button button-danger" type="button" disabled={busy} onClick={() => void handleDelete()}>Delete message</button></header>
       <p className="admin-message-notification is-detail">{notificationLabel(message.notification_status)}</p>
       {message.notification_status === 'failed' && <p className="admin-message-warning" role="status">The message was saved, but its email notification failed.</p>}

@@ -255,6 +255,8 @@ h1 {
 .home-hero {
   --hero-grid-focus: 50% 50%;
   padding-block: clamp(4rem, 8vw, 6rem);
+  padding-block-start: clamp(3rem, 5vw, 4.5rem);
+  padding-block-end: clamp(5rem, 8vw, 7rem);
   background-image:
     radial-gradient(
       ellipse at var(--hero-grid-focus),
@@ -309,27 +311,32 @@ h1 {
 .home-hero.has-photo {
   --hero-grid-focus: 29% 50%;
   display: grid;
-  grid-template-columns: minmax(0, 62ch) minmax(12rem, 18rem);
+  grid-template-columns: minmax(0, 66ch) minmax(12rem, 15rem);
   grid-template-areas: "copy photo";
-  align-items: center;
+  align-items: stretch;
   justify-content: start;
-  gap: clamp(4.5rem, 6vw, 5.5rem);
+  gap: clamp(7.5rem, 6vw, 8.5rem);
 }
 .home-hero-copy {
   grid-area: copy;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   min-width: 0;
-  max-width: 52ch;
+  max-width: 59ch;
+}
+.home-hero-copy .home-hero-actions {
+  margin-top: 0.75rem;
 }
 .home-hero-badge {
   grid-area: photo;
-  width: min(100%, 18rem);
-  justify-self: start;
-  margin-left: 0.5rem;
+  width: min(100%, 15rem);
+  justify-self: end;
 }
 .home-hero-photo {
   display: block;
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 3 / 4;
   position: relative;
   z-index: 1;
   border: 2px solid var(--color-border);
@@ -788,6 +795,14 @@ p {
   color: var(--color-muted);
   font-size: 0.875rem;
 }
+
+.app-route-loading {
+  min-height: 50vh;
+  display: grid;
+  place-items: center;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+}
 .footer-inner {
   min-height: 4.5rem;
   display: flex;
@@ -1063,7 +1078,28 @@ p {
     gap: 1rem;
   }
   .home-hero {
+    position: relative;
+    isolation: isolate;
     padding-block: 3.25rem 3rem;
+  }
+  .home-hero::after {
+    position: absolute;
+    z-index: 0;
+    inset-inline: 0;
+    bottom: 0;
+    height: 35%;
+    background: linear-gradient(
+      to top,
+      var(--color-bg) 0%,
+      var(--color-bg) 72%,
+      transparent
+    );
+    content: "";
+    pointer-events: none;
+  }
+  .home-hero > * {
+    position: relative;
+    z-index: 1;
   }
   .home-hero,
 .home-hero-copy {
@@ -1090,13 +1126,12 @@ p {
   }
   .home-hero-badge {
     width: 10rem;
-    margin-left: 0.35rem;
     justify-self: center;
   }
   .home-hero-photo {
     width: 9rem;
     margin-inline: auto;
-    aspect-ratio: 1;
+    aspect-ratio: 3 / 4;
     object-fit: cover;
   }
   .lightbox {
@@ -1119,4 +1154,144 @@ p {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Loading placeholders for remote public content. */
+.content-skeleton-status > [aria-hidden="true"] {
+  display: contents;
+  pointer-events: none;
+}
+.ui-skeleton {
+  display: block;
+  max-width: 100%;
+  border-radius: 4px;
+  background: linear-gradient(100deg, var(--color-surface) 25%, var(--color-surface-subtle) 45%, var(--color-surface) 65%);
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+.skeleton-stack {
+  display: grid;
+  align-content: start;
+  gap: 0.8rem;
+}
+.skeleton-project-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 13rem;
+}
+.public-project-skeletons .project-entry {
+  gap: 0.75rem;
+}
+.public-about-skeleton {
+  display: grid;
+  gap: 0;
+  width: 100%;
+}
+.skeleton-about-intro-cv {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(2rem, 4vw, 3rem);
+  margin-top: 1.25rem;
+}
+.skeleton-about-intro {
+  gap: 0.5rem;
+}
+.skeleton-about-cv {
+  align-content: start;
+}
+.skeleton-about-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 3rem);
+  margin-top: clamp(2rem, 5vw, 3rem);
+}
+.skeleton-about-skills {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 1rem;
+}
+.skeleton-about-categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1rem;
+}
+.skeleton-about-experience {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+.skeleton-detail-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+.public-contact-skeleton {
+  display: grid;
+  gap: 0.75rem;
+}
+.skeleton-contact-row {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0.65rem;
+  row-gap: 0.15rem;
+  min-width: 0;
+  padding-block: 0.35rem;
+}
+.skeleton-contact-icon {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  border-radius: 50%;
+}
+.skeleton-contact-copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.project-detail-skeleton {
+  display: block;
+}
+.skeleton-detail-status {
+  border-radius: 999px;
+}
+.skeleton-detail-technologies .technology-list {
+  margin-top: 0.65rem;
+}
+.skeleton-project-gallery {
+  margin-top: 1.25rem;
+}
+.skeleton-detail-image {
+  width: 100%;
+  max-height: 28rem;
+  aspect-ratio: 16 / 9;
+}
+.skeleton-thumbnail {
+  display: block;
+}
+.skeleton-detail-actions {
+  margin-top: 1rem;
+}
+.skeleton-detail-copy {
+  display: grid;
+  gap: 0.8rem;
+}
+@media (max-width: 639px) {
+  .skeleton-about-intro-cv,
+  .skeleton-detail-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 359px) {
+  .skeleton-about-categories {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@keyframes skeleton-shimmer {
+  to { background-position-x: -220%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-skeleton { animation: none; }
 }

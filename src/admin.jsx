@@ -13,7 +13,6 @@ import {
   AdminProjectsPage,
 } from "./admin/projects-page.jsx";
 import { AdminProfilePage } from "./admin/profile-page.jsx";
-import { AdminHomepagePage } from "./admin/homepage-page.jsx";
 import {
   AdminMailboxPage,
   AdminMessageDetailPage,
@@ -55,14 +54,6 @@ function AdminRoutes() {
         element={
           <RequireAdmin>
             <AdminProfilePage />
-          </RequireAdmin>
-        }
-      />
-      <Route
-        path="homepage"
-        element={
-          <RequireAdmin>
-            <AdminHomepagePage />
           </RequireAdmin>
         }
       />

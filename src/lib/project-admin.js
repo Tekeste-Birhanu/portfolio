@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { invalidatePublicPortfolioCache } from './public-content-cache.js';
 
 export const PROJECT_FIELDS = [
   ['name', 'Project name', true],
@@ -39,7 +40,7 @@ export async function getProjectEditorData(projectId) {
     projectId
       ? supabase.from('projects').select(PROJECT_FIELDS.map(([key]) => key).join(',')).eq('id', projectId).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
-    supabase.from('project_technologies').select('technologies!inner(id,name)').order('sort_order'),
+    supabase.from('technologies').select('id, name').order('name', { ascending: true }),
     projectId
       ? supabase.from('project_technologies').select('technology_id,sort_order').eq('project_id', projectId).order('sort_order')
       : Promise.resolve({ data: [], error: null }),
@@ -67,6 +68,7 @@ export async function saveProject(projectId, values, technologyIds, newTechnolog
     p_new_technology_names: newTechnologyNames,
   });
   if (error) throw error;
+  invalidatePublicPortfolioCache();
   return data;
 }
 
@@ -87,4 +89,5 @@ export async function permanentlyDeleteProject(projectId) {
   }
   const { data, error } = await supabase.from('projects').delete().eq('id', projectId).select('id').maybeSingle();
   if (error || !data) throw new Error('The files were removed, but the project record could not be deleted. Retry deletion to finish.');
+  invalidatePublicPortfolioCache();
 }

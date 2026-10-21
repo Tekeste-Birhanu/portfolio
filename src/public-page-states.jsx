@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { ProjectDetailSkeleton } from "./skeletons.jsx";
 
 export function PageLayout({
   eyebrow,
@@ -43,10 +44,8 @@ export function NotFoundPage({ project = false }) {
 
 export function LoadingPage({ title = "Loading" }) {
   return (
-    <PageLayout eyebrow="Please wait" title={title}>
-      <p className="empty-state" role="status" aria-live="polite">
-        Loading content…
-      </p>
+    <PageLayout title={title} backToProjects panel>
+      <ProjectDetailSkeleton />
     </PageLayout>
   );
 }

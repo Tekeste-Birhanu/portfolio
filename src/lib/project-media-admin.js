@@ -61,7 +61,7 @@ export async function getProjectMediaData(projectId) {
   const client = requireSupabase();
   const [mediaResult, cleanupResult] = await Promise.all([
     client.from('project_media').select(MEDIA_COLUMNS).eq('project_id', projectId).order('sort_order', { ascending: true }),
-    client.from('project_media_cleanup').select('id, storage_path, created_at').eq('project_id', projectId).order('created_at', { ascending: true }),
+    client.from('project_media_cleanup').select('id, storage_path').eq('project_id', projectId).order('created_at', { ascending: true }),
   ]);
   if (mediaResult.error) throw mediaResult.error;
   if (cleanupResult.error) {

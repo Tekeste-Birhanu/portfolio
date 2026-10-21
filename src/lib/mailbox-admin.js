@@ -1,4 +1,4 @@
-import { invalidatePublicPortfolioCache } from './public-content.js';
+import { invalidatePublicPortfolioCache } from './public-content-cache.js';
 import { supabase } from './supabase.js';
 import { CONTACT_METHOD_ICONS } from './contact-methods.js';
 
@@ -16,7 +16,7 @@ export async function getMailboxData() {
   const client = db();
   const [methodsResult, messagesResult] = await Promise.all([
     client.from('contact_methods').select('id, label, method_type, icon_key, value, is_enabled, sort_order').order('sort_order', { ascending: true }),
-    client.from('visitor_messages').select('id, visitor_email, message_body, created_at, is_read, notification_status, notification_attempted_at').order('created_at', { ascending: false }),
+    client.from('visitor_messages').select('id, visitor_email, message_body, created_at, is_read, notification_status').order('created_at', { ascending: false }),
   ]);
   return {
     contactMethods: unwrap(methodsResult) ?? [],
@@ -44,7 +44,7 @@ export async function saveContactMethods(methods) {
 export async function getVisitorMessage(messageId) {
   const client = db();
   const message = unwrap(await client.from('visitor_messages')
-    .select('id, visitor_email, message_body, created_at, is_read, notification_status, notification_attempted_at')
+    .select('id, visitor_email, message_body, created_at, is_read, notification_status')
     .eq('id', messageId)
     .maybeSingle());
   if (!message) return null;

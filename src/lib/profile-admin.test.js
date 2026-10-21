@@ -7,15 +7,6 @@ import {
 } from './profile-admin.js';
 
 describe('profile media validation', () => {
-  it('accepts supported profile photos up to 5 MB', () => {
-    expect(validateProfileFile('photo_storage_path', { type: 'image/webp', size: 5 * 1024 * 1024 })).toBe('');
-  });
-
-  it('rejects unsupported and oversized profile photos', () => {
-    expect(validateProfileFile('photo_storage_path', { type: 'image/gif', size: 1024 })).toMatch(/JPG, PNG, or WebP/);
-    expect(validateProfileFile('photo_storage_path', { type: 'image/png', size: 5 * 1024 * 1024 + 1 })).toMatch(/5 MB or smaller/);
-  });
-
   it('accepts PDFs up to 10 MB and rejects empty files', () => {
     expect(validateProfileFile('cv_storage_path', { type: 'application/pdf', size: 10 * 1024 * 1024 })).toBe('');
     expect(validateProfileFile('cv_storage_path', { type: 'application/pdf', size: 0 })).toMatch(/file is empty/);
