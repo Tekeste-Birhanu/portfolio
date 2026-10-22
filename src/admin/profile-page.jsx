@@ -7,18 +7,13 @@ import {
   deleteSkill,
   deleteSkillCategory,
   getProfileEditorData,
-  profileCvUrl,
-  removeProfileFile,
   reorderProfileEntries,
   reorderSkillCategories,
   reorderSkills,
   renameSkillCategory,
-  retryProfileMediaCleanup,
   saveProfileEntry,
-  saveProfileFile,
   saveProfileIntro,
   saveSkill,
-  validateProfileFile,
 } from '../lib/profile-admin.js';
 
 const ENTRY_FIELDS = {
@@ -155,8 +150,6 @@ export function AdminProfilePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [cvFile, setCvFile] = useState(null);
-  const [cvError, setCvError] = useState('');
   const [categoryName, setCategoryName] = useState('');
   const [categoryDrafts, setCategoryDrafts] = useState({});
   const [skillDrafts, setSkillDrafts] = useState({});
@@ -202,12 +195,6 @@ export function AdminProfilePage() {
     } finally {
       setBusy(false);
     }
-  };
-
-  const saveCv = async () => {
-    if (!cvFile) return;
-    const result = await run(() => saveProfileFile('cv_storage_path', cvFile), (saved) => saved.cleanupPending ? 'CV saved. Old-file cleanup is queued for retry.' : 'CV saved.');
-    if (result) { setCvFile(null); document.getElementById('profile-cv-file').value = ''; }
   };
 
   if (loading && !data) return <AdminLayout title="Profile" activeSection="profile"><AdminProfileSkeleton /></AdminLayout>;
@@ -321,32 +308,12 @@ export function AdminProfilePage() {
     {error && <p className="admin-error" role="alert">{error}</p>}
     {notice && <p className="auth-success" role="status">{notice}</p>}
     <div className="admin-profile-page">
-      <div className="admin-profile-top-grid">
       <section className="admin-profile-section" aria-labelledby="profile-intro-title">
         <h2 id="profile-intro-title">About introduction</h2>
         <label className="admin-profile-wide-field" htmlFor="profile-intro">Introduction</label>
         <textarea id="profile-intro" rows="5" value={intro} onChange={(event) => setIntro(event.target.value)} />
         <button className="button admin-primary-button" type="button" disabled={busy || intro === (data.profile.intro ?? '')} onClick={() => { void run(() => saveProfileIntro(intro), 'Introduction saved.').then((result) => { if (result) setIntro(intro.trim()); }); }}>Save introduction</button>
       </section>
-
-      <section className="admin-profile-section" aria-labelledby="profile-files-title">
-        <h2 id="profile-files-title">CV</h2>
-        <div className="admin-profile-files">
-          <div className="admin-profile-file-card admin-profile-cv-card">
-            <h3>CV</h3>
-            {data.profile.cv_storage_path && <p><a href={profileCvUrl(data.profile.cv_storage_path)}>Download current CV</a></p>}
-            <label htmlFor="profile-cv-file">PDF, up to 10 MB</label>
-            <input id="profile-cv-file" type="file" accept="application/pdf,.pdf" disabled={busy} onChange={(event) => { const file = event.target.files?.[0] ?? null; setCvFile(file); setCvError(file ? validateProfileFile('cv_storage_path', file) : ''); }} />
-            {cvFile && <p className="admin-list-help">Selected: {cvFile.name}</p>}
-            {cvError && <p className="admin-field-error" role="alert">{cvError}</p>}
-            <div className="admin-profile-actions">
-              <button className="button button-secondary" type="button" disabled={busy || !cvFile || Boolean(cvError)} onClick={() => void saveCv()}>Save CV</button>
-              {data.profile.cv_storage_path && <button className="button button-danger" type="button" disabled={busy} onClick={() => { if (window.confirm('Remove the CV?')) void run(() => removeProfileFile('cv_storage_path'), 'CV removed.'); }}>Remove CV</button>}
-            </div>
-          </div>
-        </div>
-      </section>
-      </div>
 
       <ProfileEntrySection kind="experience" title="Experience" items={data.experience} busy={busy} run={run} />
 
@@ -416,10 +383,6 @@ export function AdminProfilePage() {
         <button className="button button-secondary admin-profile-save-skills" type="button" disabled={busy || !hasSkillChanges} onClick={() => void saveSkills()}>Save skills</button>
       </section>
 
-      {data.cleanups.some((item) => item.bucket_id === 'profile-cv') && <section className="admin-profile-section" aria-labelledby="profile-cleanup-title">
-        <h2 id="profile-cleanup-title">File cleanup needs retry</h2>
-        <ul className="admin-profile-cleanups">{data.cleanups.filter((item) => item.bucket_id === 'profile-cv').map((item) => <li key={item.id}><span>CV: <code>{item.storage_path}</code></span><button className="button button-secondary" type="button" disabled={busy} onClick={() => void run(() => retryProfileMediaCleanup(item), 'File cleanup completed.')}>Retry cleanup</button></li>)}</ul>
-      </section>}
     </div>
   </AdminLayout>;
 }

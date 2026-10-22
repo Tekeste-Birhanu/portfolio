@@ -3,15 +3,11 @@ import { invalidatePublicPortfolioCache } from './public-content-cache.js';
 
 export const PROJECT_FIELDS = [
   ['name', 'Project name', true],
-  ['short_description', 'Short description', true],
-  ['long_description', 'Long description'],
+  ['short_description', 'Description', true],
   ['status', 'Status', true],
   ['repository_url', 'Repository URL'],
   ['live_demo_url', 'Live demo URL'],
   ['key_features', 'Key features'],
-  ['technical_details', 'Technical details'],
-  ['challenges_and_solutions', 'Challenges and solutions'],
-  ['what_i_learned', 'What I learned'],
 ];
 
 export const EMPTY_PROJECT = Object.fromEntries(PROJECT_FIELDS.map(([key]) => [key, '']));
@@ -19,7 +15,7 @@ export const EMPTY_PROJECT = Object.fromEntries(PROJECT_FIELDS.map(([key]) => [k
 export function validateProject(values) {
   const errors = {};
   if (!values.name.trim()) errors.name = 'Enter a project name.';
-  if (!values.short_description.trim()) errors.short_description = 'Enter a short description.';
+  if (!values.short_description.trim()) errors.short_description = 'Enter a description.';
   if (!['planning', 'in_progress', 'completed'].includes(values.status)) errors.status = 'Choose a project status.';
   for (const key of ['repository_url', 'live_demo_url']) {
     const value = values[key].trim();

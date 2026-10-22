@@ -71,7 +71,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 | Confirmation dialog            | Delete project, delete message, delete contact method, leave with unsaved changes | Names the item, clear primary and cancel actions, Escape cancels, focus is trapped while open.                                      |
 | Inline notice                  | "Saved" and error messages                                                        | Appears near the action, announced to screen readers, does not block the page.                                                      |
 | Admin project card             | Projects dashboard                                                               | Name, last updated, Edit, Delete; drag handle sets public order. Two columns on wide screens, one on narrow screens. |
-| Image upload area              | Project screenshots and CV                                                       | Preview, alt text field for project images, set main image, reorder, replace, remove; shows file type and size errors. Project images are manually optimized and served as uploaded; CV PDF limit is 10 MB. The Home profile image is bundled with the app and is not uploaded or managed in admin. |
+| Image upload area              | Project screenshots                                                              | Preview, alt text field, set main image, reorder, replace, remove; shows file type and size errors. Project images are manually optimized and served as uploaded. The Home profile image is bundled with the app and is not uploaded or managed in admin. |
 | Notification warning           | Mailbox messages                                                                  | Failed email notification is marked in both the message row and the opened message; the saved message remains available.             |
 | Empty state                    | No content                                                                        | One plain line, with the next action where one exists.                                                                              |
 
@@ -99,7 +99,7 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### Project detail
 
 - **Purpose:** Show one project in full.
-- **Layout:** A prominent "Back to Projects" link directly below the header and above the title; then name and status, short description, gallery, technologies, links, detailed description, and populated optional detail sections. Repeat "Back to Projects" at the bottom of the page.
+- **Layout:** A prominent "Back to Projects" link directly below the header and above the title; then name and status, description, gallery, technologies, links, and key features when populated. Repeat "Back to Projects" at the bottom of the page. There is no separate long-description or additional detail section.
 - **Primary action:** Open the live demo or repository, when set.
 - **Content and behavior:** Show all saved project information. Optional sections appear in a fixed order and are omitted when empty. Link buttons appear only when a link exists. External links open in a new tab. The back links return to the featured Projects section. On top-level public pages, visitors use the persistent site navigation instead of a redundant back button.
 - **Responsive changes:** Gallery fills the column width; thumbnails wrap or scroll within their own row.
@@ -107,9 +107,9 @@ Values below are initial decisions. Verify contrast with a checker during implem
 
 ### About
 
-- **Purpose:** Give background and the CV.
-- **Layout:** About Me introduction and optional CV preview button appear side by side when space allows. Skills and Experience follow as distinct, vertically stacked sections; skill categories can sit side by side. The Skills heading is visually subordinate to About Me. About Me does not display the profile photo.
-- **Content and behavior:** The administrator edits the About Me intro, experience entries, skill categories, skills, and CV in About. The profile image is a bundled static asset, not Supabase content or an admin setting. Education is not managed or displayed. Show skills as bulleted lists under their category headings. Omit empty categories and sections; show the CV preview link only when a CV exists.
+- **Purpose:** Give background through the introduction, experience, and skills.
+- **Layout:** About Me introduction appears first. Skills and Experience follow as distinct, vertically stacked sections; skill categories can sit side by side. The Skills heading is visually subordinate to About Me. About Me does not display the profile photo.
+- **Content and behavior:** The administrator edits the About Me intro, experience entries, skill categories, and skills. The profile image is a bundled static asset, not Supabase content or an admin setting. CV and education are not managed or displayed. Show skills as bulleted lists under their category headings. Omit empty categories and sections.
 - **Related flow:** J-02
 
 ### Contact
@@ -140,15 +140,15 @@ Values below are initial decisions. Verify contrast with a checker during implem
 ### Admin project editor
 
 - **Purpose:** Create or edit one project on a single page.
-- **Layout:** Sections in order: basic information, descriptions, technologies, status, links, screenshots, optional details. Technologies use a multi-select picker with an "Add new technology" option. One Save button, always reachable.
+- **Layout:** Sections in order: basic information, description, technologies, status, links, screenshots, and optional key features. Technologies use a multi-select picker with an "Add new technology" option. One Save button, always reachable.
 - **Primary action:** Save.
 - **Content and behavior:** Existing technologies are offered for selection. The admin can create a new technology from the picker; it is added to the shared list and selected for the current project. The editor stays open after saving, with a "Saved" notice. Leaving with unsaved changes opens the confirmation dialog.
 - **Related flow:** J-03
 
 ### Admin About and Contact
 
-- **Purpose:** Edit About Me content, CV, skill categories, and skills (About); read messages and manage contact methods (Contact). The Home hero role, intro, image, and actions are fixed in the app.
-- **Layout:** About uses clear sections for About Me content, experience, CV, and skill categories. Experience entries use two columns on wide screens, with the Add entry form as the final card in its grid; entries share one Save experience action and use drag handles to reorder. Each category is a column with its own ordered skill list. One Save skills action commits category and skill name edits; Remove stays beside each skill. Drag handles reorder categories and skills, and dropping a skill into another category moves it there. Education is not available in the dashboard. Contact has a messages list with unread messages marked, and a contact methods section.
+- **Purpose:** Edit About Me content, experience, skill categories, and skills (About); read messages and manage contact methods (Contact). The Home hero role, intro, image, and actions are fixed in the app.
+- **Layout:** About uses clear sections for About Me content, experience, and skill categories. Experience entries use two columns on wide screens, with the Add entry form as the final card in its grid; entries share one Save experience action and use drag handles to reorder. Each category is a column with its own ordered skill list. One Save skills action commits category and skill name edits; Remove stays beside each skill. Drag handles reorder categories and skills, and dropping a skill into another category moves it there. CV and education are not available in the dashboard. Contact has a messages list with unread messages marked, and a contact methods section.
 - **Primary action:** Save About content; open a message or save contact methods.
 - **Content and behavior:** In About, category headings and skill lists can be added; category and skill names are edited and saved together with one Save skills action. Category and skill order is changed by dragging the associated handle. Skills can be dragged within a category to reorder or into another category to move. A category can be deleted only when it has no skills. Messages are ordered newest first; opening a message marks it read. Notification failure is marked in the message list and opened message. Exactly one Email contact method exists; it can be edited but cannot be deleted or disabled. Other contact methods can be managed with add, edit, enable/disable, reorder, and remove actions.
 - **Related flow:** J-04, J-05

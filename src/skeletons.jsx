@@ -89,15 +89,10 @@ export function PublicProjectsSkeleton() {
 export function PublicAboutSkeleton() {
   return (
     <LoadingStatus label="Loading About Me" className="public-about-skeleton">
-      <div className="skeleton-about-intro-cv">
-        <div className="skeleton-stack skeleton-about-intro">
-          <Bar width="82%" height="1.4rem" />
-          <Bar width="91%" height="1.4rem" />
-          <Bar width="63%" height="1.4rem" />
-        </div>
-        <div className="skeleton-stack skeleton-about-cv">
-          <Bar width="10rem" height="2.75rem" />
-        </div>
+      <div className="skeleton-stack skeleton-about-intro">
+        <Bar width="82%" height="1.4rem" />
+        <Bar width="91%" height="1.4rem" />
+        <Bar width="63%" height="1.4rem" />
       </div>
       <div className="skeleton-about-details">
         <div className="skeleton-about-skills">

@@ -111,13 +111,12 @@
 - **Priority:** Must
 - **Depends on:** T-01, T-03
 - **Related:** F-05, F-15; J-02
-- **Goal:** Present the owner's background and optional CV.
-- **Scope:** Render the About Me intro, experience, and CV from stored content, and render the bundled profile image in the Home hero. Render intro, experience, and categorized skill bullet lists only when populated; omit empty categories. Education is not part of the public portfolio.
+- **Goal:** Present the owner's background, experience, and skills.
+- **Scope:** Render the About Me intro and experience from stored content, and render the bundled profile image in the Home hero. Render intro, experience, and categorized skill bullet lists only when populated; omit empty categories. CV and education are not part of the public portfolio.
 - **Done when:**
-  - [x] Sections without content are omitted and the CV link appears only when a CV exists.
-  - [x] CV opens as a browser PDF preview and the page adapts to phone and desktop.
-- **Verify:** Check partial and complete profiles, with and without a CV; the Home image is a bundled asset and is not profile content fetched from Supabase.
-- **Progress:** Added public profile and experience data reads, conditional About Me rendering, and the additive schema/storage migration. Education was later removed from the application; its legacy table is retained with access revoked. The migration was applied to the linked Supabase project. The owner confirmed the profile behavior; automated tests and the production build pass.
+  - [x] Empty About sections are omitted and the page adapts to phone and desktop.
+- **Verify:** Check partial and complete About content; the Home image is a bundled asset and is not profile content fetched from Supabase.
+- **Progress:** Added public profile and experience data reads and conditional About Me rendering. Education and CV were later removed from the application; their legacy schema and stored files are retained without an application read/write path. The Home image is bundled with the app. The owner confirmed the profile behavior; automated tests and the production build pass.
 
 ### M3 — Admin and contact workflows
 
@@ -160,9 +159,9 @@
 - **Depends on:** T-08
 - **Related:** F-10, F-12, F-14; J-03, J-06
 - **Goal:** Let the administrator create, edit, and permanently delete projects.
-- **Scope:** Implement explicit-save project editing, required fields, a technology multi-select populated from technologies already used by projects, an option to create and select a new reusable technology, status, links, optional detail fields, unique slug generation/history, unsaved-change guard, and named delete confirmation.
+- **Scope:** Implement explicit-save project editing, required fields, a technology multi-select populated from technologies already used by projects, an option to create and select a new reusable technology, status, links, optional key features, unique slug generation/history, unsaved-change guard, and named delete confirmation.
 - **Done when:**
-  - [x] First save requires name, short description, and status; successful edits become live immediately.
+  - [x] First save requires name, description, and status; successful edits become live immediately.
   - [x] Existing technologies can be selected; a newly created technology is attached to the current project and appears as an option for later projects.
   - [x] Leaving with unsaved edits offers Stay or Leave and discard.
   - [x] Rename preserves redirects; the user verified the old URL redirects to the current project.
@@ -170,7 +169,7 @@
   - [x] Storage cleanup failure retains the project and supports a safe retry; verify with uploaded media during T-10.
 - **Verify:** Check create/edit validation, existing and newly created reusable technologies, URLs, unsaved changes, and confirmed deletion.
 
-- **Progress:** Implemented the project editor, required-field and URL validation, reusable technology selection/creation, explicit save, a transactional save RPC for project fields/technologies/slug history, unsaved-navigation protection, and named permanent deletion with retryable Storage cleanup. The production build passes and the hosted save RPC is applied. The user verified save/public listing after refresh, project details, existing and reusable new technologies, both unsaved-change choices, rename redirects, and deletion/not-found behavior. Storage cleanup retry with uploaded media remains to be verified after T-10 media management is available. The owner later confirmed the remaining checks were complete.
+- **Progress:** Implemented the project editor, required-field and URL validation, reusable technology selection/creation, explicit save, a transactional save RPC for project fields/technologies/slug history, unsaved-navigation protection, and named permanent deletion with retryable Storage cleanup. Removed the unused long description, technical details, challenges and solutions, and what I learned fields from the editor and public detail view. Migration `20261022000000_simplify_project_details.sql` updates the save RPC to preserve those legacy database columns without reading or writing them. The production build passes and the hosted save RPC is applied; apply the new migration before future project saves. The user verified save/public listing after refresh, project details, existing and reusable new technologies, both unsaved-change choices, rename redirects, and deletion/not-found behavior. Storage cleanup retry with uploaded media remains to be verified after T-10 media management is available. The owner later confirmed the remaining checks were complete.
 
 #### T-10 — Implement project media management
 
@@ -195,14 +194,13 @@
 - **Depends on:** T-07, T-01
 - **Related:** F-05, F-15; J-04
 - **Goal:** Let the owner maintain About Me content and skills without code changes.
-- **Scope:** Build explicit-save editors for the About Me intro, experience (including optional free-form date ranges), PDF CV, skill categories, and their skills. Education is not managed in the dashboard. The profile image is bundled with the app, not managed from the dashboard.
+- **Scope:** Build explicit-save editors for the About Me intro, experience (including optional free-form date ranges), skill categories, and their skills. CV and education are not managed in the dashboard. The profile image is bundled with the app, not managed from the dashboard.
 - **Done when:**
   - [x] Profile content saves and appears on About; empty sections and categories are omitted publicly.
   - [x] Categories can be added, renamed with one Save skills action, and reordered by dragging; a category can be removed only when empty.
   - [x] Skills can be added, renamed with the shared Save skills action, reordered within a category, moved between categories by dragging, and removed; About groups skills in bullet lists under category names and omits empty categories.
-  - [x] CV accepts PDF up to 10 MB and can be replaced or removed.
 - **Verify:** Check validation, media handling, category and skill operations, drag reordering for categories and skills, moving skills between category columns by dragging, that non-empty categories cannot be deleted, empty-state behavior, and public updates.
-- **Progress:** Replaced the Profile placeholder with editors for the About Me introduction, experience, CV, skill categories, and skills. Education has been removed from the administrator and public interfaces; its legacy database table is retained without an application read/write path to avoid deleting existing records. The Home image is bundled with the app rather than managed from the dashboard. Added browser-side file type/size checks, retryable CV cleanup, and a database trigger that prevents deleting a category with skills. Migration `20261017000006_profile_editor_rules.sql` is confirmed in both local and remote migration history; the owner confirmed the interactive checks were complete.
+- **Progress:** Replaced the Profile placeholder with editors for the About Me introduction, experience, skill categories, and skills. CV and education have been removed from the administrator and public interfaces; their legacy schema and stored files are retained without an application read/write path to avoid deleting existing data. The Home image is bundled with the app rather than managed from the dashboard. A database trigger prevents deleting a category with skills. Migration `20261017000006_profile_editor_rules.sql` is confirmed in both local and remote migration history; the owner confirmed the interactive checks were complete.
 
 #### T-12 — Keep Home content fixed and bundled
 

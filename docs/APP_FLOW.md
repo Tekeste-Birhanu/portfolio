@@ -11,7 +11,7 @@ Public (any visitor)
 [/] Single scrolling public page
   ├── #home                 Owner name and short introduction
   ├── #projects             All projects in admin order; each opens a separate detail page
-  ├── #about                About Me introduction, experience, skills, and optional CV preview
+  ├── #about                About Me introduction, experience, and skills
   └── #contact              Configured contact links and message form
       /projects/<slug>      Separate project detail and screenshot lightbox
 
@@ -24,7 +24,7 @@ Admin (not linked publicly)
         ├── /admin/projects       Projects list, search, ordering
         ├── /admin/projects/new   Add project
         ├── /admin/projects/<id>  Edit project
-        ├── /admin/profile        About Me content, experience, CV, skills
+        ├── /admin/profile        About Me content, experience, skills
         └── /admin/mailbox        Messages and contact methods
 ```
 
@@ -36,7 +36,7 @@ The Home section contains the owner's name, fixed role and short introduction, b
 
 - **Actor:** Visitor
 - **Entry point:** Home, Projects, or a direct project URL
-- **Steps:** Read the Home introduction and bundled profile photo; as the visitor scrolls, Projects, About, and Contact load independently near the viewport. Scan the ordered project list; select "View details" on a project; the detail route resolves that URL's slug and loads only that project and its related technologies and media in one request; review its description, screenshots, technologies, status, links, and populated detail sections; use the lightbox to navigate its images; follow a repository or demo link if present.
+- **Steps:** Read the Home introduction and bundled profile photo; as the visitor scrolls, Projects, About, and Contact load independently near the viewport. Scan the ordered project list; select "View details" on a project; the detail route resolves that URL's slug and loads only that project and its related technologies and media in one request; review its description, screenshots, technologies, status, links, and key features when present; use the lightbox to navigate its images; follow a repository or demo link if present.
 - **Success:** The visitor understands the project and can reach its repository or demo.
 - **Failure and recovery:** Unknown or deleted project URLs show a 404 page with a link home. Old project URLs redirect to the current slug. A failed image shows its alt text or a placeholder.
 - **Related requirements:** F-01, F-02, F-03, F-04
@@ -45,7 +45,7 @@ The Home section contains the owner's name, fixed role and short introduction, b
 
 - **Actor:** Visitor
 - **Entry point:** About or Contact
-- **Steps:** Read the About Me content and work experience, and preview the CV in the browser if available; on Contact, choose an enabled contact link or enter an email address and message in the form; submit; see confirmation after the message is saved.
+- **Steps:** Read the About Me content, work experience, and skills; on Contact, choose an enabled contact link or enter an email address and message in the form; submit; see confirmation after the message is saved.
 - **Contact links:** The configured Email link opens the visitor's email app. Other enabled methods (for example, Telegram, GitHub, or a social platform) open their configured destinations in a new tab.
 - **Message submission:** The server validates the visitor's email and message, saves the message in Mailbox, then attempts an email notification to the configured contact email. The visitor's email is set as Reply-To in that notification.
 - **Success:** The message is saved and the visitor sees success. The form is cleared after successful saving.
@@ -66,7 +66,7 @@ The Home section contains the owner's name, fixed role and short introduction, b
 
 - **Actor:** Designated administrator
 - **Entry point:** Admin navigation to About or Contact
-- **Steps:** In About, explicitly save the About Me introduction; edit experience entries and their order, then save them together with one Save experience action; upload, replace, or remove the CV; and manage skill categories and skills. Education is not managed or displayed. The Home role, intro, image, and buttons are fixed in the app. In Contact, add, edit, enable/disable, reorder, or remove a contact method and review messages. A method includes a label and value; link methods choose a built-in icon, including Phone, which opens a `tel:` link. The public page shows the label and actual clickable destination.
+- **Steps:** In About, explicitly save the About Me introduction; edit experience entries and their order, then save them together with one Save experience action; and manage skill categories and skills. CV and education are not managed or displayed. The Home role, intro, image, and buttons are fixed in the app. In Contact, add, edit, enable/disable, reorder, or remove a contact method and review messages. A method includes a label and value; link methods choose a built-in icon, including Phone, which opens a `tel:` link. The public page shows the label and actual clickable destination.
 - **Skill management:** Add categories; edit category and skill names, then save those edits together with one Save skills action. Reorder categories by dragging their handles. Add or remove skills; drag a skill handle within its category to reorder it, or into another category column to move it. A category can be removed only after all its skills have been moved or removed. About shows skills as bullet lists grouped under category names and omits empty categories.
 - **Email invariant:** Exactly one Email contact method exists. Its value can be edited, but the method cannot be disabled or removed. This address is shown on Contact and receives message notifications; it is independent of the admin login email. Configure it under Admin → Contact before public launch.
 - **Success:** Saved changes are live on the public site.
@@ -99,14 +99,14 @@ The Home section contains the owner's name, fixed role and short introduction, b
 | `/` and `/#home` | Single scrolling public portfolio, starting at the intro | Anyone | J-01, J-02 |
 | `/#projects` | All projects in admin order; two columns on wide screens, one on narrow screens | Anyone | J-01 |
 | `/projects/<slug>` | Project detail and screenshot lightbox | Anyone | J-01 |
-| `/#about` | About Me introduction, experience, categorized skills, and optional CV preview | Anyone | J-02 |
+| `/#about` | About Me introduction, experience, and categorized skills | Anyone | J-02 |
 | `/#contact` | Enabled contact methods and email/message form | Anyone | J-02 |
 | 404 | Unknown or deleted addresses | Anyone | J-01, J-06 |
 | `/admin` | Sign-in, then redirect to Projects when signed in | Sign-in is public; dashboard is administrator-only | J-03 |
 | `/admin/reset-password` | Request a reset link, or set a new password after a valid recovery event; invalid/expired links show an error and allow a new request | Anyone | J-03 |
 | `/admin/projects` | Search, order, edit, and delete projects | Designated administrator | J-03, J-06 |
 | `/admin/projects/new`, `/admin/projects/<id>` | Add or edit a project | Designated administrator | J-03 |
-| `/admin/profile` | About Me content, experience, CV, and skills | Designated administrator | J-04 |
+| `/admin/profile` | About Me content, experience, and skills | Designated administrator | J-04 |
 | `/admin/mailbox` | Messages and contact-method management | Designated administrator | J-04, J-05 |
 
 ## 5. Shared states and edge cases

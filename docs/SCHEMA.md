@@ -30,18 +30,18 @@ The names below describe logical tables. Final SQL names, enum types, policies, 
 
 ### Profile
 
-- **Purpose:** Store the owner's About Me intro, legacy profile photo path, and current CV file path.
-- **Fields:** Singleton row with `intro` (plain text, optional), `photo_storage_path` (optional), `cv_storage_path` (optional), and `updated_at`.
-- **Constraints:** Empty fields are omitted publicly. The CV is a PDF up to 10 MB. The `photo_storage_path` field is retained for legacy data but is no longer read or written by the application; Home uses the bundled `public/profile-placeholder.jpg` asset.
+- **Purpose:** Store the owner's About Me intro and retain legacy file-path fields.
+- **Fields:** Singleton row with `intro` (plain text, optional), legacy `photo_storage_path` and `cv_storage_path` fields, and `updated_at`.
+- **Constraints:** Empty intro content is omitted publicly. Legacy file paths are no longer read or written by the application; Home uses the bundled `public/profile-placeholder.jpg` asset, and CV is not part of the product.
 - **Related requirements:** F-05, F-15
-- **Implementation:** The singleton row is `public.profile_content` with `id = true`. The CV uses the `profile-cv` Storage bucket. The legacy `profile-photo` bucket, `photo_storage_path` column, and stored objects remain in the hosted schema; no application route accesses them. Failed CV cleanup is recorded in `public.profile_media_cleanup` for administrator retry from About.
+- **Implementation:** The singleton row is `public.profile_content` with `id = true`. The legacy `profile-cv` and `profile-photo` buckets, path columns, and stored objects remain in the hosted schema; the application no longer accesses them.
 
 ### Profile media cleanup
 
-- **Purpose:** Retain retryable Storage cleanup work when a CV is replaced or removed. Historical photo cleanup rows may remain from the former photo editor.
-- **Fields:** `id`, `bucket_id` (`profile-photo` or `profile-cv`), `storage_path`, and `created_at`. New application cleanup rows use `profile-cv`.
+- **Purpose:** Retain historical retryable Storage cleanup work for profile files.
+- **Fields:** `id`, `bucket_id` (`profile-photo` or `profile-cv`), `storage_path`, and `created_at`. No new application cleanup rows are created.
 - **Constraints:** Only the designated administrator can read or manage cleanup rows. Rows are removed only after the corresponding Storage object is deleted.
-- **Implementation:** `public.profile_media_cleanup` is private under RLS and is introduced with the Profile editor.
+- **Implementation:** `public.profile_media_cleanup` is private under RLS and remains unused by the application.
 
 The legacy `public.education_entries` table remains in the deployed schema to preserve existing records. Application roles have no access to it, and education is no longer queried or managed by the application.
 
@@ -70,8 +70,8 @@ The legacy `public.education_entries` table remains in the deployed schema to pr
 ### Project
 
 - **Purpose:** Store a public portfolio project.
-- **Fields:** `id`, `name`, `short_description`, optional `long_description`, `status` (`planning`, `in_progress`, or `completed`), optional `repository_url`, optional `live_demo_url`, optional `key_features`, `technical_details`, `challenges_and_solutions`, and `what_i_learned`, plus `sort_order`, `created_at`, and `updated_at`.
-- **Constraints:** Name, short description, and status are required on first save. Every saved project appears in the public Projects section in `sort_order` and has a public detail route. There is no featured/unfeatured state, archive state, or soft delete. URLs must be validated. Saving makes changes live. Project deletion reports success only after all associated Storage files and database records are removed. If Storage cleanup fails, keep the project record and show an error with a retry option; retries must safely handle files already removed.
+- **Fields used by the application:** `id`, `name`, `short_description` (the project's description), `status` (`planning`, `in_progress`, or `completed`), optional `repository_url`, optional `live_demo_url`, optional `key_features`, plus `sort_order`, `created_at`, and `updated_at`. Legacy `long_description`, `technical_details`, `challenges_and_solutions`, and `what_i_learned` columns remain in the database but are not read, written, or displayed by the application.
+- **Constraints:** Name, description, and status are required on first save. Every saved project appears in the public Projects section in `sort_order` and has a public detail route. There is no featured/unfeatured state, archive state, or soft delete. URLs must be validated. Saving makes changes live. Project deletion reports success only after all associated Storage files and database records are removed. If Storage cleanup fails, keep the project record and show an error with a retry option; retries must safely handle files already removed.
 - **Related requirements:** F-01, F-02, F-03, F-09, F-10, F-13, F-14
 
 ### Project slug
@@ -153,7 +153,7 @@ Project name search can use a case-insensitive match at the expected small portf
 ## 6. Access and data lifecycle
 
 - **Ownership / tenant boundaries:** One owner/admin. The admin Auth user ID is explicitly allowlisted in a protected configuration source. No public registration or multi-tenant data.
-- **Public reads:** About Me content and CV metadata, skill categories and skills, projects, current/historical slugs, project media metadata/files, and enabled contact methods. The Home role, introduction, actions, and profile image are bundled with the app; Home content and the legacy profile photo path are not read from Supabase. Legacy homepage copy has no app read path.
+- **Public reads:** About Me intro, skill categories and skills, projects, current/historical slugs, project media metadata/files, and enabled contact methods. The Home role, introduction, actions, and profile image are bundled with the app; Home content and legacy profile file paths are not read from Supabase. Legacy homepage copy has no app read path.
 - **Admin reads/writes:** All content management, contact methods, and messages are restricted to the designated administrator. Enabled contact methods are also publicly readable. The contact Email row invariant is enforced by the database trigger and unique index.
 - **Visitor message writes:** Browser clients cannot insert directly. The contact Edge Function validates input and writes the message using trusted credentials; it then sends the Brevo notification and records the result.
 - **File access:** Uploaded portfolio files are publicly readable because they appear on public pages. Only the designated admin can upload, replace, or delete them. Storage paths associate each file with exactly one profile or project item.
@@ -163,7 +163,7 @@ Project name search can use a case-insensitive match at the expected small portf
 
 ## 7. Migrations and seed data
 
-- **Migration approach:** Version schema, indexes, constraints, policies, and storage setup in ordered Supabase SQL migrations committed to the repository. Migration `20261017000001_all_projects_ordered_publicly.sql` removes the obsolete `is_featured` project field and its index; every project is public in shared admin order. Project saves use the designated-admin-only transactional RPC in migration 20261017000002_admin_project_editor.sql to keep project fields, technology links, and current/historical slugs consistent. Migration `20261017000008_mailbox_and_contact_methods.sql` adds administrator-only visitor message access, public reads of enabled contact methods, and a transactional administrator contact-method save RPC. Migration `20261017000009_contact_method_icons.sql` adds administrator-selected contact icons and phone contact destinations.
+- **Migration approach:** Version schema, indexes, constraints, policies, and storage setup in ordered Supabase SQL migrations committed to the repository. Migration `20261017000001_all_projects_ordered_publicly.sql` removes the obsolete `is_featured` project field and its index; every project is public in shared admin order. Project saves use the designated-admin-only transactional RPC in migration 20261017000002_admin_project_editor.sql to keep project fields, technology links, and current/historical slugs consistent. Migration `20261022000000_simplify_project_details.sql` updates that RPC to save only fields still used by the app while preserving legacy detail columns. Migration `20261017000008_mailbox_and_contact_methods.sql` adds administrator-only visitor message access, public reads of enabled contact methods, and a transactional administrator contact-method save RPC. Migration `20261017000009_contact_method_icons.sql` adds administrator-selected contact icons and phone contact destinations.
 - **Seed data:** Local development may use clearly fictional projects and messages. Production must not receive demo visitor messages or a fake public contact address. Provision the designated Auth user and required Email contact method through documented setup before launch.
 - **Compatibility / rollback:** Review migrations before applying to production. Prefer additive changes; document any migration that could remove or transform owner content. The obsolete `is_featured` values are dropped; this does not delete project content. Backups/exports are not part of this version.
 

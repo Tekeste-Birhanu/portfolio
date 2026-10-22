@@ -421,12 +421,15 @@ export function AdminProjectEditor({ isNew = false }) {
   const renderProjectField = ([name, label, required]) => {
     const isStatus = name === 'status';
     const isUrl = name === 'repository_url' || name === 'live_demo_url';
-    const isMultiline = ['short_description', 'long_description', 'key_features', 'technical_details', 'challenges_and_solutions', 'what_i_learned'].includes(name);
+    const isMultiline = ['short_description', 'key_features'].includes(name);
+    const hintId = name === 'key_features' ? `${name}-hint` : undefined;
+    const describedBy = [fieldErrors[name] ? `${name}-error` : null, hintId].filter(Boolean).join(' ') || undefined;
     return <div className={`admin-field${isMultiline ? ' is-wide' : ''}`} key={name}>
       <label htmlFor={name}>{label}{required && <span aria-hidden="true"> *</span>}</label>
       {isStatus ? <select id={name} name={name} value={values[name]} onChange={updateField} required aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined}>
         <option value="">Choose status</option><option value="planning">Planning</option><option value="in_progress">In progress</option><option value="completed">Completed</option>
-      </select> : isMultiline ? <textarea id={name} name={name} value={values[name]} onChange={updateField} rows={name === 'short_description' ? 2 : 4} required={required} aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined} /> : <input id={name} name={name} type={isUrl ? 'url' : 'text'} value={values[name]} onChange={updateField} required={required} aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined} />}
+      </select> : isMultiline ? <textarea id={name} name={name} value={values[name]} onChange={updateField} rows={name === 'short_description' ? 2 : 4} required={required} aria-invalid={Boolean(fieldErrors[name])} aria-describedby={describedBy} /> : <input id={name} name={name} type={isUrl ? 'url' : 'text'} value={values[name]} onChange={updateField} required={required} aria-invalid={Boolean(fieldErrors[name])} aria-describedby={fieldErrors[name] ? `${name}-error` : undefined} />}
+      {name === 'key_features' && <span className="admin-field-hint" id="key_features-hint">One feature per line. Each line appears as a bullet on the public page.</span>}
       {fieldErrors[name] && <span className="admin-field-error" id={`${name}-error`}>{fieldErrors[name]}</span>}
     </div>;
   };

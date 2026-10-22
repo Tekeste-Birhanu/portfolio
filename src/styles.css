@@ -384,8 +384,10 @@ p {
   display: grid;
   min-width: 0;
   gap: 1.25rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid var(--color-border);
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
 }
 .project-image,
 .detail-image {
@@ -395,6 +397,11 @@ p {
   border: 1px solid var(--color-border);
   border-radius: 4px;
   background: var(--color-surface);
+}
+.project-image {
+  aspect-ratio: 16 / 9;
+  max-height: 13rem;
+  object-fit: cover;
 }
 .project-copy {
   min-width: 0;
@@ -525,19 +532,6 @@ p {
 .profile-intro {
   margin: 0;
 }
-.profile-intro-cv-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: clamp(2rem, 4vw, 3rem);
-  margin-top: 1.25rem;
-}
-.profile-intro-cv-grid > .profile-section {
-  margin-top: 0;
-}
-.profile-intro-cv-grid > :only-child {
-  grid-column: 1 / -1;
-}
 .profile-intro-copy,
 .profile-entry-description {
   max-width: 70ch;
@@ -570,14 +564,6 @@ p {
 }
 .profile-entry-description {
   margin: 0.5rem 0 0;
-}
-.profile-cv-actions {
-  display: flex;
-  margin-top: 1.25rem;
-}
-.cv-download {
-  margin-top: 0;
-  text-decoration: none;
 }
 .detail-status {
   margin-top: 0.75rem;
@@ -655,6 +641,14 @@ p {
 }
 .detail-copy {
   white-space: pre-wrap;
+}
+.detail-key-features {
+  list-style: disc;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  line-height: 1.6;
 }
 .detail-actions {
   margin-top: 1rem;
@@ -937,10 +931,6 @@ p {
   .detail-summary-grid.has-technologies {
     grid-template-columns: minmax(0, 1fr);
   }
-  .profile-intro-cv-grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1.5rem;
-  }
   .public-contact-grid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -972,9 +962,7 @@ p {
     background: var(--color-surface);
   }
   .project-grid .project-image {
-    aspect-ratio: 16 / 9;
     max-height: 13rem;
-    object-fit: cover;
   }
 }
 
@@ -1187,17 +1175,8 @@ p {
   gap: 0;
   width: 100%;
 }
-.skeleton-about-intro-cv {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(2rem, 4vw, 3rem);
-  margin-top: 1.25rem;
-}
 .skeleton-about-intro {
   gap: 0.5rem;
-}
-.skeleton-about-cv {
-  align-content: start;
 }
 .skeleton-about-details {
   display: grid;
@@ -1279,7 +1258,6 @@ p {
   gap: 0.8rem;
 }
 @media (max-width: 639px) {
-  .skeleton-about-intro-cv,
   .skeleton-detail-summary {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -2,8 +2,7 @@ import { isSupabaseConfigured, supabase } from './supabase.js';
 import { writePublicContentCache } from './public-content-cache.js';
 
 const PROJECT_DETAIL_FIELDS = `
-  id, name, short_description, long_description, key_features, technical_details,
-  challenges_and_solutions, what_i_learned, status, repository_url, live_demo_url,
+  id, name, short_description, key_features, status, repository_url, live_demo_url,
   sort_order, project_slugs(slug, is_current),
   project_technologies(sort_order, technologies(name)),
   project_media(id, storage_path, media_type, alt_text, sort_order, is_main)
@@ -70,11 +69,7 @@ function mapProjectDetails(row) {
     name: row.name,
     slug: currentSlug,
     shortDescription: row.short_description,
-    longDescription: row.long_description,
     keyFeatures: row.key_features,
-    technicalDetails: row.technical_details,
-    challengesAndSolutions: row.challenges_and_solutions,
-    whatILearned: row.what_i_learned,
     status: row.status,
     repositoryUrl: safeHttpUrl(row.repository_url),
     liveDemoUrl: safeHttpUrl(row.live_demo_url),
@@ -124,7 +119,7 @@ export async function getPublicAbout() {
   return dedupeRequest('about', async () => {
     assertSupabaseConfigured();
     const [profileResult, experienceResult, categoriesResult] = await Promise.all([
-      supabase.from('profile_content').select('intro, cv_storage_path').eq('id', true).maybeSingle(),
+      supabase.from('profile_content').select('intro').eq('id', true).maybeSingle(),
       supabase.from('experience_entries').select('id, organization, role, date_range, description, sort_order').order('sort_order', { ascending: true }),
       supabase.from('skill_categories').select('id, name, sort_order, skills(id, name, sort_order)').order('sort_order', { ascending: true }),
     ]);
@@ -134,9 +129,6 @@ export async function getPublicAbout() {
     const about = {
       profile: {
         intro: profile?.intro?.trim() ?? '',
-        cvUrl: profile?.cv_storage_path
-          ? supabase.storage.from('profile-cv').getPublicUrl(profile.cv_storage_path).data.publicUrl
-          : null,
       },
       experience: sortByOrder(experience ?? []),
       skillCategories: sortByOrder(categories ?? [])

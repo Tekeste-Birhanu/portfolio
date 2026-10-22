@@ -825,27 +825,9 @@ function Skills({ categories }) {
 function AboutContent({ profile, experience, categories }) {
   return (
     <>
-      {(profile.intro || profile.cvUrl) && (
-        <div className="profile-intro-cv-grid">
-          {profile.intro && (
-            <div className="profile-intro">
-              <p className="profile-intro-copy">{profile.intro}</p>
-            </div>
-          )}
-          {profile.cvUrl && (
-            <div className="profile-section">
-              <div className="profile-cv-actions">
-                <a
-                  className="button button-secondary cv-download"
-                  href={profile.cvUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Preview CV
-                </a>
-              </div>
-            </div>
-          )}
+      {profile.intro && (
+        <div className="profile-intro">
+          <p className="profile-intro-copy">{profile.intro}</p>
         </div>
       )}
       {(categories.length > 0 || experience.length > 0) && (
@@ -925,6 +907,11 @@ function App() {
       };
     }
   }, []);
+
+  useLayoutEffect(() => {
+    if (location.pathname === "/") return;
+    window.scrollTo(0, 0);
+  }, [location.key, location.pathname]);
 
   useEffect(() => {
     if (location.pathname !== "/") return;

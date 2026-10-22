@@ -83,25 +83,20 @@ export default function ProjectDetailPage() {
           )}
         </div>
       )}
-      {project.longDescription && (
+      {project.keyFeatures?.trim() && (
         <div className="detail-block">
-          <h2>About this project</h2>
-          <p className="detail-copy">{project.longDescription}</p>
+          <h2>Key features</h2>
+          <ul className="detail-key-features">
+            {project.keyFeatures
+              .split("\n")
+              .map((line) => line.trim())
+              .filter(Boolean)
+              .map((feature, index) => (
+                <li key={index}>{feature}</li>
+              ))}
+          </ul>
         </div>
       )}
-      {[
-        ["Key features", project.keyFeatures],
-        ["Technical details", project.technicalDetails],
-        ["Challenges and solutions", project.challengesAndSolutions],
-        ["What I learned", project.whatILearned],
-      ]
-        .filter(([, content]) => content?.trim())
-        .map(([heading, content]) => (
-          <div className="detail-block" key={heading}>
-            <h2>{heading}</h2>
-            <p className="detail-copy">{content}</p>
-          </div>
-        ))}
       <Link
         className="text-link project-back-link project-back-bottom"
         to="/#projects"
@@ -268,4 +263,3 @@ function ProjectGallery({ project }) {
     </div>
   );
 }
-
